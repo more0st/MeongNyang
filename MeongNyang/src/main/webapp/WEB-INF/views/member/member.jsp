@@ -7,22 +7,29 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>spring</title>
+<title>멍냥마켓 회원가입</title>
 <jsp:include page="/WEB-INF/views/layout/staticHeader.jsp"/>
 
 <style type="text/css">
 .body-main {
-	max-width: 800px;
+	max-width: 500px;
 	padding-top: 15px;
+
 }
 
-.table-form td { padding: 7px 0; }
-.table-form tr:first-child { border-top: 2px solid #212529; }
-.table-form tr td:first-child{ background: #f8f8f8; text-align: center; width: 120px; font-weight: 500; }
+.table-form td { padding: 7px 0;}
+.table-form tr:first-child {}
+.table-form tr td:first-child{ background: white; text-align: center; width: 120px; font-weight: 500; }
 .table-form tr td:nth-child(2) { text-align: left; padding-left: 10px; }
 
+.table-form input {
+	border-radius: 30px;
+	border: 2px solid #eee;
+	height: 30px;
+}
+
 .table-form input[type=text]:focus, .table-form input[type=date]:focus, .table-form input[type=password]:focus {
-	border: 1px solid #222222; }
+	border: 2px solid tomato; }
 
 .help-block, .block { margin-top: 5px; }
 .msg-box { text-align: center; color: blue; }
@@ -132,11 +139,11 @@ function changeEmail() {
 	
 <main>
 	<div class="container body-container">
-	    <div class="body-title">
-			<h2><i class="fas fa-user"></i> ${title} </h2>
-	    </div>
 	    
 	    <div class="body-main mx-auto">
+	    <div class="body-title">
+			<h2> 회원가입 </h2>
+	    </div>
 			<form name="memberForm" method="post">
 			<table class="table table-border table-form">
 				<tr>

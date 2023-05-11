@@ -18,7 +18,7 @@ a:active, a:hover { color: #f28011; text-decoration: underline; }
 	border: 1px solid white;
 	background-color: tomato;
 	padding: 5px 10px;
-	border-radius: 20px;
+	border-radius: 10px;
 	font-weight: 700;
 	cursor:pointer;
 	font-size: 14px;
@@ -67,7 +67,7 @@ textarea.form-control { height: 170px; resize : none; }
 }
 .form-select[readonly] { background-color:#f8f9fa; }
 
-textarea:focus, input:focus { outline: none; }
+textarea:focus, input:focus { outline: none; border: 2px solid tomato;}
 input[type=checkbox], input[type=radio] { vertical-align: middle; }
 
 /* table */
@@ -75,8 +75,8 @@ input[type=checkbox], input[type=radio] { vertical-align: middle; }
 .table th, .table td { padding-top: 10px; padding-bottom: 10px; }
 
 .table-border thead > tr { border-bottom: 1px solid white; }
-.table-border tbody > tr { border-bottom: 1px solid #ced4da; }
-.table-border tfoot > tr { border-bottom: 1px solid #ced4da; }
+.table-border tbody > tr { border-bottom: 1px solid white; }
+.table-border tfoot > tr { border-bottom: 1px solid white; }
 .td-border td { border: 1px solid #ced4da; }
 
 tr.hover:hover { cursor: pointer; background: #f5fffa; }

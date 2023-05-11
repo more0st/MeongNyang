@@ -7,14 +7,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>spring</title>
+<title>멍냥마켓 로그인</title>
 <jsp:include page="/WEB-INF/views/layout/staticHeader.jsp"/>
 
 <style type="text/css">
-.members-form { max-width: 360px; margin: 0 auto; background: #fefeff; padding: 30px 25px; box-shadow: 0 0 15px 0 rgb(2 59 109 / 10%); }
+.members-form { max-width: 360px; margin: 0 auto; background: #fefeff; padding: 30px 25px; box-shadow: 0 0 15px 0 rgb(2 59 109 / 10%);border-radius: 30px; }
 .members-form .row { margin-bottom: 1.5rem; }
 .members-form label { display: block; font-weight: 500; margin-bottom: 0.5rem; font-family: Verdana, sans-serif; }
-.members-form input { display: block; width: 100%; padding: 7px 5px; }
+.members-form input { display: block; width: 100%; padding: 7px 5px; border-radius: 20px;}
 .members-form button { padding: 8px 30px; font-size: 15px; width: 97%; }
 
 .members-message { margin: 0 auto; padding: 20px 5px; }
@@ -49,30 +49,24 @@ function sendLogin() {
 
 </head>
 <body>
-
-<header>
-    <jsp:include page="/WEB-INF/views/layout/header.jsp"></jsp:include>
-</header>
 	
 <main>
 	<div class="container body-container">
-		<div class="body-title">
-			<h2><i class="fa-solid fa-lock"></i> Members Login </h2>
-		</div>
+
 		
 		<div class="body-main">
-			<div style="margin: 0 -15px 50px -15px"></div>
+			<div style="margin: 150px -15px 50px -15px"></div>
 			<form name="loginForm" method="post">
 				<div class="members-form">
 					<div class="row text-center">
-						<i class="fa-solid fa-lock" style="font-size: 37px; color: #023b6d;"></i>
+						<a href="${pageContext.request.contextPath}/main.do"><img src="${pageContext.request.contextPath}/resource/images/logo.png" style="width: 200px;"></a>
 					</div>
 					<div class="row">
-						<label for="login-userId">Your ID</label>
+						<label for="login-userId" style="font-weight: 900;">아이디</label>
 						<input name="userId" type="text" class="form-control" id="login-userId" placeholder="아이디">
 					</div>
 					<div class="row">
-						<label for="login-password">Your Password</label>
+						<label for="login-password" style="font-weight: 900;">비밀번호</label>
 						<input name="userPwd" type="password" class="form-control" id="login-password" autocomplete="off"
 							placeholder="패스워드">
 					</div>
@@ -84,6 +78,7 @@ function sendLogin() {
 						<a href="${pageContext.request.contextPath}/">아이디 찾기</a> <span>|</span>
 						<a href="${pageContext.request.contextPath}/">패스워드 찾기</a>
 					</p>
+
 				</div>
 			</form>
 			<div class="members-message">

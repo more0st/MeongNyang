@@ -124,6 +124,8 @@ nav ul, nav li {
 	font-weight: 600;
 	background: #ffedea;
 	border-radius: 20px;
+	color: gray;
+	font-weight: 600;
 }
 
 .container {
