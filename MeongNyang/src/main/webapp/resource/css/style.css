@@ -14,12 +14,12 @@ a:active, a:hover { color: #f28011; text-decoration: underline; }
 
 /* form-control */
 .btn {
-	color: #333333;
-	border: 1px solid #999999;
-	background-color: #ffffff;
+	color: white;
+	border: 1px solid white;
+	background-color: tomato;
 	padding: 5px 10px;
-	border-radius: 4px;
-	font-weight: 500;
+	border-radius: 20px;
+	font-weight: 700;
 	cursor:pointer;
 	font-size: 14px;
 	font-family: "맑은 고딕", 나눔고딕, 돋움, sans-serif;
@@ -27,7 +27,7 @@ a:active, a:hover { color: #f28011; text-decoration: underline; }
 }
 .btn:active, .btn:focus, .btn:hover {
 	background-color: #f8f9fa;
-	color:#333333;
+	color:tomato;
 }
 .btn[disabled], fieldset[disabled] .btn {
 	pointer-events: none;
@@ -39,13 +39,13 @@ a:active, a:hover { color: #f28011; text-decoration: underline; }
 }
 
 .btn-primary {
-    background: #106eea;
-	border:1px solid #00a6eb;
+    background: tomato;
+	border:1px solid tomato;
     color:#ffffff;
 }
 .btn-primary:hover, .btn-primary:active, .btn-primary:focus {
-    background: #3284f1;
-    border:1px solid #00a6eb;
+    background: #ffa393;
+    border:1px solid #ffa393;
     color:#ffffff;
 }
 
@@ -74,7 +74,7 @@ input[type=checkbox], input[type=radio] { vertical-align: middle; }
 .table { width: 100%; border-spacing: 0; border-collapse: collapse; }
 .table th, .table td { padding-top: 10px; padding-bottom: 10px; }
 
-.table-border thead > tr { border-top: 2px solid #212529; border-bottom: 1px solid #ced4da; }
+.table-border thead > tr { border-bottom: 1px solid white; }
 .table-border tbody > tr { border-bottom: 1px solid #ced4da; }
 .table-border tfoot > tr { border-bottom: 1px solid #ced4da; }
 .td-border td { border: 1px solid #ced4da; }
