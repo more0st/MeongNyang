@@ -2,6 +2,7 @@ package com.market;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 import javax.servlet.ServletException;
@@ -13,6 +14,7 @@ import javax.servlet.http.HttpSession;
 
 import com.member.SessionInfo;
 import com.util.MyUploadServlet;
+import com.util.MyUtil;
 
 @MultipartConfig
 @WebServlet("/market/*")
@@ -59,7 +61,52 @@ public class MarketServlet extends MyUploadServlet{
 	
 	protected void list(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		
-		// JSP로 포워딩
+		MarketDAO dao = new MarketDAO();
+		MyUtil util = new MyUtil();
+		
+		HttpSession session = req.getSession();
+		SessionInfo info = (SessionInfo)session.getAttribute("member");
+		
+		String cp = req.getContextPath();
+		
+		try {
+			String page = req.getParameter("page");
+			int current_page = 1;
+			if(page != null) {
+				current_page = Integer.parseInt(page);
+			}
+			
+			// 전체데이터 개수
+			int dataCount = dao.dataCount();
+
+			// 전체페이지수
+			int size = 12;
+			int total_page = util.pageCount(dataCount, size);
+			if (current_page > total_page) {
+				current_page = total_page;
+			}
+
+			// 게시물 가져오기
+			int offset = (current_page - 1) * size;
+			if(offset < 0) offset = 0;
+			
+			List<MarketDTO> list = dao.listMarket(offset, size);
+			
+			// 페이징 처리
+			String listUrl = cp + "/market/list.do";
+			String articleUrl = cp + "/market/article.do?page=" + current_page;
+			String paging = util.paging(current_page, total_page, listUrl);
+
+			// 포워딩할 list.jsp에 넘길 값
+			req.setAttribute("list", list);
+			req.setAttribute("dataCount", dataCount);
+			req.setAttribute("articleUrl", articleUrl);
+			req.setAttribute("page", current_page);
+			req.setAttribute("total_page", total_page);
+			req.setAttribute("paging", paging);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		forward(req, resp, "/WEB-INF/views/market/list.jsp");
 	}
 	
@@ -109,8 +156,36 @@ public class MarketServlet extends MyUploadServlet{
 	
 	protected void article(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		
-		// JSP로 포워딩
-		forward(req, resp, "/WEB-INF/views/market/list.jsp");
+		MarketDAO dao = new MarketDAO();
+		
+		HttpSession session = req.getSession();
+		SessionInfo info = (SessionInfo) session.getAttribute("member");
+
+		String cp = req.getContextPath();
+		String page = req.getParameter("page");
+
+		try {
+			long marketNum = Long.parseLong(req.getParameter("marketNum"));
+
+			MarketDTO dto = dao.readMarket(marketNum);
+			if (dto == null || !dto.getSellerId().equals(info.getUserId())) {
+				resp.sendRedirect(cp + "/market/list.do?page=" + page);
+				return;
+			}
+			dto.setContent(dto.getContent().replaceAll("\n", "<br>"));
+			
+			List<MarketDTO> listFile = dao.listPhotoFile(marketNum);
+
+			req.setAttribute("dto", dto);
+			req.setAttribute("listFile", listFile);
+			req.setAttribute("page", page);
+
+			forward(req, resp, "/WEB-INF/views/market/article.jsp");
+			return;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		forward(req, resp, "/WEB-INF/views/market/article.jsp");
 	}
 	
 	protected void updateForm(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {

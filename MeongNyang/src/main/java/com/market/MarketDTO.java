@@ -9,6 +9,7 @@ public class MarketDTO {
 	private String addr;
 	private int price;
 	private String reg_date;
+	private String pay_date;
 	private int hitCount;
 	private int state;
 
@@ -63,6 +64,12 @@ public class MarketDTO {
 	}
 	public void setReg_date(String reg_date) {
 		this.reg_date = reg_date;
+	}
+	public String getPay_date() {
+		return pay_date;
+	}
+	public void setPay_date(String pay_date) {
+		this.pay_date = pay_date;
 	}
 	public int getHitCount() {
 		return hitCount;

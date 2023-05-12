@@ -16,13 +16,30 @@
 }
 
 .table-article tr>td { padding-left: 5px; padding-right: 5px; }
+
+.img-box {
+	max-width: 700px;
+	padding: 5px;
+	box-sizing: border-box;
+	border: 1px solid #ccc;
+	display: flex; /* 자손요소를 flexbox로 변경 */
+	flex-direction: row; /* 정방향 수평나열 */
+	flex-wrap: nowrap;
+	overflow-x: auto;
+}
+.img-box img {
+	width: 100px; height: 100px;
+	margin-right: 5px;
+	flex: 0 0 auto;
+	cursor: pointer;
+}
 </style>
 <script type="text/javascript">
-<c:if test="${sessionScope.member.userId==dto.userId || sessionScope.member.userId=='admin'}">
+<c:if test="${sessionScope.member.userId==dto.sellerId || sessionScope.member.userId=='admin'}">
 	function deleteBoard() {
 	    if(confirm("게시글을 삭제 하시 겠습니까 ? ")) {
-		    let query = "num=${dto.num}&${query}";
-		    let url = "${pageContext.request.contextPath}/bbs/delete.do?" + query;
+		    let query = "num=${dto.marketNum}&${query}";
+		    let url = "${pageContext.request.contextPath}/market/delete.do?" + query;
 	    	location.href = url;
 	    }
 	}
@@ -55,7 +72,7 @@
 				<tbody>
 					<tr>
 						<td width="50%">
-							이름 : ${dto.userName}
+							이름 : ${dto.sellerId}
 						</td>
 						<td align="right">
 							${dto.reg_date} | 조회 ${dto.hitCount}
@@ -68,11 +85,21 @@
 						</td>
 					</tr>
 					
+					<tr style="border-bottom: none;">
+						<td colspan="2" height="110">
+							<div class="img-box">
+								<c:forEach var="vo" items="${listFile}">
+									<img src="${pageContext.request.contextPath}/uploads/market/${vo.imageFilename}"
+										onclick="imageViewer('${pageContext.request.contextPath}/uploads/market/${vo.imageFilename}');">
+								</c:forEach>
+							</div>
+						</td>	
+					</tr>
 					<tr>
 						<td colspan="2">
 							이전글 :
 							<c:if test="${not empty preReadDto}">
-								<a href="${pageContext.request.contextPath}/bbs/article.do?${query}&num=${preReadDto.num}">${preReadDto.subject}</a>
+								<a href="${pageContext.request.contextPath}/market/article.do?${query}&num=${preReadDto.num}">${preReadDto.subject}</a>
 							</c:if>
 						</td>
 					</tr>
@@ -91,8 +118,8 @@
 				<tr>
 					<td width="50%">
 						<c:choose>
-							<c:when test="${sessionScope.member.userId==dto.userId}">
-								<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/bbs/update.do?num=${dto.num}&page=${page}';">수정</button>
+							<c:when test="${sessionScope.member.userId==dto.sellerId}">
+								<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/market/update.do?num=${dto.marketNum}&page=${page}';">수정</button>
 							</c:when>
 							<c:otherwise>
 								<button type="button" class="btn" disabled="disabled">수정</button>
@@ -100,7 +127,7 @@
 						</c:choose>
 				    	
 						<c:choose>
-				    		<c:when test="${sessionScope.member.userId==dto.userId || sessionScope.member.userId=='admin'}">
+				    		<c:when test="${sessionScope.member.userId==dto.sellerId || sessionScope.member.userId=='admin'}">
 				    			<button type="button" class="btn" onclick="deleteBoard();">삭제</button>
 				    		</c:when>
 				    		<c:otherwise>
@@ -109,7 +136,7 @@
 				    	</c:choose>
 					</td>
 					<td align="right">
-						<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/bbs/list.do?${query}';">리스트</button>
+						<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/market/list.do?${query}';">리스트</button>
 					</td>
 				</tr>
 			</table>

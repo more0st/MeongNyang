@@ -80,7 +80,6 @@ function sendOk() {
         return;
     }
 	
-    alert(f.price.value.trim());
     f.action = "${pageContext.request.contextPath}/market/${mode}_ok.do";
     f.submit();
 }
