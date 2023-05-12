@@ -31,6 +31,10 @@ public class MemberServlet extends MyServlet {
 			logout(req, resp);
 		} else if(uri.indexOf("member.do")!=-1) {
 			memberForm(req, resp);
+		} else if(uri.indexOf("findpwd.do")!=-1) {
+			findPwdForm(req, resp);
+		} else if(uri.indexOf("findid.do")!=-1) {
+			findIdForm(req, resp);
 		} else if(uri.indexOf("member_ok.do")!=-1) {
 			memberSubmit(req, resp);
 		} else if(uri.indexOf("pwd.do")!=-1) {
@@ -113,6 +117,16 @@ public class MemberServlet extends MyServlet {
 		req.setAttribute("mode", "member");
 		
 		forward(req, resp, "/WEB-INF/views/member/member.jsp");
+	}
+	protected void findPwdForm(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		//비밀번호 수정 폼 불러오기
+		
+		forward(req, resp, "/WEB-INF/views/member/findpwd.jsp");
+	}
+	protected void findIdForm(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		//아이디 수정 폼 불러오기
+		
+		forward(req, resp, "/WEB-INF/views/member/findid.jsp");
 	}
 
 	protected void memberSubmit(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {

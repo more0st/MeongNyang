@@ -75,8 +75,8 @@ function sendLogin() {
 					</div>
 					<p class="text-center">
 						<a href="${pageContext.request.contextPath}/member/member.do">회원가입</a> <span>|</span>
-						<a href="${pageContext.request.contextPath}/">아이디 찾기</a> <span>|</span>
-						<a href="${pageContext.request.contextPath}/">패스워드 찾기</a>
+						<a href="${pageContext.request.contextPath}/member/findid.do">아이디 찾기</a> <span>|</span>
+						<a href="${pageContext.request.contextPath}/member/findpwd.do">패스워드 찾기</a>
 					</p>
 
 				</div>
