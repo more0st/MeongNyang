@@ -29,7 +29,7 @@
 		<ul class="main-menu">
 			<li><a href="${pageContext.request.contextPath}/main.do">홈</a></li>
 			
-			<li><a href="#"> 멍냥마켓 </a></li>
+			<li><a href="${pageContext.request.contextPath}/market/main.do"> 멍냥마켓 </a></li>
 
 			<li><a href="#">커뮤니티</a>
 			   	<ul class="sub-menu">
