@@ -1,0 +1,197 @@
+	member 테이블
+	CREATE TABLE member (
+   userId   VARCHAR2(50)      NOT NULL,
+   userPwd   VARCHAR2(100)      NOT NULL,
+   userName   VARCHAR2(50)      NOT NULL,
+   birth   DATE      NULL,
+   tel   VARCHAR2(20)      NULL,
+   addr   VARCHAR2(100)      NULL,
+   email   VARCHAR2(100)      NULL,
+   enabled   NUMBER(1)   DEFAULT 1 
+	);
+	
+	club 테이블
+	CREATE TABLE club (
+   clubNum   NUMBER      NOT NULL,
+   clubName   VARCHAR2(300)      NOT NULL,
+   content   VARCHAR2(4000)      NOT NULL,
+   reg_date   DATE      NULL,
+   maxMember   NUMBER      NULL,
+   nowMember   NUMBER      NULL,
+   hitCount   NUMBER   DEFAULT 0,
+   subject   VARCHAR2(300)      NOT NULL,
+   userId   VARCHAR2(50)      NOT NULL
+	);
+	
+	club_seq
+	
+	clubMember 테이블
+	CREATE TABLE clubMember (
+   clubNum   NUMBER      NOT NULL,
+   userId   VARCHAR2(50)      NOT NULL,
+   join_date   DATE      NULL,
+   status   NUMBER(1)   DEFAULT 0
+	);
+	
+	clubReply 테이블
+	CREATE TABLE clubReply (
+   replyNum   NUMBER      NOT NULL,
+   content   VARCHAR2(4000)      NOT NULL,
+   reg_date   DATE      NULL,
+   num   NUMBER      NOT NULL,
+   userId   VARCHAR2(50)      NOT NULL,
+   originalReplyNum   NUMBER      NULL
+	);
+	
+	clubReply_seq
+	
+	clubLike 테이블
+	CREATE TABLE clubLike (
+   userId   VARCHAR2(50)      NOT NULL,
+   clubNum   NUMBER      NOT NULL
+	);
+	
+	clubImgFile 테이블
+	CREATE TABLE clubImgFile (
+   fileNum   NUMBER      NOT NULL,
+   imageFilename   VARCHAR2(255)      NULL,
+   num   NUMBER      NOT NULL
+	);
+	
+	clubImgFile_seq
+	
+	——————————————————————————————————————————————
+	
+	--URI 및 JSP
+
+	1.글 리스트
+		uri : /cp/club/list.do
+		jsp : /cp/WEB-INF/views/club/list.jsp
+	
+	2.글쓰기 폼
+		uri : /cp/club/write.do
+		jsp : cp/WEB-INF/views/club/write.jsp
+	
+	3.글저장
+		uri : /cp/club/write_ok.do : DB의 테이블에 저장 -> list.do 리다이렉트
+	
+	4.글보기
+		uri : /cp/club/article.do
+		jsp : cp/WEB-INF/views/club/article.jsp
+	
+	5.글 수정 폼
+		uri : /cp/club/update.do
+		jsp : cp/WEB-INF/views/club/write.jsp
+	
+	6.수정 완료
+		uri : /cp/club/update_ok.do : DB의 테이블의 정보를 수정 -> list.do(article.do) 리다이렉트
+	
+	7.글삭제
+		uri : /cp/club/delete.do : DB의 테이블의 정보를 삭제 -> list.do 리다이렉트
+		
+		
+	——————————————————————————————————————————————	
+		
+	--흐름도 및 파라미터
+
+	1. 글리스트
+		- 글리스트 ---> 글리스트 : 페이지번호클릭할때 (페이지번호 [,검색컬럼, 검색값 ])
+		- 글리스트 ---> 글리스트 : 검색 (검색컬럼, 검색값)
+		- 글리스트 ---> 글리스트 :초기화 (검색해제)
+		- 글리스트 ---> 글보기 : 글제목클릭할때 (글번호,페이지번호 [,검색컬럼, 검색값 ])
+		- 글리스트 ---> 글쓰기폼 : 글등록버튼
+		- 글리스트 ---> 글리스트 : 내 모임 버튼 클릭할때 : ?
+	
+	2. 글쓰기폼
+		- 글쓰기폼 ---> 글저장 : 테이블에 글을 등록 ---> 글리스트로 리다이렉트
+				|
+			폼데이터 : 제목,패스워드,이름,내용
+	
+		- 글쓰기폼 ---> 등록취소 : 글리스트로복귀
+	
+	3.글보기
+		- 넘겨 받은 파라미터 :  (글번호,페이지번호 [,검색컬럼, 검색값 ])
+		
+		- 글보기 ---> 글리스트 : 리스트버튼클릭할때 (페이지번호 [ ,검색컬럼,검색값] )
+		- 글보기 ---> 글수정폼 : 수정버튼클릭할때 (글번호, 페이지번호)
+		- 글보기 ---> 글삭제 :    삭제버튼클릭할때(글번호, 페이지번호 [ , 검색컬럼,검색값] )
+		- 글보기 ---> 글보기 :    이전글/다음글(이전글번호/다음글번호,페이지번호 [ , 검색컬럼,검색값] )
+	
+	4.수정폼
+		- 넘겨 받은 파라미터 : 글번호,페이지번호
+		
+		- 글수정폼 ---> 글수정완료 : 테이블에 글을 수정 ---> 글리스트로 리다이렉트(페이지번호)
+				|
+			폼데이터 : 제목,패스워드,이름,내용,글번호,페이지번호
+	
+		- 글수정폼 ---> 수정취소 : 글리스트로복귀
+	
+	5.글삭제
+		-넘겨 받은 파라미터 : 글번호,페이지번호 [ , 검색컬럼, 검색값]
+	
+		-테이블의 해당 글삭제 -> 글리스트로 리다이렉트(페이지번호 [ , 검색컬럼, 검색값] )
+
+		
+		
+	——————————————————————————————————————————————
+	메모
+	가입하기 버튼 누르면 hidden되고 멤버보기 버튼 활성화
+	글등록/수정 이미지추가 jquertEx/ex/image_write.html 참고
+	<script src="https://code.jquery.com/jquery-3.6.4.min.js"></script> jquery쓸때 꼭있어야함
+	
+	——————————————————————————————————————————————
+	
+	멍냥모임
+	-모임을 만든 사람이 리더
+	-리더는 이름옆에 아이콘으로 표시
+	-모임멤버,신청한사람은 거절기능 따로 없이 바로 가입가능
+	-멤버와 리더만 댓글로 소통
+	-모임을 가입한 사람은 내모임 버튼 누르면 가입한 모임만 보이게 설정(현재 세션아이디에서 모임 num 있는것들 보여주기)
+	
+	
+	리더가 할 수 있는 기능:
+	리더는 멤버가 0명일때 모임(게시글) 삭제가능
+	현재 멤버 리스트(이름(리더))
+	댓글달기
+	
+	멤버가 할 수 있는 기능:
+	탈퇴하기
+	댓글달기
+	현재 멤버 리스트(이름(리더))
+	
+	——————————————————————————————————————————————
+	
+	글리스트
+	글번호.   제목.   작성자.   작성일.   인원표시.  조회.   좋아요.  
+	
+	——————————————————————————————————————————————
+	
+	글등록/수정
+	제목
+	모임명
+	내용 (양식 고정)
+	인원정원수(현재인원보다 정원수가 더 적습니다)
+	이미지첨부(용도?)
+	
+	——————————————————————————————————————————————
+	
+	글보기         
+	제목
+	모임명
+	내용
+	현재인원수/전체인원수
+	이미지
+	좋아요 
+	가입하기(멤버,리더 이거나 정원보다 클경우 히든)
+	멤버보기(멤버,리더 빼고 히든)
+	
+	댓글(리더,멤버 빼고 히든)
+	댓글양식
+	
+	
+	——————————————————————————————————————————————
+	
+	
+	
+	
+	

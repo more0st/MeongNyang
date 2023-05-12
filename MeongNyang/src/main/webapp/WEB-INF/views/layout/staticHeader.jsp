@@ -7,6 +7,7 @@
 <!--
 <link href="https://hangeul.pstatic.net/hangeul_static/css/nanum-gothic.css" rel="stylesheet">
 -->
+<link rel="stylesheet" href="${pageContext.request.contextPath}/resource/css/reply.css" type="text/css">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/resource/css/style.css" type="text/css">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/resource/css/layout.css" type="text/css">
 <link rel="stylesheet" href="${pageContext.request.contextPath}/resource/css/paginate.css" type="text/css">
