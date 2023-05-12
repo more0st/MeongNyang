@@ -1,6 +1,7 @@
 package com.member;
 
 import java.io.IOException;
+import java.sql.SQLException;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -54,7 +55,7 @@ public class MemberServlet extends MyServlet {
 		// 세션객체. 세션 정보는 서버에 저장(로그인 정보, 권한등을 저장)
 		HttpSession session = req.getSession();
 		
-		MemberDAO dao = new MemberDAO();
+		MemberDAO dao=new MemberDAO();
 		String cp = req.getContextPath();
 
 		if(req.getMethod().equalsIgnoreCase("GET")) {
@@ -107,10 +108,70 @@ public class MemberServlet extends MyServlet {
 	}
 	
 	protected void memberForm(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-
+		//회원가입 폼 불러오기
+		req.setAttribute("title", "회원가입");
+		req.setAttribute("mode", "member");
+		
+		forward(req, resp, "/WEB-INF/views/member/member.jsp");
 	}
 
 	protected void memberSubmit(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		//회원가입 처리
+		MemberDAO dao=new MemberDAO();
+		
+		String cp=req.getContextPath();
+		if(req.getMethod().equalsIgnoreCase("GET")) {
+			resp.sendRedirect(cp+"/");
+			return;
+		}
+		
+		String message="";
+		
+		try {
+			MemberDTO dto=new MemberDTO();
+			dto.setUserId(req.getParameter("userId"));
+			dto.setUserPwd(req.getParameter("userPwd"));
+			dto.setUserName(req.getParameter("userName"));
+			dto.setBirth(req.getParameter("birth"));
+		
+			String tel1=req.getParameter("tel1");
+			String tel2=req.getParameter("tel2");
+			String tel3=req.getParameter("tel3");
+			dto.setTel(tel1+"-"+tel2+"-"+tel3);
+			
+			dto.setPostNum(req.getParameter("postNum"));
+			
+			String addr1=req.getParameter("addr1");
+			String addr2=req.getParameter("addr2");
+			dto.setAddr(addr1+" "+addr2);
+			
+			String email1=req.getParameter("email1");
+			String email2=req.getParameter("email2");
+			dto.setEmail(email1+"@"+email2);
+			
+			dao.insertMember(dto);
+			resp.sendRedirect(cp+"/");
+			return;
+			
+		} catch (SQLException e) {
+			if (e.getErrorCode() == 1)
+				message = "아이디 중복으로 회원 가입이 실패 했습니다.";
+			else if (e.getErrorCode() == 1400)
+				message = "필수 사항을 입력하지 않았습니다.";
+			else if (e.getErrorCode() == 1840 || e.getErrorCode() == 1861)
+				message = "날짜 형식이 일치하지 않습니다.";
+			else
+				message = "회원 가입이 실패 했습니다.";
+			// 기타 - 2291:참조키 위반, 12899:폭보다 문자열 입력 값이 큰경우
+		} catch (Exception e) {
+			message = "회원 가입이 실패 했습니다.";
+			e.printStackTrace();
+		}
+		
+		req.setAttribute("title", "회원가입");
+		req.setAttribute("mode", "member");
+		req.setAttribute("message", message);
+		forward(req, resp, "/WEB-INF/views/member/member.jsp");
 
 	}
 	

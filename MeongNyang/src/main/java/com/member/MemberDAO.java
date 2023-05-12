@@ -17,8 +17,8 @@ public class MemberDAO {
 		String sql;
 		
 		try {
-			sql = " SELECT userId, userName, userPwd, register_date, modify_date "
-					+ " FROM member1"
+			sql = " SELECT userId, userPwd, userName, birth, tel "
+					+ " FROM member"
 					+ " WHERE userId = ? AND userPwd = ? AND enabled = 1";
 			
 			pstmt = conn.prepareStatement(sql);
@@ -34,8 +34,8 @@ public class MemberDAO {
 				dto.setUserId(rs.getString("userId"));
 				dto.setUserPwd(rs.getString("userPwd"));
 				dto.setUserName(rs.getString("userName"));
-				dto.setRegister_date(rs.getString("register_date"));
-				dto.setModify_date(rs.getString("modify_date"));
+				dto.setBirth(rs.getString("birth"));
+				dto.setTel(rs.getString("tel"));
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -57,4 +57,39 @@ public class MemberDAO {
 		
 		return dto;
 	}	
+	
+	
+	public void insertMember(MemberDTO dto) throws SQLException {
+		//회원가입 처리
+		PreparedStatement pstmt=null;
+		String sql;
+		
+		try {
+			
+			sql="insert into member(userId, userPwd, userName, birth, tel, postNum, addr, email, enabled) "
+					+ "values(?,?,?,TO_DATE(?,'YYYY-MM-DD'),?,?,?,?,1)";
+			pstmt=conn.prepareStatement(sql);
+			
+			pstmt.setString(1, dto.getUserId());
+			pstmt.setString(2, dto.getUserPwd());
+			pstmt.setString(3, dto.getUserName());
+			pstmt.setString(4, dto.getBirth());
+			pstmt.setString(5, dto.getTel());
+			pstmt.setString(6, dto.getPostNum());
+			pstmt.setString(7, dto.getAddr());
+			pstmt.setString(8, dto.getEmail());
+			
+			pstmt.executeUpdate();
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			if(pstmt!=null) {
+				try {
+					pstmt.close();
+				} catch (Exception e2) {
+				}
+			}
+		}
+	}
 }

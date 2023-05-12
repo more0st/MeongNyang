@@ -2,16 +2,15 @@ package com.member;
 
 public class MemberDTO {
 	private String userId;
-	private String userName;
 	private String userPwd;
-	private String register_date;
-	private String modify_date;
-	private String email, email1, email2;
-	private String tel, tel1, tel2, tel3;
+	private String userName;
 	private String birth;
-	private String zip;
+	private String tel, tel1, tel2, tel3;
+	private String postNum;
+	private String addr;
 	private String addr1;
 	private String addr2;
+	private String email, email1, email2;
 	private int enabled;
 	
 	public String getUserId() {
@@ -20,47 +19,23 @@ public class MemberDTO {
 	public void setUserId(String userId) {
 		this.userId = userId;
 	}
-	public String getUserName() {
-		return userName;
-	}
-	public void setUserName(String userName) {
-		this.userName = userName;
-	}
 	public String getUserPwd() {
 		return userPwd;
 	}
 	public void setUserPwd(String userPwd) {
 		this.userPwd = userPwd;
 	}
-	public String getRegister_date() {
-		return register_date;
+	public String getUserName() {
+		return userName;
 	}
-	public void setRegister_date(String register_date) {
-		this.register_date = register_date;
+	public void setUserName(String userName) {
+		this.userName = userName;
 	}
-	public String getModify_date() {
-		return modify_date;
+	public String getBirth() {
+		return birth;
 	}
-	public void setModify_date(String modify_date) {
-		this.modify_date = modify_date;
-	}
-	public String getEmail() {
-		return email;
-	}
-	public void setEmail(String email) {
-		this.email = email;
-	}
-	public String getEmail1() {
-		return email1;
-	}
-	public void setEmail1(String email1) {
-		this.email1 = email1;
-	}
-	public String getEmail2() {
-		return email2;
-	}
-	public void setEmail2(String email2) {
-		this.email2 = email2;
+	public void setBirth(String birth) {
+		this.birth = birth;
 	}
 	public String getTel() {
 		return tel;
@@ -86,17 +61,17 @@ public class MemberDTO {
 	public void setTel3(String tel3) {
 		this.tel3 = tel3;
 	}
-	public String getBirth() {
-		return birth;
+	public String getPostNum() {
+		return postNum;
 	}
-	public void setBirth(String birth) {
-		this.birth = birth;
+	public void setPostNum(String postNum) {
+		this.postNum = postNum;
 	}
-	public String getZip() {
-		return zip;
+	public String getAddr() {
+		return addr;
 	}
-	public void setZip(String zip) {
-		this.zip = zip;
+	public void setAddr(String addr) {
+		this.addr = addr;
 	}
 	public String getAddr1() {
 		return addr1;
@@ -109,6 +84,24 @@ public class MemberDTO {
 	}
 	public void setAddr2(String addr2) {
 		this.addr2 = addr2;
+	}
+	public String getEmail() {
+		return email;
+	}
+	public void setEmail(String email) {
+		this.email = email;
+	}
+	public String getEmail1() {
+		return email1;
+	}
+	public void setEmail1(String email1) {
+		this.email1 = email1;
+	}
+	public String getEmail2() {
+		return email2;
+	}
+	public void setEmail2(String email2) {
+		this.email2 = email2;
 	}
 	public int getEnabled() {
 		return enabled;

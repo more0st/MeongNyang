@@ -109,7 +109,7 @@ function memberOk() {
         return;
     }
 
-   	f.action = "${pageContext.request.contextPath}/";
+   	f.action = "${pageContext.request.contextPath}/member/${mode}_ok.do";
     f.submit();
 }
 
@@ -243,7 +243,7 @@ function changeEmail() {
 				<tr>
 					<td>우편번호</td>
 					<td>
-						<input type="text" name="zip" id="zip" maxlength="7" class="form-control" value="${dto.zip}" readonly="readonly" style="width: 50%;">
+						<input type="text" name="postNum" id="postNum" maxlength="7" class="form-control" value="${dto.zip}" readonly="readonly" style="width: 50%;">
 						<button type="button" class="btn" onclick="daumPostcode();">우편번호검색</button>
 					</td>
 				</tr>
@@ -280,7 +280,7 @@ function changeEmail() {
 					    <button type="button" class="btn" name="btnOk" onclick="memberOk();"> ${mode=="member"?"회원가입":"정보수정"} </button>
 					    <button type="reset" class="btn"> 다시입력 </button>
 					    <button type="button" class="btn" 
-					    	onclick="javascript:location.href='${pageContext.request.contextPath}/';"> ${mode=="member"?"가입취소":"수정취소"} </button>
+					    	onclick="javascript:location.href='${pageContext.request.contextPath}/member/login.do';"> ${mode=="member"?"가입취소":"수정취소"} </button>
 					</td>
 				</tr>
 				
@@ -331,7 +331,7 @@ function changeEmail() {
                 }
 
                 // 우편번호와 주소 정보를 해당 필드에 넣는다.
-                document.getElementById('zip').value = data.zonecode; //5자리 새우편번호 사용
+                document.getElementById('postNum').value = data.zonecode; //5자리 새우편번호 사용
                 document.getElementById('addr1').value = fullAddr;
 
                 // 커서를 상세주소 필드로 이동한다.
