@@ -33,33 +33,33 @@
 
 			<li><a href="#">커뮤니티</a>
 			   	<ul class="sub-menu">
-               		<li><a href="${pageContext.request.contextPath}/bbs/list.do">멍냥지도</a></li>
-               		<li><a href="#">멍냥갤러리</a></li>
-               		<li><a href="#">멍냥모임</a></li>
+               		<li><a href="${pageContext.request.contextPath}/map/list.do">멍냥지도</a></li>
+               		<li><a href="${pageContext.request.contextPath}/photo/list.do">멍냥갤러리</a></li>
+               		<li><a href="${pageContext.request.contextPath}/club/list.do">멍냥모임</a></li>
             	</ul>
 
 			<li><a href="#">고객센터</a>
 			   	<ul class="sub-menu">
-					<li><a href="#">공지사항</a></li>
-					<li><a href="#">1:1 문의</a></li>
+					<li><a href="${pageContext.request.contextPath}/notice/list.do">공지사항</a></li>
+					<li><a href="${pageContext.request.contextPath}/qna/list.do">1:1 문의</a></li>
             	</ul>
 			</li>
 
 			<li><a href="#">마이페이지</a>
 			   	<ul class="sub-menu">
-					<li><a href="#">나의 구매내역</a></li>
-					<li><a href="#">나의 판매내역</a></li>
-					<li><a href="#">회원정보수정</a></li>
-					<li><a href="#">쪽지함</a></li>
-					<li><a href="#">찜 목록</a></li>
+					<li><a href="${pageContext.request.contextPath}/myPage/buyList.do">나의 구매내역</a></li>
+					<li><a href="${pageContext.request.contextPath}/myPage/salesList.do">나의 판매내역</a></li>
+					<li><a href="${pageContext.request.contextPath}/myPage/writingList.do">작성글목록</a></li>
+					<li><a href="${pageContext.request.contextPath}/myPage/likeList.do">찜 목록</a></li>
+					<li><a href="${pageContext.request.contextPath}/message/list.do">쪽지함</a></li>
+					<li><a href="${pageContext.request.contextPath}/myPage2/memberRepair.do">회원정보수정</a></li>
             	</ul>
 			</li>
 			<!-- 만약 관리자계정으로 로그인하는 경우 마이페이지->관리페이지로 보이게 -->
 			<li><a href="#">관리페이지</a>
 			   	<ul class="sub-menu">
-					<li><a href="#">관리페이지 접근</a></li>
-					<li><a href="#">전체 사용자 조회</a></li>
-					<li><a href="#">사용자 관리</a></li>
+					<li><a href="${pageContext.request.contextPath}/admin/userList.do">전체 사용자 조회</a></li>
+					<li><a href="${pageContext.request.contextPath}/admin/userFix.do">사용자 관리</a></li>
             	</ul>
 			</li>
 
