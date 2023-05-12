@@ -47,10 +47,10 @@
 
 			<li><a href="#">마이페이지</a>
 			   	<ul class="sub-menu">
-					<li><a href="${pageContext.request.contextPath}/myPage/buyList.do">나의 구매내역</a></li>
-					<li><a href="${pageContext.request.contextPath}/myPage/salesList.do">나의 판매내역</a></li>
-					<li><a href="${pageContext.request.contextPath}/myPage/writingList.do">작성글목록</a></li>
-					<li><a href="${pageContext.request.contextPath}/myPage/likeList.do">찜 목록</a></li>
+					<li><a href="${pageContext.request.contextPath}/myPage/buyList.do?category=1">나의 구매내역</a></li>
+					<li><a href="${pageContext.request.contextPath}/myPage/salesList.do?category=2">나의 판매내역</a></li>
+					<li><a href="${pageContext.request.contextPath}/myPage/writingList.do?category=3">작성글목록</a></li>
+					<li><a href="${pageContext.request.contextPath}/myPage/likeList.do?category=4">찜 목록</a></li>
 					<li><a href="${pageContext.request.contextPath}/message/list.do">쪽지함</a></li>
 					<li><a href="${pageContext.request.contextPath}/myPage2/memberRepair.do">회원정보수정</a></li>
             	</ul>
