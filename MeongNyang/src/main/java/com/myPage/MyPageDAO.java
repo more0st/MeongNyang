@@ -20,7 +20,7 @@ public class MyPageDAO {
 		String sql;
 		
 		try {
-			sql = "SELECT COUNT(*) FROM sbbs WHERE category = ?";
+			sql = "SELECT COUNT(*) FROM market WHERE category = ?";
 			pstmt = conn.prepareStatement(sql);
 			
 			pstmt.setInt(1, category);
