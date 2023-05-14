@@ -13,18 +13,15 @@ public class MyPageDAO {
 	private Connection conn = DBConn.getConnection();
 
 	// 데이터 개수
-	public int dataCount(int category) {
+	public int dataCount() {
 		int result = 0;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		String sql;
 		
 		try {
-			sql = "SELECT COUNT(*) FROM market WHERE category = ?";
+			sql = "SELECT COUNT(*) FROM bbs";
 			pstmt = conn.prepareStatement(sql);
-			
-			pstmt.setInt(1, category);
-			
 			rs = pstmt.executeQuery();
 			if(rs.next()) {
 				result = rs.getInt(1);
@@ -38,48 +35,45 @@ public class MyPageDAO {
 				} catch (Exception e2) {
 				}
 			}
-			
-			if(pstmt != null) {
+
+			if (pstmt != null) {
 				try {
 					pstmt.close();
 				} catch (Exception e2) {
 				}
 			}
 		}
-		
+
 		return result;
 	}
 
 	// 검색에서의 데이터 개수
-	public int dataCount(int category, String condition, String keyword) {
+	public int dataCount(String condition, String keyword) {
 		int result = 0;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		String sql;
 		
 		try {
-			sql = "SELECT COUNT(*) FROM sbbs s "
-					+ " JOIN member1 m ON s.userId = m.userId "
-					+ " WHERE category = ? ";
+			sql = "SELECT COUNT(*) FROM bbs";
 			if(condition.equals("all")) {
-				sql += "  AND (INSTR(subject, ?) >= 1 OR INSTR(content, ?) >= 1) ";
-			} else if(condition.equals("reg_date")) {
+				sql += " WHERE INSTR(subject, ?) >= 1 OR INSTR(content, ? ) >= 1";
+			} else if(condition.equals("reg_data")) {
 				keyword = keyword.replaceAll("(\\-|\\.|\\/)", "");
-				sql += "  AND TO_CHAR(reg_date, 'YYYYMMDD') = ?";
-			} else {
-				sql += "  AND INSTR(" + condition + ", ?) >= 1";
+				sql += " WHERE TO_CHAR(reg_date, 'YYYYMMDD') = ?";
+			} else {	// subject, content, name
+				sql += " WHERE INSTR(" + condition + ", ?) >= 1";
 			}
 			
 			pstmt = conn.prepareStatement(sql);
-
-			pstmt.setInt(1, category);
-			pstmt.setString(2, keyword);
+			
+			pstmt.setString(1, keyword);
 			if(condition.equals("all")) {
-				pstmt.setString(3, keyword);
+				pstmt.setString(2, keyword);
 			}
 			
 			rs = pstmt.executeQuery();
-			if(rs.next()) {
+			if(rs.next() ) {
 				result = rs.getInt(1);
 			}
 			
@@ -92,8 +86,8 @@ public class MyPageDAO {
 				} catch (Exception e2) {
 				}
 			}
-			
-			if(pstmt != null) {
+
+			if (pstmt != null) {
 				try {
 					pstmt.close();
 				} catch (Exception e2) {
@@ -105,33 +99,29 @@ public class MyPageDAO {
 	}
 
 	// 게시물 리스트
-	public List<MyPageDTO> listBoard(int category, int offset, int size) {
+	public List<MyPageDTO> listBoard(int offset, int size) {
 		List<MyPageDTO> list = new ArrayList<>();
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		String sql;
 		
 		try {
-			sql = "SELECT num, userName, subject, hitCount, saveFilename, "
-					+ "    TO_CHAR(reg_date, 'YYYY-MM-DD') reg_date "
-					+ "  FROM sbbs s "
-					+ "  JOIN member1 m ON s.userId = m.userId"
-					+ "  WHERE category = ? "
-					+ "  ORDER BY num DESC "
-					+ "  OFFSET ? ROWS FETCH FIRST ? ROWS ONLY ";
-			
+			sql = "SELECT num,name,subject,hitCount, TO_CHAR(reg_date, 'YYYY-MM-DD') reg_date"
+					+ " FROM bbs ORDER BY num DESC "
+					+ " OFFSET ? ROWS FETCH FIRST ? ROWS ONLY";
+				
 			pstmt = conn.prepareStatement(sql);
 			
-			pstmt.setInt(1, category);
-			pstmt.setInt(2, offset);
-			pstmt.setInt(3, size);
+			pstmt.setInt(1, offset);
+			pstmt.setInt(2, size);
 			
 			rs = pstmt.executeQuery();
-			while(rs.next()) {
+			while(rs.next() ) {
 				MyPageDTO dto = new MyPageDTO();
 				
 				dto.setSubject(rs.getString("subject"));
-				
+				dto.setHitCount(rs.getInt("hitCount"));
+			
 				list.add(dto);
 			}
 			
@@ -144,8 +134,8 @@ public class MyPageDAO {
 				} catch (Exception e2) {
 				}
 			}
-			
-			if(pstmt != null) {
+
+			if (pstmt != null) {
 				try {
 					pstmt.close();
 				} catch (Exception e2) {
@@ -157,47 +147,45 @@ public class MyPageDAO {
 	}
 	
 	//
-	public List<MyPageDTO> listBoard(int category, int offset, int size, String condition, String keyword) {
+	public List<MyPageDTO> listBoard(int offset, int size, String condition, String keyword) {
 		List<MyPageDTO> list = new ArrayList<>();
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
-		StringBuilder sb = new StringBuilder();
+		String sql;
 		
 		try {
-			sb.append("SELECT num, userName, subject, hitCount, saveFilename, ");
-			sb.append("    TO_CHAR(reg_date, 'YYYY-MM-DD') reg_date ");
-			sb.append("  FROM sbbs s ");
-			sb.append("  JOIN member1 m ON s.userId = m.userId ");
-			sb.append("  WHERE category = ? ");
+			sql = "SELECT num, name, subject, hitCount, TO_CHAR(reg_date, 'YYYY-MM-DD') reg_date FROM bbs";
+			
 			if(condition.equals("all")) {
-				sb.append("  AND (INSTR(subject, ?) >= 1 OR INSTR(content, ?) >= 1) ");
+				sql += " WHERE INSTR(subject, ?) >= 1 OR INSTR(content, ?) >= 1 ";
 			} else if(condition.equals("reg_date")) {
-				keyword = keyword.replaceAll("(\\-|\\.|\\/)", "");
-				sb.append("  AND TO_CHAR(reg_date, 'YYYYMMDD') = ?");
+				keyword= keyword.replaceAll("(\\-|\\.|\\/)", "");
+				sql += " WHERE TO_CHAR(reg_date, 'YYYYMMDD') = ?";
 			} else {
-				sb.append("  AND INSTR(" + condition + ", ?) >= 1");
+				sql += " WHERE INSTR(" + condition + ", ?) >= 1";
 			}
-			sb.append("  ORDER BY num DESC ");
-			sb.append("  OFFSET ? ROWS FETCH FIRST ? ROWS ONLY ");
+			sql += " ORDER BY num DESC";
+			sql += " OFFSET ? ROWS FETCH FIRST ? ROWS ONLY ";
 			
-			pstmt = conn.prepareStatement(sb.toString());
+			pstmt = conn.prepareStatement(sql);
 			
-			pstmt.setInt(1, category);
 			if(condition.equals("all")) {
-				pstmt.setString(2, keyword);
-				pstmt.setString(3, keyword);
-				pstmt.setInt(4, offset);
-				pstmt.setInt(5, size);
-			} else {
+				pstmt.setString(1, keyword);
 				pstmt.setString(2, keyword);
 				pstmt.setInt(3, offset);
 				pstmt.setInt(4, size);
+			} else {
+				pstmt.setString(1, keyword);
+				pstmt.setInt(2, offset);
+				pstmt.setInt(3, size);
 			}
+			
 			rs = pstmt.executeQuery();
 			while(rs.next()) {
 				MyPageDTO dto = new MyPageDTO();
 				
 				dto.setSubject(rs.getString("subject"));
+				dto.setHitCount(rs.getInt("hitCount"));
 				
 				list.add(dto);
 			}
@@ -211,8 +199,8 @@ public class MyPageDAO {
 				} catch (Exception e2) {
 				}
 			}
-			
-			if(pstmt != null) {
+
+			if (pstmt != null) {
 				try {
 					pstmt.close();
 				} catch (Exception e2) {
@@ -297,146 +285,120 @@ public class MyPageDAO {
 	}
 
 	// 이전글
-	public MyPageDTO preReadBoard(int category, long marketnum, String condition, String keyword) {
+	public MyPageDTO preReadBoard(long marketnum, String condition, String keyword) {
 		MyPageDTO dto = null;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
-		StringBuilder sb = new StringBuilder();
+		String sql;
 
 		try {
-			if (keyword != null && keyword.length() != 0) {
-				sb.append(" SELECT num, subject ");
-				sb.append(" FROM sbbs b ");
-				sb.append(" JOIN member1 m ON b.userId = m.userId ");
-				sb.append(" WHERE category = ? AND num > ? ");
-				if (condition.equals("all")) {
-					sb.append("   AND ( INSTR(subject, ?) >= 1 OR INSTR(content, ?) >= 1 ) ");
-				} else if (condition.equals("reg_date")) {
-					keyword = keyword.replaceAll("(\\-|\\/|\\.)", "");
-					sb.append("   AND TO_CHAR(reg_date, 'YYYYMMDD') = ? ");
-				} else {
-					sb.append("   AND INSTR(" + condition + ", ?) >= 1 ");
-				}
-				sb.append(" ORDER BY num ASC ");
-				sb.append(" FETCH FIRST 1 ROWS ONLY ");
-
-				pstmt = conn.prepareStatement(sb.toString());
-				
-				pstmt.setInt(1, category);
-				pstmt.setLong(2, marketnum);
-				pstmt.setString(3, keyword);
-				if (condition.equals("all")) {
-					pstmt.setString(4, keyword);
-				}
-			} else {
-				sb.append(" SELECT num, subject FROM sbbs ");
-				sb.append(" WHERE category = ? AND num > ? ");
-				sb.append(" ORDER BY num ASC ");
-				sb.append(" FETCH FIRST 1 ROWS ONLY ");
-
-				pstmt = conn.prepareStatement(sb.toString());
-				
-				pstmt.setInt(1, category);
-				pstmt.setLong(2, marketnum);
-			}
-
+			sql = "SELECT num, name, subject, content, pwd, ipAddr, hitCount, reg_date"
+					+ " FROM bbs"
+					+ " WHERE num = ?";
+			
+			pstmt = conn.prepareStatement(sql);
+			
+			pstmt.setLong(1, marketnum);
+			
 			rs = pstmt.executeQuery();
-
-			if (rs.next()) {
+			
+			if(rs.next()) {
 				dto = new MyPageDTO();
 				
-				dto.setSubject(rs.getString("subject"));
+				dto.setSubject(rs.getString("Subject"));
+				dto.setContent(rs.getString("content"));
+				dto.setHitCount(rs.getInt("hitCount"));
 			}
-		} catch (SQLException e) {
+			
+		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
-			if (rs != null) {
+			if(rs != null) {
 				try {
 					rs.close();
-				} catch (SQLException e) {
+				} catch (Exception e2) {
 				}
 			}
-
-			if (pstmt != null) {
+			
+			if(pstmt != null) {
 				try {
 					pstmt.close();
-				} catch (SQLException e) {
+				} catch (Exception e2) {
 				}
 			}
 		}
-
+		
 		return dto;
 	}
 
 	// 다음글
-	public MyPageDTO nextReadBoard(int category, long marketnum, String condition, String keyword) {
+	public MyPageDTO nextReadBoard(long marketnum, String condition, String keyword) {
 		MyPageDTO dto = null;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		StringBuilder sb = new StringBuilder();
 
 		try {
-			if (keyword != null && keyword.length() != 0) {
-				sb.append(" SELECT num, subject ");
-				sb.append(" FROM sbbs b ");
-				sb.append(" JOIN member1 m ON b.userId = m.userId ");
-				sb.append(" WHERE category = ? AND num < ? ");
-				if (condition.equals("all")) {
-					sb.append("   AND ( INSTR(subject, ?) >= 1 OR INSTR(content, ?) >= 1 ) ");
-				} else if (condition.equals("reg_date")) {
-					keyword = keyword.replaceAll("(\\-|\\/|\\.)", "");
-					sb.append("   AND TO_CHAR(reg_date, 'YYYYMMDD') = ? ");
+			if(keyword != null && keyword.length() != 0) {
+				// 검색
+				sb.append(" SELECT num, subject");
+				sb.append(" FROM bbs ");
+				sb.append(" WHERE num > ? ");
+				if(condition.equals("all")) {
+					sb.append(" AND (INSTR(subject, ?) >= 1 OR INSTR(content, ?) >= 1) ");
+				} else if(condition.equals("reg_date")) {
+					keyword = keyword.replaceAll("(\\-|\\/|\\.)","");
+					sb.append(" AND (TO_CHAR(reg_date, 'YYYYMMDD') = ?) ");
 				} else {
-					sb.append("   AND INSTR(" + condition + ", ?) >= 1 ");
+					sb.append(" AND (INSTR(" + condition + ", ?) >= 1");
 				}
-				sb.append(" ORDER BY num DESC ");
-				sb.append(" FETCH FIRST 1 ROWS ONLY ");
-
-				pstmt = conn.prepareStatement(sb.toString());
+				sb.append(" ORDER BY num ASC");
+				sb.append(" FETCH FIRST 1 ROWS ONLY");
 				
-				pstmt.setInt(1, category);
-				pstmt.setLong(2, marketnum);
-				pstmt.setString(3, keyword);
-				if (condition.equals("all")) {
-					pstmt.setString(4, keyword);
+				pstmt = conn.prepareStatement(sb.toString());
+				pstmt.setLong(1, marketnum);
+				pstmt.setString(2, keyword);
+				if(condition.equals("all")) {
+					pstmt.setString(3, keyword);
 				}
 			} else {
-				sb.append(" SELECT num, subject FROM sbbs ");
-				sb.append(" WHERE category = ? AND num < ? ");
-				sb.append(" ORDER BY num DESC ");
-				sb.append(" FETCH FIRST 1 ROWS ONLY ");
-
+				// 검색이 아닐때
+				sb.append("SELECT num, subject");
+				sb.append(" FROM bbs ");
+				sb.append(" WHERE num > ? ");
+				sb.append(" ORDER BY NUM ASC");
+				sb.append(" FETCH FIRST 1 ROWS ONLY");
+				
 				pstmt = conn.prepareStatement(sb.toString());
-				
-				pstmt.setInt(1, category);
-				pstmt.setLong(2, marketnum);
-			}
-
+				pstmt.setLong(1, marketnum);
+			} 
+			
 			rs = pstmt.executeQuery();
-
-			if (rs.next()) {
+			
+			if(rs.next()) {
 				dto = new MyPageDTO();
-				
+				dto.setMarketnum(rs.getLong("num"));
 				dto.setSubject(rs.getString("subject"));
 			}
-		} catch (SQLException e) {
+			
+		} catch (Exception e) {
 			e.printStackTrace();
 		} finally {
-			if (rs != null) {
+			if(rs != null) {
 				try {
 					rs.close();
-				} catch (SQLException e) {
+				} catch (Exception e2) {
 				}
 			}
-
-			if (pstmt != null) {
+			
+			if(pstmt != null) {
 				try {
 					pstmt.close();
-				} catch (SQLException e) {
+				} catch (Exception e2) {
 				}
 			}
 		}
-
+	
 		return dto;
 	}
 

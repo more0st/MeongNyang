@@ -2,7 +2,6 @@ package com.myPage;
 
 public class MyPageDTO {
 	
-	private int category;
 	private long marketnum;	//	판매글 no
 	private String sellerid;	// 판매자 id
 	private String buyerid;		// 구매자 id
@@ -13,12 +12,6 @@ public class MyPageDTO {
 	private int state;		// 상품상태(0:판매중, 1:온라인거래완료, 2:직거래완료)
 	private String pay_date;	// 결제날짜(판매완료 날짜)
 	
-	public int getCategory() {
-		return category;
-	}
-	public void setCategory(int category) {
-		this.category = category;
-	}
 	public long getMarketnum() {
 		return marketnum;
 	}

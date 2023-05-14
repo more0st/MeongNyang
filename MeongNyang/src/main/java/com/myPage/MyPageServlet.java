@@ -52,78 +52,76 @@ public class MyPageServlet extends MyServlet{
 		String cp = req.getContextPath();
 		
 		try {
-			String gubun = req.getParameter("category");
-			int category = 1;
-			if(gubun != null) {
-				category = Integer.parseInt(gubun);
-			}
+			// 파라미터 : [페이지번호], [검색컬럼,검색값]          (페이지번호가 올수도 있고 오지않을수도잇음)
 			
+			// 페이지번호
 			String page = req.getParameter("page");
 			int current_page = 1;
-			if (page != null)
+			if(page != null) {
 				current_page = Integer.parseInt(page);
-
+			}
+			
 			// 검색
 			String condition = req.getParameter("condition");
 			String keyword = req.getParameter("keyword");
-			if (condition == null) {
+			if(condition == null) {	// 검색상태가 아니면
 				condition = "all";
 				keyword = "";
 			}
-
-			// GET 방식인 경우 디코딩
-			if (req.getMethod().equalsIgnoreCase("GET")) {
+			
+			// GET 방식이면 디코딩
+			if(req.getMethod().equalsIgnoreCase("GET")) {
 				keyword = URLDecoder.decode(keyword, "utf-8");
 			}
-
+			
 			// 전체 데이터 개수
 			int dataCount;
-			if (keyword.length() == 0) {
-				dataCount = dao.dataCount(category);
+			if(keyword.length() == 0) {	// 검색이 아닐때
+				dataCount = dao.dataCount();
 			} else {
-				dataCount = dao.dataCount(category, condition, keyword);
+				dataCount = dao.dataCount(condition, keyword);
 			}
-
-			// 전체 페이지 수
-			int size = 10;
+			
+			// 전체 페이지수
+			int size = 2;
 			int total_page = util.pageCount(dataCount, size);
-			if (current_page > total_page) {
+			if(current_page > total_page) {
 				current_page = total_page;
 			}
-
-			// 게시물 가져오기
+			
+			// 게시글 가져오기
 			int offset = (current_page - 1) * size;
 			if(offset < 0) offset = 0;
 			
 			List<MyPageDTO> list = null;
-			if (keyword.length() == 0) {
-				list = dao.listBoard(category, offset, size);
+			
+			if(keyword.length() == 0) {
+				list = dao.listBoard(offset, size);
 			} else {
-				list = dao.listBoard(category, offset, size, condition, keyword);
+				list = dao.listBoard(offset, size, condition, keyword);
 			}
-
+			
+			// 페이징 처리
 			String query = "";
-			if (keyword.length() != 0) {
+			if(keyword.length() != 0) {
 				query = "condition=" + condition + "&keyword=" + URLEncoder.encode(keyword, "utf-8");
 			}
-
-			// 페이징 처리
-			String listUrl = cp + "/myPage/buyList.do?category=" + category;
-			String articleUrl = cp + "/myPage/buyArticle.do?category=" + category + "&page=" + current_page;
-			if (query.length() != 0) {
-				listUrl += "&" + query;
+			
+			String listUrl = cp + "/myPage/buyList.do";
+			String articleUrl = cp + "/myPage/buyList.do?page=" + current_page;
+			if(query.length() != 0) {
+				listUrl += "?" + query;
 				articleUrl += "&" + query;
 			}
 
 			String paging = util.paging(current_page, total_page, listUrl);
-
-			// 포워딩할 JSP로 넘길 속성
+			
+			// 포워딩할 JSP에 전달할 속성(attribute)
 			req.setAttribute("list", list);
-			req.setAttribute("category", category);
 			req.setAttribute("page", current_page);
-			req.setAttribute("total_page", total_page);
 			req.setAttribute("dataCount", dataCount);
 			req.setAttribute("size", size);
+			req.setAttribute("total_page", total_page);
 			req.setAttribute("articleUrl", articleUrl);
 			req.setAttribute("paging", paging);
 			req.setAttribute("condition", condition);
@@ -132,68 +130,67 @@ public class MyPageServlet extends MyServlet{
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
-		// JSP로 포워딩
-		forward(req, resp, "/WEB-INF/views/myPage/buyList.jsp");
+		
+		
+		// 포워딩에서/ 는 cp까지를 의미한다.
+		forward(req,resp,"/WEB-INF/views/myPage/buyList.jsp");
 	}
 
 
 	private void article(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		// 글 보기
 		MyPageDAO dao = new MyPageDAO();
-		MyUtil util = new MyUtil();
-		
 		String cp = req.getContextPath();
 		
-		String category = req.getParameter("category");
 		String page = req.getParameter("page");
-		String query = "category=" + category + "&page=" + page;
-
+		String query = "page=" + page;
+		
 		try {
-			long marketnum = Long.parseLong(req.getParameter("marketnum"));
+			long num = Long.parseLong(req.getParameter("num"));
 			String condition = req.getParameter("condition");
 			String keyword = req.getParameter("keyword");
-			if (condition == null) {
+			if(condition == null) {
 				condition = "all";
 				keyword = "";
 			}
 			keyword = URLDecoder.decode(keyword, "utf-8");
-
-			if (keyword.length() != 0) {
-				query += "&condition=" + condition + "&keyword=" + URLEncoder.encode(keyword, "UTF-8");
+			
+			if(keyword.length() != 0) {
+				query += "&condition=" + condition + "&keyword=" + URLEncoder.encode(keyword, "utf-8");
 			}
-
-			// 조회수 증가
-			dao.updateHitCount(marketnum);
-
-			// 게시물 가져오기
-			MyPageDTO dto = dao.readBoard(marketnum);
-			if (dto == null) { // 게시물이 없으면 다시 리스트로
+			
+			/// 조회수 증가
+			dao.updateHitCount(num);
+			
+			// 게시글 가져오기
+			MyPageDTO dto = dao.readBoard(num);
+			if(dto == null) {
 				resp.sendRedirect(cp + "/myPage/buyList.do?" + query);
 				return;
 			}
-			dto.setContent(util.htmlSymbols(dto.getContent()));
-
+			
+			// 글내용 엔터를 <br>로
+			dto.setContent(dto.getContent().replaceAll("\n", "<br>"));
+			
 			// 이전글 다음글
-			int nCategory = Integer.parseInt(category);
-			MyPageDTO preReadDto = dao.preReadBoard(nCategory, dto.getMarketnum(), condition, keyword);
-			MyPageDTO nextReadDto = dao.nextReadBoard(nCategory, dto.getMarketnum(), condition, keyword);
-
-			// JSP로 전달할 속성
-			req.setAttribute("category", category);
+			MyPageDTO preReadDto = dao.preReadBoard(num, condition, keyword);
+			MyPageDTO nextReadDto = dao.nextReadBoard(num, condition, keyword);
+			
+			// 포워딩할 JSP에 넘겨줄 속성
 			req.setAttribute("dto", dto);
-			req.setAttribute("page", page);
-			req.setAttribute("query", query);
 			req.setAttribute("preReadDto", preReadDto);
 			req.setAttribute("nextReadDto", nextReadDto);
-
-			// 포워딩
-			forward(req, resp, "/WEB-INF/views/myPage/buyArticle.jsp");
+			
+			req.setAttribute("page", page);
+			req.setAttribute("query", query);
+			
+			forward(req,resp,"/WEB-INF/views/myPage/buyArticle.jsp");
 			return;
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
+		
 		resp.sendRedirect(cp + "/myPage/buyList.do?" + query);
 	}
 
