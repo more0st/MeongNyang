@@ -21,8 +21,8 @@
 <c:if test="${sessionScope.member.userId==dto.userId || sessionScope.member.userId=='admin'}">
 	function deleteBoard() {
 	    if(confirm("게시글을 삭제 하시 겠습니까 ? ")) {
-		    let query = "num=${dto.num}&${query}";
-		    let url = "${pageContext.request.contextPath}/bbs/delete.do?" + query;
+		    let query = "num=${dto.mapNum}&${query}";
+		    let url = "${pageContext.request.contextPath}/map/delete.do?" + query;
 	    	location.href = url;
 	    }
 	}
@@ -151,7 +151,7 @@ window.addEventListener('load',() => {
 				<tbody>
 					<tr>
 						<td width="50%">
-							이름 : ${dto.userName}
+							이름 : ${dto.userId}
 						</td>
 						<td align="right">
 							${dto.reg_date} | 조회 ${dto.hitCount}
@@ -188,7 +188,7 @@ window.addEventListener('load',() => {
 					<td width="50%">
 						<c:choose>
 							<c:when test="${sessionScope.member.userId==dto.userId}">
-								<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/bbs/update.do?num=${dto.num}&page=${page}';">수정</button>
+								<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/map/update.do?num=${dto.mapNum}&page=${page}';">수정</button>
 							</c:when>
 							<c:otherwise>
 								<button type="button" class="btn" disabled="disabled">수정</button>
@@ -205,7 +205,7 @@ window.addEventListener('load',() => {
 				    	</c:choose>
 					</td>
 					<td align="right">
-						<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/bbs/list.do?${query}';">리스트</button>
+						<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/map/list.do?${query}';">리스트</button>
 					</td>
 				</tr>
 			</table>
