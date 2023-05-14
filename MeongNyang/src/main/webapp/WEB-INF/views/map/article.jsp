@@ -151,7 +151,7 @@ window.addEventListener('load',() => {
 				<tbody>
 					<tr>
 						<td width="50%">
-							이름 : ${dto.userId}
+							이름 : ${dto.userName}
 						</td>
 						<td align="right">
 							${dto.reg_date} | 조회 ${dto.hitCount}
@@ -164,11 +164,23 @@ window.addEventListener('load',() => {
 						</td>
 					</tr>
 					
+					<tr style="border-bottom: none;">
+						<td colspan="2" height="110">
+							<div class="img-box">
+								<c:forEach var="vo" items="${listFile}">
+									<img src="${pageContext.request.contextPath}/uploads/map/${vo.imageFilename}"
+										onclick="imageViewer('${pageContext.request.contextPath}/uploads/map/${vo.imageFilename}');">
+								</c:forEach>
+							</div>
+						</td>	
+					</tr>
+					
+					
 					<tr>
 						<td colspan="2">
 							이전글 :
 							<c:if test="${not empty preReadDto}">
-								<a href="${pageContext.request.contextPath}/bbs/article.do?${query}&num=${preReadDto.num}">${preReadDto.subject}</a>
+								<a href="${pageContext.request.contextPath}/map/article.do?${query}&num=${preReadDto.mapNum}">${preReadDto.subject}</a>
 							</c:if>
 						</td>
 					</tr>
@@ -176,7 +188,7 @@ window.addEventListener('load',() => {
 						<td colspan="2">
 							다음글 :
 							<c:if test="${not empty nextReadDto}">
-								<a href="${pageContext.request.contextPath}/bbs/article.do?${query}&num=${nextReadDto.num}">${nextReadDto.subject}</a>
+								<a href="${pageContext.request.contextPath}/map/article.do?${query}&num=${nextReadDto.mapNum}">${nextReadDto.subject}</a>
 							</c:if>
 						</td>
 					</tr>

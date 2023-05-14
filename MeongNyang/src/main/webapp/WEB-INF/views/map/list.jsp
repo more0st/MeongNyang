@@ -71,7 +71,7 @@ function searchList() {
 							<td class="left">
 								<a href="${articleUrl}&num=${dto.mapNum}">${dto.subject}</a>
 							</td>
-							<td>${dto.userId}</td>
+							<td>${dto.userName}</td>
 							<td>${dto.reg_date}</td>
 							<td>${dto.hitCount}</td>
 						</tr>

@@ -47,6 +47,21 @@ function sendOk() {
     f.action = "${pageContext.request.contextPath}/map/${mode}_ok.do";
     f.submit();
 }
+
+<c:if test="${mode=='update'}">
+function deleteImg(fileNum) {
+	if(! confirm("이미지를 삭제 하시겠습니까 ?")) {
+		return;
+	}
+	
+	let query = "num=${dto.mapNum}&fileNum=" + fileNum + "&page=${page}";
+	let url = "${pageContext.request.contextPath}/map/deleteFile.do?" + query;
+	location.href = url;
+}
+</c:if>
+
+
+
 </script>
 </head>
 <body>
@@ -100,7 +115,7 @@ function sendOk() {
 								<div class="img-box">
 									<c:forEach var="vo" items="${listFile}">
 										<img src="${pageContext.request.contextPath}/uploads/map/${vo.imageFilename}"
-											onclick="deleteFile('${vo.fileNum}');">
+											onclick="deleteImg('${vo.fileNum}');">
 									</c:forEach>
 								</div>
 							</td>
@@ -116,7 +131,7 @@ function sendOk() {
 							<button type="reset" class="btn">다시입력</button>
 							<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/map/list.do';">${mode=='update'?'수정취소':'등록취소'}</button>
 							<c:if test="${mode=='update'}">
-								<input type="hidden" name="num" value="${dto.num}">
+								<input type="hidden" name="mapNum" value="${dto.mapNum}">
 								<input type="hidden" name="imageFilename" value="${dto.imageFilename}">
 								<input type="hidden" name="page" value="${page}">
 							</c:if>

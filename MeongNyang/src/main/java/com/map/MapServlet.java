@@ -2,6 +2,8 @@ package com.map;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
 
@@ -13,6 +15,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import com.member.SessionInfo;
+import com.util.FileManager;
 import com.util.MyUploadServlet;
 import com.util.MyUtil;
 
@@ -41,7 +44,7 @@ public class MapServlet extends MyUploadServlet{
 		}
 		
 		String root = session.getServletContext().getRealPath("/");
-		pathname = root + "uploads" + File.separator + "sphoto";
+		pathname = root + "uploads" + File.separator + "map";
 		
 		// uri에 따른 작업 구분
 		if(uri.indexOf("list.do") != -1) {
@@ -75,9 +78,6 @@ public class MapServlet extends MyUploadServlet{
 		MapDAO dao = new MapDAO();
 		MyUtil util = new MyUtil();
 		
-		HttpSession session = req.getSession();
-		SessionInfo info = (SessionInfo) session.getAttribute("member");
-
 		String cp = req.getContextPath();
 		
 		try {
@@ -86,35 +86,71 @@ public class MapServlet extends MyUploadServlet{
 			if (page != null) {
 				current_page = Integer.parseInt(page);
 			}
+			
+			// 검색
+			String condition = req.getParameter("condition");
+			String keyword = req.getParameter("keyword");
+			if (condition == null) {
+				condition = "all";
+				keyword = "";
+			}
 
-			// 전체데이터 개수
-			int dataCount = dao.dataCount();
-
-			// 전체페이지수
+			// GET 방식인 경우 디코딩
+			if (req.getMethod().equalsIgnoreCase("GET")) {
+				keyword = URLDecoder.decode(keyword, "utf-8");
+			}
+			
+			// 전체 데이터 개수
+			int dataCount;
+			if (keyword.length() == 0) {
+				dataCount = dao.dataCount();
+			} else {
+				dataCount = dao.dataCount(condition, keyword);
+			}
+			
+			// 전체 페이지 수
 			int size = 2;
 			int total_page = util.pageCount(dataCount, size);
 			if (current_page > total_page) {
 				current_page = total_page;
 			}
-
+			
 			// 게시물 가져오기
 			int offset = (current_page - 1) * size;
 			if(offset < 0) offset = 0;
 			
-			List<MapDTO> list = dao.listMap(offset, size, info.getUserId());
+			List<MapDTO> list = null;
+			if (keyword.length() == 0) {
+				list = dao.listMap(offset, size);
+			} else {
+				list = dao.listMap(offset, size, condition, keyword);
+			}
 
+			String query = "";
+			if (keyword.length() != 0) {
+				query = "condition=" + condition + "&keyword=" + URLEncoder.encode(keyword, "utf-8");
+			}
+			
 			// 페이징 처리
 			String listUrl = cp + "/map/list.do";
 			String articleUrl = cp + "/map/article.do?page=" + current_page;
+			if (query.length() != 0) {
+				listUrl += "?" + query;
+				articleUrl += "&" + query;
+			}			
+			
 			String paging = util.paging(current_page, total_page, listUrl);
-
-			// 포워딩할 list.jsp에 넘길 값
+			
+			// 포워딩할 JSP에 전달할 속성
 			req.setAttribute("list", list);
-			req.setAttribute("dataCount", dataCount);
-			req.setAttribute("articleUrl", articleUrl);
 			req.setAttribute("page", current_page);
 			req.setAttribute("total_page", total_page);
+			req.setAttribute("dataCount", dataCount);
+			req.setAttribute("size", size);
+			req.setAttribute("articleUrl", articleUrl);
 			req.setAttribute("paging", paging);
+			req.setAttribute("condition", condition);
+			req.setAttribute("keyword", keyword);
 			
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -147,6 +183,7 @@ public class MapServlet extends MyUploadServlet{
 			MapDTO dto = new MapDTO();
 			
 			dto.setUserId(info.getUserId());	
+			
 			dto.setSubject(req.getParameter("subject"));
 			dto.setContent(req.getParameter("content"));
 			
@@ -168,59 +205,252 @@ public class MapServlet extends MyUploadServlet{
 		
 	}
 	protected void article(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		// 글 보기
-		// 게시물 보기
+		// 글보기
+				MapDAO dao = new MapDAO();
+				MyUtil util = new MyUtil();
+				
+				String cp = req.getContextPath();
+				
+				String page = req.getParameter("page");
+				String query = "page=" + page;
+
+				try {
+					long num = Long.parseLong(req.getParameter("num"));
+					String condition = req.getParameter("condition");
+					String keyword = req.getParameter("keyword");
+					if (condition == null) {
+						condition = "all";
+						keyword = "";
+					}
+					keyword = URLDecoder.decode(keyword, "utf-8");
+
+					if (keyword.length() != 0) {
+						query += "&condition=" + condition + "&keyword=" + URLEncoder.encode(keyword, "UTF-8");
+					}
+
+					// 조회수 증가
+					dao.updateHitCount(num);
+
+					// 게시물 가져오기
+					MapDTO dto = dao.readMap(num);
+					if (dto == null) { // 게시물이 없으면 다시 리스트로
+						resp.sendRedirect(cp + "/map/list.do?" + query);
+						return;
+					}
+					dto.setContent(util.htmlSymbols(dto.getContent()));
+
+					// 이전글 다음글
+					MapDTO preReadDto = dao.preReadBoard(dto.getMapNum(), condition, keyword);
+					MapDTO nextReadDto = dao.nextReadBoard(dto.getMapNum(), condition, keyword);
+
+					List<MapDTO> listFile = dao.listImgFile(num);
+					
+
+					
+					// JSP로 전달할 속성
+					req.setAttribute("dto", dto);
+					req.setAttribute("page", page);
+					req.setAttribute("query", query);
+					req.setAttribute("preReadDto", preReadDto);
+					req.setAttribute("nextReadDto", nextReadDto);
+					req.setAttribute("listFile", listFile);
+					// req.setAttribute("list", list);
+
+					// 포워딩
+					forward(req, resp, "/WEB-INF/views/map/article.jsp");
+					return;
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+
+		
+		resp.sendRedirect(cp + "/map/list.do?page=" + page);
+	}
+	protected void updateForm(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		// 글 수정
+		MapDAO dao = new MapDAO();
+
+		HttpSession session = req.getSession();
+		SessionInfo info = (SessionInfo) session.getAttribute("member");
+		
+		String cp = req.getContextPath();
+
+		String page = req.getParameter("page");
+
+		try {
+			long num = Long.parseLong(req.getParameter("num"));
+			MapDTO dto = dao.readMap(num);
+
+			if (dto == null) {
+				resp.sendRedirect(cp + "/map/list.do?page=" + page);
+				return;
+			}
+
+			if (! dto.getUserId().equals(info.getUserId())) {
+				resp.sendRedirect(cp + "/map/list.do?page=" + page);
+				return;
+			}
+
+			List<MapDTO> listFile = dao.listImgFile(num);
+			
+			req.setAttribute("dto", dto);
+			req.setAttribute("page", page);
+			req.setAttribute("mode", "update");
+			req.setAttribute("listFile", listFile);
+			
+			req.setAttribute("mode", "update");
+
+			forward(req, resp, "/WEB-INF/views/map/write.jsp");
+			return;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		resp.sendRedirect(cp + "/map/list.do?page=" + page);
+	
+		
+	}
+	protected void updateSubmit(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		// 글 수정 완료
+		MapDAO dao = new MapDAO();
+
+		HttpSession session = req.getSession();
+		SessionInfo info = (SessionInfo) session.getAttribute("member");
+		
+		String cp = req.getContextPath();
+		if (req.getMethod().equalsIgnoreCase("GET")) {
+			resp.sendRedirect(cp + "/map/list.do");
+			return;
+		}
+
+		String page = req.getParameter("page");
+		long num = 0;
+		try {
+			MapDTO dto = new MapDTO();
+			
+			
+			num = Long.parseLong(req.getParameter("mapNum"));
+			dto.setMapNum(num);
+			dto.setSubject(req.getParameter("subject"));
+			dto.setContent(req.getParameter("content"));
+			dto.setAddr(req.getParameter("addr"));
+			// dto.setFileNum(Long.parseLong(req.getParameter("fileNum")));
+			dto.setUserId(info.getUserId());
+			
+			Map<String, String[]> map = doFileUpload(req.getParts(), pathname);
+			if (map != null) {
+				String[] saveFiles = map.get("imageFilename");
+				dto.setImageFiles(saveFiles);
+			}
+
+			dao.updateMap(dto);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		resp.sendRedirect(cp + "/map/article.do?page=" +page+ "&num="+ num);
+		
+	}
+		
+	protected void deleteFile(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		// 수정에서 파일 삭제
+		
 		MapDAO dao = new MapDAO();
 		
 		HttpSession session = req.getSession();
 		SessionInfo info = (SessionInfo) session.getAttribute("member");
 
 		String cp = req.getContextPath();
+
 		String page = req.getParameter("page");
 
 		try {
 			long num = Long.parseLong(req.getParameter("num"));
-
+			long fileNum = Long.parseLong(req.getParameter("fileNum"));
+			
 			MapDTO dto = dao.readMap(num);
-			if (dto == null || !dto.getUserId().equals(info.getUserId())) {
-				resp.sendRedirect(cp + "/sphoto/list.do?page=" + page);
+
+			if (dto == null) {
+				resp.sendRedirect(cp + "/map/list.do?page=" + page);
 				return;
 			}
-			dto.setContent(dto.getContent().replaceAll("\n", "<br>"));
+
+			if (!info.getUserId().equals(dto.getUserId())) {
+				resp.sendRedirect(cp + "/map/list.do?page=" + page);
+				return;
+			}
 			
-			//
-			// MapDTO preReadDto = dao.preReadPhoto(num, info.getUserId());
-			// MapDTO nextReadDto = dao.nextReadPhoto(num, info.getUserId());
+			MapDTO vo = dao.readImgFile(fileNum);
+			if(vo != null) {
+				FileManager.doFiledelete(pathname, vo.getImageFilename());
+				
+				dao.deleteImgFile("one", fileNum);
+			}
+			
 
-			// List<MapDTO> listFile = dao.listPhotoFile(num);
-			// List<MapDTO> listFile = dao.li
-
-			req.setAttribute("dto", dto);
-			// req.setAttribute("preReadDto", preReadDto);
-			// req.setAttribute("nextReadDto", nextReadDto);
-			// req.setAttribute("listFile", listFile);
-			req.setAttribute("page", page);
-
-			forward(req, resp, "/WEB-INF/views/map/article.jsp");
+			resp.sendRedirect(cp + "/map/update.do?num=" + num + "&page=" + page);
 			return;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
+		resp.sendRedirect(cp + "/map/list.do?page=" + page);
+	}
 		
-		forward(req, resp, "/WEB-INF/views/map/article.jsp");
-	}
-	protected void updateForm(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		// 글 수정
-	}
-	protected void updateSubmit(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		// 글 수정 완료
-	}
-	protected void deleteFile(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		// 수정에서 파일 삭제
-	}
+		
 	protected void delete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		// 게시글 삭제
+		MapDAO dao = new MapDAO();
+
+		HttpSession session = req.getSession();
+		SessionInfo info = (SessionInfo) session.getAttribute("member");
+		
+		String cp = req.getContextPath();
+		
+		String page = req.getParameter("page");
+		String query = "page=" + page;
+
+		try {
+			long num = Long.parseLong(req.getParameter("num"));
+			String condition = req.getParameter("condition");
+			String keyword = req.getParameter("keyword");
+			if (condition == null) {
+				condition = "all";
+				keyword = "";
+			}
+			keyword = URLDecoder.decode(keyword, "utf-8");
+
+			if (keyword.length() != 0) {
+				query += "&condition=" + condition + "&keyword=" + URLEncoder.encode(keyword, "UTF-8");
+			}
+			
+			MapDTO dto = dao.readMap(num);
+			if (dto == null) {
+				resp.sendRedirect(cp + "/map/list.do?page=" + page);
+				return;
+			}
+			
+			// 게시물을 올린 사용자가 아니면
+			if (!dto.getUserId().equals(info.getUserId())) {
+				resp.sendRedirect(cp + "/map/list.do?page=" + page);
+				return;
+			}
+
+			// 이미지 파일 지우기
+			List<MapDTO> listFile = dao.listImgFile(num);
+			for (MapDTO vo : listFile) {
+				FileManager.doFiledelete(pathname, vo.getImageFilename());
+			}
+			dao.deleteImgFile("all", num);
+
+			dao.deleteMap(num);
+
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		resp.sendRedirect(cp + "/map/list.do?" + query);
+
 	}
 	protected void insertReply(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		// 댓글 추가

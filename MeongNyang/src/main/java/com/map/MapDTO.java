@@ -13,6 +13,9 @@ public class MapDTO {
 	private String imageFilename;
 	private String[] imageFiles;
 	
+	
+	private String userName;
+	
 	public long getMapNum() {
 		return mapNum;
 	}
@@ -93,4 +96,14 @@ public class MapDTO {
 		this.imageFiles = imageFiles;
 	}
 
+	public String getUserName() {
+		return userName;
+	}
+
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
+
+	
+	
 }
