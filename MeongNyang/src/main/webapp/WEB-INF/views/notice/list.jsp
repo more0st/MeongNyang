@@ -40,7 +40,7 @@ function searchList() {
 <main>
 	<div class="container body-container">
 	    <div class="body-title">
-			<h2> ${title} </h2>
+			<h2> 공지사항로고넣기 </h2>
 	    </div>
 	   <div style="box-shadow: 0 0 15px 0 rgb(2 59 109 / 10%);border-radius: 30px; margin: 0 auto ; width: 70%;">
 	    <div class="body-main mx-auto">
@@ -69,7 +69,8 @@ function searchList() {
 						<tr>
 							<td>${dataCount - (page-1) * size - status.index}</td>
 							<td class="left">
-								<a href="${articleUrl}&num=${dto.num}">${dto.subject}</a>
+								<a href="${articleUrl}&noticeNum=${dto.noticeNum}">${dto.subject}</a>
+								<c:if test="${dto.gap<1}"><img src="${pageContext.request.contextPath}/resource/images/new.gif"></c:if>
 							</td>
 							<td>${dto.userName}</td>
 							<td>${dto.reg_date}</td>
@@ -89,7 +90,7 @@ function searchList() {
 						<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/notice/list.do';" title="새로고침"><i class="fa-solid fa-arrow-rotate-right"></i></button>
 					</td>
 					<td align="center">
-						<form name="searchForm" action="${pageContext.request.contextPath}/bbs/list.do" method="post">
+						<form name="searchForm" action="${pageContext.request.contextPath}/notice/list.do" method="post">
 							<select name="condition" class="form-select">
 								<option value="all"      ${condition=="all"?"selected='selected'":"" }>제목+내용</option>
 								<option value="userName" ${condition=="userName"?"selected='selected'":"" }>작성자</option>
@@ -102,7 +103,9 @@ function searchList() {
 						</form>
 					</td>
 					<td align="right" width="100">
+					<c:if test="${sessionScope.member.userId == 'admin'}">
 						<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/notice/write.do';">글올리기</button>
+					</c:if>
 					</td>
 				</tr>
 			</table>

@@ -16,13 +16,106 @@
 }
 
 .table-article tr>td { padding-left: 5px; padding-right: 5px; }
+
+
+.table-border thead > tr { border-top: 1px solid #eee; border-bottom: 1px solid #eee; }
+
+
+/* 댓글 */
+.reply {
+	clear: both; padding: 20px 0 10px;
+}
+.reply .bold {
+	font-weight: 900;
+}
+
+.reply .form-header {
+	padding-bottom: 7px;
+}
+.reply-form tr>td {
+	padding: 2px 0 2px;
+}
+.reply-form textarea {
+	width: 100%; height: 75px; resize: none;
+	border-radius: 30px;
+}
+.reply-form button {
+	padding: 8px 25px;
+}
+
+.reply .reply-info {
+	padding-top: 25px; padding-bottom: 7px;
+}
+.reply .reply-info  .reply-count {
+	color: tomato; font-weight: 900;
+}
+
+.reply .reply-list tr>td {
+	padding: 7px 5px;
+}
+.reply .reply-list .bold {
+	font-weight: 600;
+}
+
+.reply .deleteReply, .reply .deleteReplyAnswer {
+	cursor: pointer;
+}
+.reply .notifyReply {
+	cursor: pointer;
+}
+
+.reply-list .list-header {
+	border: 1px solid white; background: #ffedea;
+	border-radius: 30px;
+	
+}
+.reply-list tr>td {
+	padding-left: 7px; padding-right: 7px;
+}
+
+.reply-answer {
+	display: none;
+}
+.reply-answer .answer-left {
+	float: left; width: 5%;
+}
+.reply-answer .answer-right {
+	float: left; width: 95%;
+	border-radius: 30px;
+}
+.reply-answer .answer-list {
+	border-top: 1px solid #cccccc; padding: 0 10px 7px;
+}
+.reply-answer .answer-form {
+	clear: both; padding: 3px 10px 5px;
+}
+.reply-answer .answer-form textarea {
+	width: 100%; height: 75px; resize: none;
+	border-radius: 30px;
+}
+.reply-answer .answer-footer {
+	clear: both; padding: 0 13px 10px 10px; text-align: right;
+}
+
+.answer-article {
+	clear: both;
+}
+.answer-article .answer-article-header {
+	clear: both; padding-top: 5px;
+}
+.answer-article .answer-article-body {
+	clear:both; padding: 5px 5px; border-bottom: 1px solid #cccccc;
+}
+
+
+
 </style>
 <script type="text/javascript">
 <c:if test="${sessionScope.member.userId==dto.userId || sessionScope.member.userId=='admin'}">
 	function deleteBoard() {
 	    if(confirm("게시글을 삭제 하시 겠습니까 ? ")) {
-		    let query = "num=${dto.num}&${query}";
-		    let url = "${pageContext.request.contextPath}/bbs/delete.do?" + query;
+		    let query = "noticeNum=${dto.noticeNum}&${query}";
+		    let url = "${pageContext.request.contextPath}/notice/delete.do?" + query;
 	    	location.href = url;
 	    }
 	}
@@ -135,21 +228,21 @@ window.addEventListener('load',() => {
 <main>
 	<div class="container body-container">
 	    <div class="body-title">
-			<h2> 글보기 </h2>
+			<h2> 공지사항로고 넣기 </h2>
 	    </div>
 	    <div style="box-shadow: 0 0 15px 0 rgb(2 59 109 / 10%);border-radius: 30px; margin: 0 auto ; width: 70%; margin-bottom: 50px;">
-	    <div class="body-main mx-auto">
+	    <div class="body-main mx-auto" >
 			<table class="table table-border table-article">
 				<thead>
 					<tr>
-						<td colspan="2" align="center">
+						<td colspan="2" align="center" style="font-weight: 900; color: tomato; font-size: 20px;">
 							${dto.subject}
 						</td>
 					</tr>
 				</thead>
 				
 				<tbody>
-					<tr>
+					<tr style="color : gray; font-size: 12px;">
 						<td width="50%">
 							이름 : ${dto.userName}
 						</td>
@@ -159,7 +252,7 @@ window.addEventListener('load',() => {
 					</tr>
 					
 					<tr>
-						<td colspan="2" valign="top" height="200">
+						<td colspan="2" valign="top" height="200" style="font-size: 13px;">
 							${dto.content}
 						</td>
 					</tr>
@@ -167,16 +260,16 @@ window.addEventListener('load',() => {
 					<tr>
 						<td colspan="2">
 							이전글 :
-							<c:if test="${not empty preReadDto}">
-								<a href="${pageContext.request.contextPath}/bbs/article.do?${query}&num=${preReadDto.num}">${preReadDto.subject}</a>
+							<c:if test="${not empty preReadDTO}">
+								<a href="${pageContext.request.contextPath}/notice/article.do?${query}&noticeNum=${preReadDTO.noticeNum}">${preReadDTO.subject}</a>
 							</c:if>
 						</td>
 					</tr>
 					<tr>
 						<td colspan="2">
 							다음글 :
-							<c:if test="${not empty nextReadDto}">
-								<a href="${pageContext.request.contextPath}/bbs/article.do?${query}&num=${nextReadDto.num}">${nextReadDto.subject}</a>
+							<c:if test="${not empty nextReadDTO}">
+								<a href="${pageContext.request.contextPath}/notice/article.do?${query}&noticeNum=${nextReadDTO.noticeNum}">${nextReadDTO.subject}</a>
 							</c:if>
 						</td>
 					</tr>
@@ -188,7 +281,7 @@ window.addEventListener('load',() => {
 					<td width="50%">
 						<c:choose>
 							<c:when test="${sessionScope.member.userId==dto.userId}">
-								<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/bbs/update.do?num=${dto.num}&page=${page}';">수정</button>
+								<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/notice/update.do?noticeNum=${dto.noticeNum}&page=${page}';">수정</button>
 							</c:when>
 							<c:otherwise>
 								<button type="button" class="btn" disabled="disabled">수정</button>
@@ -205,7 +298,7 @@ window.addEventListener('load',() => {
 				    	</c:choose>
 					</td>
 					<td align="right">
-						<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/bbs/list.do?${query}';">리스트</button>
+						<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/notice/list.do?${query}';">리스트</button>
 					</td>
 				</tr>
 			</table>
@@ -224,10 +317,10 @@ window.addEventListener('load',() => {
 				<span class="bold">댓글쓰기</span><span> - 타인을 비방하거나 개인정보를 유출하는 글의 게시를 삼가해 주세요.</span>
 			</div>
 			
-			<table class="table reply-form">
+			<table class="table reply-form" >
 				<tr>
 					<td>
-						<textarea class='form-control' name="content" style="height: 120px;"></textarea>
+						<textarea class='form-control' name="content"></textarea>
 					</td>
 				</tr>
 				<tr>
@@ -242,7 +335,7 @@ window.addEventListener('load',() => {
 		
 			<div class='reply-info'>
 				<span class='reply-count'>댓글 15개</span>
-				<span>[목록, 1/3 페이지]</span>
+				<span style="font-size: 12px;">[목록, 1/3 페이지]</span>
 			</div>
 			
 			<table class='table reply-list'>
@@ -257,7 +350,7 @@ window.addEventListener('load',() => {
 						</td>
 					</tr>
 					<tr>
-						<td colspan='2' valign='top'>내용입니다.</td>
+						<td colspan='2' valign='top'>댓글입니다댓글입니다<br>댓글입니다댓글입니다</td>
 					</tr>
 			
 					<tr>

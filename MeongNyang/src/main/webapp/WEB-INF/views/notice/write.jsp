@@ -59,7 +59,7 @@ function sendOk() {
 
 	<div class="container body-container">
 	    <div class="body-title">
-			<h2> 멍냥지도 </h2>
+			<h2> 공지사항 </h2>
 	    </div>
 	    <div style="box-shadow: 0 0 15px 0 rgb(2 59 109 / 10%);border-radius: 30px; margin: 0 auto ; width: 70%;">
 	    <div class="body-main mx-auto">
@@ -94,7 +94,7 @@ function sendOk() {
 							<button type="reset" class="btn">다시입력</button>
 							<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/notice/list.do';">${mode=='update'?'수정취소':'등록취소'}</button>
 							<c:if test="${mode=='update'}">
-								<input type="hidden" name="num" value="${dto.num}">
+								<input type="hidden" name="noticeNum" value="${dto.noticeNum}">
 								<input type="hidden" name="page" value="${page}">
 							</c:if>
 						</td>
