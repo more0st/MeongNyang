@@ -9,20 +9,59 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>spring</title>
 <jsp:include page="/WEB-INF/views/layout/staticHeader.jsp"/>
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.3.0/css/all.css">
+
 <style type="text/css">
 .body-main {
 	max-width: 700px;
 	padding-top: 15px;
 }
 
+/* 모달대화상자 */
+.ui-widget-header { /* 타이틀바 */
+	background: none;
+	border: none;
+	border-bottom: 1px solid #ccc;
+	border-radius: 0;
+}
+.ui-dialog .ui-dialog-title {
+	padding-top: 5px; padding-bottom: 5px;
+}
+.ui-widget-content { /* 내용 */
+   /* border: none; */
+   border-color: #ccc; 
+}
+
 .table-article tr>td { padding-left: 5px; padding-right: 5px; }
+
+.img-box {
+	max-width: 700px;
+	padding: 5px;
+	box-sizing: border-box;
+	display: flex; /* 자손요소를 flexbox로 변경 */
+	flex-direction: row; /* 정방향 수평나열 */
+	flex-wrap: nowrap;
+	overflow-x: auto;
+}
+.img-box img {
+	width: 100px; height: 100px;
+	margin-right: 5px;
+	flex: 0 0 auto;
+	cursor: pointer;
+}
+
+.photo-layout img { width: 570px; height: 450px; }
+
+.bold { font-weight: bold;}
+
 </style>
+<script type="text/javascript" src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
 <script type="text/javascript">
 <c:if test="${sessionScope.member.userId==dto.userId || sessionScope.member.userId=='admin'}">
 	function deleteBoard() {
 	    if(confirm("게시글을 삭제 하시 겠습니까 ? ")) {
-		    let query = "num=${dto.num}&${query}";
-		    let url = "${pageContext.request.contextPath}/bbs/delete.do?" + query;
+		    let query = "num=${dto.clubNum}&${query}";
+		    let url = "${pageContext.request.contextPath}/club/delete.do?" + query;
 	    	location.href = url;
 	    }
 	}
@@ -48,8 +87,8 @@ window.addEventListener('load',()=>{
 			return;
 		}
 		
-		content = encodeURIComponent(content);
-		alert('등록할 댓글 :' + content);
+		f.action = "${pageContext.request.contextPath}/club/replyWrite_ok.do";
+		f.submit();
 	});
 	
 });
@@ -122,6 +161,26 @@ window.addEventListener('load',() => {
 	});
 });
 
+$(function(){
+	$(".showMember").click(function(){
+		$(".popup-dialog").dialog({
+			title:"현재 가입한 멤버"
+		});
+	});
+});
+
+function imageViewer(img) {
+	const viewer = $(".photo-layout");
+	let s="<img src='"+img+"'>";
+	viewer.html(s);
+	
+	$(".dialog-photo").dialog({
+		title:"이미지",
+		width: 600,
+		height: 530,
+		modal: true
+	});
+}
 
 </script>
 
@@ -133,9 +192,9 @@ window.addEventListener('load',() => {
 </header>
 	
 <main>
-	<div class="container body-container">
-	    <div class="body-title">
-			<h2> 글보기 </h2>
+	<div class="container body-container" >
+	    <div class="body-title" style="text-align: center;">
+			<img src="${pageContext.request.contextPath}/resource/images/clubpage.png" style="width: 250px;">
 	    </div>
 	    <div style="box-shadow: 0 0 15px 0 rgb(2 59 109 / 10%);border-radius: 30px; margin: 0 auto ; width: 70%; margin-bottom: 50px;">
 	    <div class="body-main mx-auto">
@@ -143,19 +202,23 @@ window.addEventListener('load',() => {
 				<thead>
 					<tr>
 						<td colspan="2" align="center">
-							${dto.subject}
+							<h3>${dto.subject}</h3>
 						</td>
 					</tr>
 				</thead>
 				
 				<tbody>
 					<tr>
-						<td width="50%">
-							이름 : ${dto.userName}
-						</td>
+						<td><span class="bold">모임명</span> : ${dto.clubName }</td>
 						<td align="right">
-							${dto.reg_date} | 조회 ${dto.hitCount}
+							${dto.reg_date} | 조회수 ${dto.hitCount}
 						</td>
+					</tr>
+					<tr>
+						<td width="50%">
+							<span class="bold">모임장</span> : ${dto.userName}
+						</td>
+						
 					</tr>
 					
 					<tr>
@@ -165,30 +228,51 @@ window.addEventListener('load',() => {
 					</tr>
 					
 					<tr>
+						<td width="50%">
+							<span class="bold">인원</span> : ${memberCount}/${dto.maxMember }
+						</td>
+						
+					</tr>
+					
+					<tr style="border-bottom: none;">
+						<td colspan="2" height="110">
+							<div class="img-box">
+								<c:forEach var="vo" items="${listFile}">
+									<img src="${pageContext.request.contextPath}/uploads/club/${vo.imageFilename}"
+										onclick="imageViewer('${pageContext.request.contextPath}/uploads/club/${vo.imageFilename}');">
+								</c:forEach>
+							</div>
+						</td>	
+					</tr>
+					
+					<tr>
 						<td colspan="2">
-							이전글 :
+							<span class="bold">이전글 : </span>
 							<c:if test="${not empty preReadDto}">
-								<a href="${pageContext.request.contextPath}/bbs/article.do?${query}&num=${preReadDto.num}">${preReadDto.subject}</a>
+								<a href="${pageContext.request.contextPath}/club/article.do?${query}&num=${preReadDto.clubNum}">${preReadDto.subject}</a>
 							</c:if>
 						</td>
 					</tr>
 					<tr>
 						<td colspan="2">
-							다음글 :
+							<span class="bold">다음글 : </span>
 							<c:if test="${not empty nextReadDto}">
-								<a href="${pageContext.request.contextPath}/bbs/article.do?${query}&num=${nextReadDto.num}">${nextReadDto.subject}</a>
+								<a href="${pageContext.request.contextPath}/club/article.do?${query}&num=${nextReadDto.clubNum}">${nextReadDto.subject}</a>
 							</c:if>
 						</td>
 					</tr>
+					
+					
+				
 				</tbody>
 			</table>
 			
 			<table class="table">
 				<tr>
-					<td width="50%">
+					<td width="30%">
 						<c:choose>
 							<c:when test="${sessionScope.member.userId==dto.userId}">
-								<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/bbs/update.do?num=${dto.num}&page=${page}';">수정</button>
+								<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/club/update.do?num=${dto.clubNum}&page=${page}';">수정</button>
 							</c:when>
 							<c:otherwise>
 								<button type="button" class="btn" disabled="disabled">수정</button>
@@ -204,18 +288,45 @@ window.addEventListener('load',() => {
 				    		</c:otherwise>
 				    	</c:choose>
 					</td>
+					
 					<td align="right">
-						<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/bbs/list.do?${query}';">리스트</button>
+						<button type="button" class="btn showMember" >멤버보기</button>
+						
+						<!--가입하기버튼 정원수초과하면 비활성화 -> 현재수>=정원수, 멤버일 경우 비활성화->멤버리스트가 있으면(not empty)
+						  -->
+						<c:choose>
+				    		<c:when test="${ memberCount < dto.maxMember || empty list}">
+				    			<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/club/signUp.do?num=${dto.clubNum}';">가입하기</button>
+				    		</c:when>
+				    		<c:otherwise>
+				    			<button type="button" class="btn" disabled="disabled">가입하기</button>
+				    		</c:otherwise>
+				    	</c:choose>
+							<!-- 탈퇴하기 버튼 가입한멤버이면(리더빼고) 활성화 해야함 -->
+							<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/club/byebye.do?num=${dto.clubNum}';">탈퇴하기</button>
 					</td>
+					<td align="right">
+						<button type="button" class="btn" >좋아요</button>
+						<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/club/list.do?${query}';">리스트</button>
+					</td>
+					
 				</tr>
 			</table>
+			
+			
+					<!-- 멤버리스트 -->
+					<div class=" popup-dialog" style="display: none;">
+							<c:forEach var="list" items="${list }">
+								<p><i class="fa-solid fa-user" style="color: #fd855d;"></i>${list.userName }</p>
+							</c:forEach>
+					</div>
 
 	    </div>
 	    </div>
 	</div>
 	
 	
-	<!-- 댓글 폼 -->
+	<!-- 댓글 쓰기폼 -->
 	<div class="body-container">
 
 	<div class="reply">
@@ -238,6 +349,9 @@ window.addEventListener('load',() => {
 			</table>
 		</form>
 		
+		
+		
+		
 		<div id="listReply">
 		
 			<div class='reply-info'>
@@ -246,7 +360,7 @@ window.addEventListener('load',() => {
 			</div>
 			
 			<table class='table reply-list'>
-			
+							<!-- 댓글리스트 -->
 					<tr class='list-header'>
 						<td width='50%'>
 							<span class='bold'>홍길동</span>
@@ -264,12 +378,9 @@ window.addEventListener('load',() => {
 						<td>
 							<button type='button' class='btn btnReplyAnswerLayout' data-replyNum='10'>답글 <span id="answerCount10">3</span></button>
 						</td>
-						<td align='right'>
-							<button type='button' class='btn btnSendReplyLike' data-replyNum='10' data-replyLike='1' title="좋아요">좋아요 <span>3</span></button>
-							<button type='button' class='btn btnSendReplyLike' data-replyNum='10' data-replyLike='0' title="싫어요">싫어요 <span>1</span></button>	        
-						</td>
 					</tr>
 				
+						<!-- 대댓글 리스트-->
 				    <tr class='reply-answer'>
 				        <td colspan='2'>
 				            <div id='Answer10' class='answer-list'>
@@ -291,6 +402,8 @@ window.addEventListener('load',() => {
 								</div>
 												            
 				            </div>
+				            
+				            <!-- 대댓글 쓰기 -->
 				            <div class="answer-form">
 				                <div class='answer-left'>└</div>
 				                <div class='answer-right'><textarea class='form-control' ></textarea></div>
@@ -300,8 +413,6 @@ window.addEventListener('load',() => {
 				            </div>
 						</td>
 				    </tr>
-				
-
 					
 				
 			</table>
@@ -317,6 +428,10 @@ window.addEventListener('load',() => {
 <footer>
     <jsp:include page="/WEB-INF/views/layout/footer.jsp"></jsp:include>
 </footer>
+
+<div class="dialog-photo">
+      <div class="photo-layout"></div>
+</div>
 
 <jsp:include page="/WEB-INF/views/layout/staticFooter.jsp"/>
 </body>

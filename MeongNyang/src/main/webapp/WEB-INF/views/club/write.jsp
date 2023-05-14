@@ -37,16 +37,61 @@ function sendOk() {
         return;
     }
 
+    
+    str = f.clubName.value.trim();
+    if(!str) {
+        alert("모임명을 입력하세요. ");
+        f.clubName.focus();
+        return;
+    }
+    
     str = f.content.value.trim();
     if(!str) {
         alert("내용을 입력하세요. ");
         f.content.focus();
         return;
     }
+    
 
-    f.action = "${pageContext.request.contextPath}/bbs/${mode}_ok.do";
+    str = f.maxMember.value.trim();
+    if(!str) {
+        alert("인원수를 입력하세요. ");
+        f.maxMember.focus();
+        return;
+    }
+    /* 등록에서는 괜찮은데 수정에서 수정버튼이 아예 안먹음
+    <c:if test="${mode=='update'}">
+    if(str < ${dto.nowMember} ){
+    	alert("현재 인원수 보다 적습니다. ");
+        f.maxMember.focus();
+        return;
+    </c:if>
+    */
+    /* 수정에서는 괜찮은데 등록에서 등록버튼이 아예 안먹음
+    if(str < ${dto.nowMember} ){
+    	alert("현재 정원수 보다 적습니다. ");
+        f.maxMember.focus();
+        return;
+    }
+    */
+
+    f.action = "${pageContext.request.contextPath}/club/${mode}_ok.do";
     f.submit();
 }
+    
+    
+<c:if test="${mode=='update'}">
+	function deleteFile(fileNum) {
+		if(! confirm("이미지를 삭제 하시겠습니까 ?")) {
+			return;
+		}
+		
+		let query = "num=${dto.clubNum}&fileNum=" + fileNum + "&page=${page}";
+		let url = "${pageContext.request.contextPath}/club/deleteFile.do?" + query;
+		location.href = url;
+}
+</c:if>
+
 </script>
 </head>
 <body>
@@ -58,12 +103,12 @@ function sendOk() {
 <main>
 
 	<div class="container body-container">
-	    <div class="body-title">
-			<h2> 멍냥지도 </h2>
+	    <div class="body-title" style="text-align: center;">
+			<img src="${pageContext.request.contextPath}/resource/images/clubpage.png" style="width: 250px;">
 	    </div>
 	    <div style="box-shadow: 0 0 15px 0 rgb(2 59 109 / 10%);border-radius: 30px; margin: 0 auto ; width: 70%;">
 	    <div class="body-main mx-auto">
-			<form name="boardForm" method="post">
+			<form name="boardForm" method="post" enctype="multipart/form-data">
 				<table class="table table-border table-form">
 					<tr> 
 						<td>제&nbsp;&nbsp;&nbsp;&nbsp;목</td>
@@ -73,7 +118,14 @@ function sendOk() {
 					</tr>
 					
 					<tr> 
-						<td>작성자</td>
+						<td>모임명</td>
+						<td> 
+							<input type="text" name="clubName" maxlength="100" class="form-control" value="${dto.clubName }">
+						</td>
+					</tr>
+					
+					<tr> 
+						<td>모임장</td>
 						<td> 
 							<p>${sessionScope.member.userName}</p>
 						</td>
@@ -85,6 +137,36 @@ function sendOk() {
 							<textarea name="content" class="form-control">${dto.content}</textarea>
 						</td>
 					</tr>
+					<tr> 
+						<td>모임 정원수</td>
+						<td> 
+							<input type="text" name="maxMember" maxlength="100" class="form-control" value="${dto.maxMember }">
+						</td>
+					</tr>
+					
+					
+					
+					<tr> 
+						<td>이미지</td>
+						<td> 
+							<input type="file" name="selectFile" accept="image/*" multiple="multiple" class="form-control">
+						</td>
+					</tr>
+					
+					<c:if test="${mode=='update'}">
+						<tr>
+							<td>등록이미지</td>
+							<td> 
+								<div class="img-box">
+									<c:forEach var="vo" items="${listFile}">
+										<img src="${pageContext.request.contextPath}/uploads/sphoto/${vo.imageFilename}"
+											onclick="deleteFile('${vo.fileNum}');">
+									</c:forEach>
+								</div>
+							</td>
+						</tr>
+					</c:if>
+					
 				</table>
 					
 				<table class="table">
@@ -92,9 +174,9 @@ function sendOk() {
 						<td align="center">
 							<button type="button" class="btn" onclick="sendOk();">${mode=='update'?'수정완료':'등록하기'}</button>
 							<button type="reset" class="btn">다시입력</button>
-							<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/bbs/list.do';">${mode=='update'?'수정취소':'등록취소'}</button>
+							<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/club/list.do';">${mode=='update'?'수정취소':'등록취소'}</button>
 							<c:if test="${mode=='update'}">
-								<input type="hidden" name="num" value="${dto.num}">
+								<input type="hidden" name="clubNum" value="${dto.clubNum}">
 								<input type="hidden" name="page" value="${page}">
 							</c:if>
 						</td>

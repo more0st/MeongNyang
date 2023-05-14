@@ -39,8 +39,8 @@ function searchList() {
 	
 <main>
 	<div class="container body-container">
-	    <div class="body-title">
-			<h2> 멍냥지도 </h2>
+	   <div class="body-title" style="text-align: center;">
+			<img src="${pageContext.request.contextPath}/resource/images/clubpage.png" style="width: 250px;">
 	    </div>
 	   <div style="box-shadow: 0 0 15px 0 rgb(2 59 109 / 10%);border-radius: 30px; margin: 0 auto ; width: 70%;">
 	    <div class="body-main mx-auto">
@@ -58,9 +58,11 @@ function searchList() {
 					<tr>
 						<th class="num">번호</th>
 						<th class="subject">제목</th>
-						<th class="name">작성자</th>
+						<th class="name">모임장</th>
 						<th class="date">작성일</th>
+						<th class="hit">인원표시</th>
 						<th class="hit">조회수</th>
+						<th class="hit">좋아요</th>
 					</tr>
 				</thead>
 				
@@ -68,12 +70,14 @@ function searchList() {
 					<c:forEach var="dto" items="${list}" varStatus="status">
 						<tr>
 							<td>${dataCount - (page-1) * size - status.index}</td>
-							<td class="left">
-								<a href="${articleUrl}&num=${dto.num}">${dto.subject}</a>
+							<td style="text-align: center;">
+								<a href="${articleUrl}&num=${dto.clubNum}">${dto.subject}</a>
 							</td>
 							<td>${dto.userName}</td>
 							<td>${dto.reg_date}</td>
+							<td>${dto.nowMember }/${dto.maxMember }</td>
 							<td>${dto.hitCount}</td>
+							<td>좋아요</td>
 						</tr>
 					</c:forEach>
 				</tbody>
@@ -86,13 +90,13 @@ function searchList() {
 			<table class="table">
 				<tr>
 					<td width="100">
-						<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/bbs/list.do';" title="새로고침"><i class="fa-solid fa-arrow-rotate-right"></i></button>
+						<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/club/list.do';" title="새로고침"><i class="fa-solid fa-arrow-rotate-right"></i></button>
 					</td>
 					<td align="center">
-						<form name="searchForm" action="${pageContext.request.contextPath}/bbs/list.do" method="post">
+						<form name="searchForm" action="${pageContext.request.contextPath}/club/list.do" method="post">
 							<select name="condition" class="form-select">
 								<option value="all"      ${condition=="all"?"selected='selected'":"" }>제목+내용</option>
-								<option value="userName" ${condition=="userName"?"selected='selected'":"" }>작성자</option>
+								<option value="userName" ${condition=="userName"?"selected='selected'":"" }>모임장</option>
 								<option value="reg_date"  ${condition=="reg_date"?"selected='selected'":"" }>등록일</option>
 								<option value="subject"  ${condition=="subject"?"selected='selected'":"" }>제목</option>
 								<option value="content"  ${condition=="content"?"selected='selected'":"" }>내용</option>
@@ -102,7 +106,10 @@ function searchList() {
 						</form>
 					</td>
 					<td align="right" width="100">
-						<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/bbs/write.do';">글올리기</button>
+						<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/club/list.do';">내모임</button>
+					</td>
+					<td align="right" width="100">
+						<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/club/write.do';">등록하기</button>
 					</td>
 				</tr>
 			</table>
