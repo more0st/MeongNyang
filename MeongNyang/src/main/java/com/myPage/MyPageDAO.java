@@ -20,7 +20,7 @@ public class MyPageDAO {
 		String sql;
 		
 		try {
-			sql = "SELECT COUNT(*) FROM bbs";
+			sql = "SELECT COUNT(*) FROM market";
 			pstmt = conn.prepareStatement(sql);
 			rs = pstmt.executeQuery();
 			if(rs.next()) {
@@ -55,7 +55,7 @@ public class MyPageDAO {
 		String sql;
 		
 		try {
-			sql = "SELECT COUNT(*) FROM bbs";
+			sql = "SELECT COUNT(*) FROM market";
 			if(condition.equals("all")) {
 				sql += " WHERE INSTR(subject, ?) >= 1 OR INSTR(content, ? ) >= 1";
 			} else if(condition.equals("reg_data")) {
@@ -106,8 +106,8 @@ public class MyPageDAO {
 		String sql;
 		
 		try {
-			sql = "SELECT num,name,subject,hitCount, TO_CHAR(reg_date, 'YYYY-MM-DD') reg_date"
-					+ " FROM bbs ORDER BY num DESC "
+			sql = "SELECT marketnum,sellerid,buyerid,subject,hitCount, TO_CHAR(reg_date, 'YYYY-MM-DD') reg_date, TO_CHAR(pay_date, 'YYYY-MM-DD') pay_date"
+					+ " FROM market ORDER BY marketnum DESC "
 					+ " OFFSET ? ROWS FETCH FIRST ? ROWS ONLY";
 				
 			pstmt = conn.prepareStatement(sql);
@@ -119,8 +119,14 @@ public class MyPageDAO {
 			while(rs.next() ) {
 				MyPageDTO dto = new MyPageDTO();
 				
+				dto.setMarketnum(rs.getLong("marketnum"));
+				dto.setSellerid(rs.getString("sellerid"));
+				dto.setBuyerid(rs.getString("buyerid"));
 				dto.setSubject(rs.getString("subject"));
 				dto.setHitCount(rs.getInt("hitCount"));
+				dto.setReg_date(rs.getString("reg_date"));
+				dto.setPay_date(rs.getString("pay_date"));
+				
 			
 				list.add(dto);
 			}
@@ -154,7 +160,7 @@ public class MyPageDAO {
 		String sql;
 		
 		try {
-			sql = "SELECT num, name, subject, hitCount, TO_CHAR(reg_date, 'YYYY-MM-DD') reg_date FROM bbs";
+			sql = "SELECT marketnum,sellerid,buyerid,subject,hitCount, TO_CHAR(reg_date, 'YYYY-MM-DD') reg_date, TO_CHAR(pay_date, 'YYYY-MM-DD') pay_date FROM market";
 			
 			if(condition.equals("all")) {
 				sql += " WHERE INSTR(subject, ?) >= 1 OR INSTR(content, ?) >= 1 ";
@@ -184,8 +190,13 @@ public class MyPageDAO {
 			while(rs.next()) {
 				MyPageDTO dto = new MyPageDTO();
 				
+				dto.setMarketnum(rs.getLong("marketnum"));
+				dto.setSellerid(rs.getString("sellerid"));
+				dto.setBuyerid(rs.getString("buyerid"));
 				dto.setSubject(rs.getString("subject"));
 				dto.setHitCount(rs.getInt("hitCount"));
+				dto.setReg_date(rs.getString("reg_date"));
+				dto.setPay_date(rs.getString("pay_date"));
 				
 				list.add(dto);
 			}
@@ -218,7 +229,7 @@ public class MyPageDAO {
 		String sql;
 
 		try {
-			sql = "UPDATE sbbs SET hitCount=hitCount+1 WHERE num=?";
+			sql = "UPDATE market SET hitCount=hitCount+1 WHERE marketnum=?";
 			
 			pstmt = conn.prepareStatement(sql);
 			
@@ -246,11 +257,9 @@ public class MyPageDAO {
 		String sql;
 
 		try {
-			sql = "SELECT num, category, b.userId, userName, subject, content, "
-					+ " saveFilename, originalFilename, filesize, reg_date, hitCount "
-					+ " FROM sbbs b "
-					+ " JOIN member1 m ON b.userId=m.userId "
-					+ " WHERE num = ? ";
+			sql = "SELECT marketnum,sellerid,buyerid,subject,hitCount, reg_date, pay_date"
+					+ " FROM market"
+					+ " WHERE marketnum = ?";
 			pstmt = conn.prepareStatement(sql);
 			
 			pstmt.setLong(1, marketnum);
@@ -260,9 +269,15 @@ public class MyPageDAO {
 			if (rs.next()) {
 				dto = new MyPageDTO();
 				
+				dto.setMarketnum(rs.getLong("marketnum"));
+				dto.setSellerid(rs.getString("sellerid"));
+				dto.setBuyerid(rs.getString("buyerid"));
 				dto.setSubject(rs.getString("subject"));
-				dto.setContent(rs.getString("content"));
+				dto.setHitCount(rs.getInt("hitcount"));
+				dto.setReg_date(rs.getString("reg_date"));
+				dto.setPay_date(rs.getString("pay_date"));
 			}
+			
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
@@ -284,17 +299,18 @@ public class MyPageDAO {
 		return dto;
 	}
 
+	
 	// 이전글
-	public MyPageDTO preReadBoard(long marketnum, String condition, String keyword) {
+	public MyPageDTO prereadBoard(long marketnum) {
 		MyPageDTO dto = null;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		String sql;
-
+		
 		try {
-			sql = "SELECT num, name, subject, content, pwd, ipAddr, hitCount, reg_date"
-					+ " FROM bbs"
-					+ " WHERE num = ?";
+			sql = "SELECT marketnum,sellerid,buyerid,subject,hitCount, reg_date, pay_date"
+					+ " FROM market"
+					+ " WHERE marketnum = ?";
 			
 			pstmt = conn.prepareStatement(sql);
 			
@@ -305,9 +321,13 @@ public class MyPageDAO {
 			if(rs.next()) {
 				dto = new MyPageDTO();
 				
-				dto.setSubject(rs.getString("Subject"));
-				dto.setContent(rs.getString("content"));
-				dto.setHitCount(rs.getInt("hitCount"));
+				dto.setMarketnum(rs.getLong("marketnum"));
+				dto.setSellerid(rs.getString("sellerid"));
+				dto.setBuyerid(rs.getString("buyerid"));
+				dto.setSubject(rs.getString("subject"));
+				dto.setHitCount(rs.getInt("hitcount"));
+				dto.setReg_date(rs.getString("reg_date"));
+				dto.setPay_date(rs.getString("pay_date"));
 			}
 			
 		} catch (Exception e) {
@@ -330,6 +350,77 @@ public class MyPageDAO {
 		
 		return dto;
 	}
+	
+	// 이전글
+	public MyPageDTO preReadBoard(long marketnum, String condition, String keyword) {
+		MyPageDTO dto = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		StringBuilder sb = new StringBuilder();
+
+		try {
+			if(keyword != null && keyword.length() != 0) {
+				// 검색
+				sb.append(" SELECT marketnum, subject");
+				sb.append(" FROM market ");
+				sb.append(" WHERE marketnum > ? ");
+				if(condition.equals("all")) {
+					sb.append(" AND (INSTR(subject, ?) >= 1 OR INSTR(content, ?) >= 1) ");
+				} else if(condition.equals("reg_date")) {
+					keyword = keyword.replaceAll("(\\-|\\/|\\.)","");
+					sb.append(" AND (TO_CHAR(reg_date, 'YYYYMMDD') = ?) ");
+				} else {
+					sb.append(" AND (INSTR(" + condition + ", ?) >= 1");
+				}
+				sb.append(" ORDER BY marketnum ASC");
+				sb.append(" FETCH FIRST 1 ROWS ONLY");
+				
+				pstmt = conn.prepareStatement(sb.toString());
+				pstmt.setLong(1, marketnum);
+				pstmt.setString(2, keyword);
+				if(condition.equals("all")) {
+					pstmt.setString(3, keyword);
+				}
+			} else {
+				// 검색이 아닐때
+				sb.append("SELECT marketnum, subject");
+				sb.append(" FROM market ");
+				sb.append(" WHERE marketnum > ? ");
+				sb.append(" ORDER BY marketnum ASC");
+				sb.append(" FETCH FIRST 1 ROWS ONLY");
+				
+				pstmt = conn.prepareStatement(sb.toString());
+				pstmt.setLong(1, marketnum);
+			} 
+			
+			rs = pstmt.executeQuery();
+			
+			if(rs.next()) {
+				dto = new MyPageDTO();
+				dto.setMarketnum(rs.getLong("marketnum"));
+				dto.setSubject(rs.getString("subject"));
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			if(rs != null) {
+				try {
+					rs.close();
+				} catch (Exception e2) {
+				}
+			}
+			
+			if(pstmt != null) {
+				try {
+					pstmt.close();
+				} catch (Exception e2) {
+				}
+			}
+		}
+	
+		return dto;
+	}
 
 	// 다음글
 	public MyPageDTO nextReadBoard(long marketnum, String condition, String keyword) {
@@ -341,9 +432,9 @@ public class MyPageDAO {
 		try {
 			if(keyword != null && keyword.length() != 0) {
 				// 검색
-				sb.append(" SELECT num, subject");
-				sb.append(" FROM bbs ");
-				sb.append(" WHERE num > ? ");
+				sb.append(" SELECT marketnum, subject");
+				sb.append(" FROM market ");
+				sb.append(" WHERE marketnum > ? ");
 				if(condition.equals("all")) {
 					sb.append(" AND (INSTR(subject, ?) >= 1 OR INSTR(content, ?) >= 1) ");
 				} else if(condition.equals("reg_date")) {
@@ -352,7 +443,7 @@ public class MyPageDAO {
 				} else {
 					sb.append(" AND (INSTR(" + condition + ", ?) >= 1");
 				}
-				sb.append(" ORDER BY num ASC");
+				sb.append(" ORDER BY marketnum ASC");
 				sb.append(" FETCH FIRST 1 ROWS ONLY");
 				
 				pstmt = conn.prepareStatement(sb.toString());
@@ -363,10 +454,10 @@ public class MyPageDAO {
 				}
 			} else {
 				// 검색이 아닐때
-				sb.append("SELECT num, subject");
-				sb.append(" FROM bbs ");
-				sb.append(" WHERE num > ? ");
-				sb.append(" ORDER BY NUM ASC");
+				sb.append("SELECT marketnum, subject");
+				sb.append(" FROM market ");
+				sb.append(" WHERE marketnum > ? ");
+				sb.append(" ORDER BY marketnum ASC");
 				sb.append(" FETCH FIRST 1 ROWS ONLY");
 				
 				pstmt = conn.prepareStatement(sb.toString());
@@ -377,7 +468,7 @@ public class MyPageDAO {
 			
 			if(rs.next()) {
 				dto = new MyPageDTO();
-				dto.setMarketnum(rs.getLong("num"));
+				dto.setMarketnum(rs.getLong("marketnum"));
 				dto.setSubject(rs.getString("subject"));
 			}
 			

@@ -7,11 +7,26 @@ public class MyPageDTO {
 	private String buyerid;		// 구매자 id
 	private String subject;	// 판매글 제목
 	private String content;	// 판매글 내용
+	private String addr;	// 거래할 주소
 	private String price;	// 가격
 	private int hitCount;	// 조회수
 	private int state;		// 상품상태(0:판매중, 1:온라인거래완료, 2:직거래완료)
+	private String reg_date;	// 글 등록날짜
 	private String pay_date;	// 결제날짜(판매완료 날짜)
 	
+	
+	public String getAddr() {
+		return addr;
+	}
+	public void setAddr(String addr) {
+		this.addr = addr;
+	}
+	public String getReg_date() {
+		return reg_date;
+	}
+	public void setReg_date(String reg_date) {
+		this.reg_date = reg_date;
+	}
 	public long getMarketnum() {
 		return marketnum;
 	}

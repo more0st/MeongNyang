@@ -68,9 +68,9 @@
 						<tr>
 							<td>${dataCount - (page-1) * size - status.index}</td>
 							<td class="left">
-								<a href="${articleUrl}&num=${dto.num}">${dto.subject}</a>
+								<a href="${articleUrl}&num=${dto.marketnum}">${dto.subject}</a>
 							</td>
-							<td>${dto.userName}</td>
+							<td>${dto.sellerid}</td>
 							<td>${dto.reg_date}</td>
 							<td>${dto.hitCount}</td>
 						</tr>
@@ -85,10 +85,10 @@
 			<table class="table">
 				<tr>
 					<td width="100">
-						<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/bbs/list.do';" title="새로고침"><i class="fa-solid fa-arrow-rotate-right"></i></button>
+						<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/myPage/buyList.do';" title="새로고침"><i class="fa-solid fa-arrow-rotate-right"></i></button>
 					</td>
 					<td align="center">
-						<form name="searchForm" action="${pageContext.request.contextPath}/bbs/list.do" method="post">
+						<form name="searchForm" action="${pageContext.request.contextPath}/myPage/buyList.do" method="post">
 							<select name="condition" class="form-select">
 								<option value="all"      ${condition=="all"?"selected='selected'":"" }>제목+내용</option>
 								<option value="userName" ${condition=="userName"?"selected='selected'":"" }>작성자</option>
@@ -99,9 +99,6 @@
 							<input type="text" name="keyword" value="${keyword}" class="form-control" style="border-radius: 20px;">
 							<button type="button" class="btn" onclick="searchList();">검색</button>
 						</form>
-					</td>
-					<td align="right" width="100">
-						<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/bbs/write.do';">글올리기</button>
 					</td>
 				</tr>
 			</table>
