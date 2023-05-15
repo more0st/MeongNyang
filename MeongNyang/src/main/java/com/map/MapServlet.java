@@ -166,43 +166,45 @@ public class MapServlet extends MyUploadServlet{
 		forward(req, resp, "/WEB-INF/views/map/write.jsp");
 	}
 	protected void writeSubmit(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		// 글 저장
-		MapDAO dao = new MapDAO();
-		
-		HttpSession session = req.getSession();
-		SessionInfo info = (SessionInfo) session.getAttribute("member");
-		
-		
-		String cp = req.getContextPath();
-		if (req.getMethod().equalsIgnoreCase("GET")) {
-			resp.sendRedirect(cp + "/map/list.do");
-			return;
-		}
-		
-		try {
-			MapDTO dto = new MapDTO();
-			
-			dto.setUserId(info.getUserId());	
-			
-			dto.setSubject(req.getParameter("subject"));
-			dto.setContent(req.getParameter("content"));
-			
-			Map<String, String[]> map = doFileUpload(req.getParts(), pathname);
-			if (map != null) {
-				String[] saveFiles = map.get("saveFilenames");
-				dto.setImageFiles(saveFiles);
-			}
+	    // 글 저장
+	    MapDAO dao = new MapDAO();
+	    
+	    HttpSession session = req.getSession();
+	    SessionInfo info = (SessionInfo) session.getAttribute("member");
 
-			dao.insertMap(dto);
-			
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
+	    String cp = req.getContextPath();
+	    if (req.getMethod().equalsIgnoreCase("GET")) {
+	        resp.sendRedirect(cp + "/map/list.do");
+	        return;
+	    }
+	    
+	    try {
+	        MapDTO dto = new MapDTO();
+	        
+	        dto.setUserId(info.getUserId());
+	        
+	        dto.setSubject(req.getParameter("subject"));
+	        dto.setContent(req.getParameter("content"));
+	        dto.setAddr(req.getParameter("addr"));
+	        
+	        // 숨겨진 좌표 값을 받아와서 DTO에 설정합니다.
+	        String coordinate = req.getParameter("coordinate");
+	        dto.setAddr(coordinate);
+	        
+	        
+	        Map<String, String[]> map = doFileUpload(req.getParts(), pathname);
+	        if (map != null) {
+	            String[] saveFiles = map.get("saveFilenames");
+	            dto.setImageFiles(saveFiles);
+	        }
 
-		resp.sendRedirect(cp + "/map/list.do");
+	        dao.insertMap(dto);
+	        
+	    } catch (Exception e) {
+	        e.printStackTrace();
+	    }
 
-		
-		
+	    resp.sendRedirect(cp + "/map/list.do");
 	}
 	protected void article(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		// 글보기

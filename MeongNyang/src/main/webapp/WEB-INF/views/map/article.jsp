@@ -45,6 +45,14 @@
 .photo-layout img { width: 570px; height: 450px; }
 
 .table-article tr>td { padding-left: 5px; padding-right: 5px; }
+
+.map_wrap {position:relative;width:100%;height:350px;}
+    .title {font-weight:bold;display:block;}
+    .hAddr {position:absolute;left:10px;top:10px;border-radius: 2px;background:#fff;background:rgba(255,255,255,0.8);z-index:1;padding:5px;}
+    #centerAddr {display:block;margin-top:2px;font-weight: normal;}
+    .bAddr {padding:5px;text-overflow: ellipsis;overflow: hidden;white-space: nowrap;}
+
+
 </style>
 <script type="text/javascript">
 <c:if test="${sessionScope.member.userId==dto.userId || sessionScope.member.userId=='admin'}">
@@ -164,6 +172,31 @@ function imageViewer(img) {
 	});
 }
 
+kakao.maps.event.addListener(map, 'click', function(mouseEvent) {
+    searchDetailAddrFromCoords(mouseEvent.latLng, function(result, status) {
+        if (status === kakao.maps.services.Status.OK) {
+            var detailAddr = !!result[0].road_address ? '<div>도로명주소 : ' + result[0].road_address.address_name + '</div>' : '';
+            detailAddr += '<div>지번 주소 : ' + result[0].address.address_name + '</div>';
+            
+            var content = '<div class="bAddr">' +
+                            '<span class="title">법정동 주소정보</span>' + 
+                            detailAddr + 
+                        '</div>';
+
+            // 마커를 클릭한 위치에 표시합니다 
+            marker.setPosition(mouseEvent.latLng);
+            marker.setMap(map);
+
+            // 인포윈도우에 클릭한 위치에 대한 법정동 상세 주소정보를 표시합니다
+            infowindow.setContent(content);
+            infowindow.open(map, marker);
+        }   
+    });
+});
+
+
+
+
 
 </script>
 
@@ -219,7 +252,7 @@ function imageViewer(img) {
 					
 					<tr style="text-align: center;">
 						<td>
-							<div id="kakaomap" style="width:500px;height:400px;"></div>
+							<div id="map" style="width:100%;height:350px;"></div>
 						</td>
 					</tr>
 					
@@ -382,14 +415,31 @@ function imageViewer(img) {
 <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=01680d6fa50eecc6cbcc23d4888731c2"></script>
 
 <script>
-		var container = document.getElementById('kakaomap');
-		var options = {
-			center: new kakao.maps.LatLng(33.450701, 126.570667),
-			level: 3
-		};
+	var mapContainer = document.getElementById('map'), // 지도를 표시할 div 
+	mapOption = { 
+	    center: new kakao.maps.LatLng(${dto.addr}), // 지도의 중심좌표
+	    level: 3 // 지도의 확대 레벨
+	};
+	
+	var map = new kakao.maps.Map(mapContainer, mapOption); // 지도를 생성합니다
+	
+	//마커가 표시될 위치입니다 
+	var markerPosition  = new kakao.maps.LatLng(${dto.addr}); 
+	
+	//마커를 생성합니다
+	var marker = new kakao.maps.Marker({
+	position: markerPosition
+	});
+	
+	//마커가 지도 위에 표시되도록 설정합니다
+	marker.setMap(map);
+	
 
-		var map = new kakao.maps.Map(container, options);
+	
+	
+	
+	//아래 코드는 지도 위의 마커를 제거하는 코드입니다
+	//marker.setMap(null);    
 	</script>
-
 </body>
 </html>
