@@ -89,6 +89,7 @@ function searchList() {
 			
 			<table class="table">
 				<tr>
+				
 					<td width="100">
 						<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/club/list.do';" title="새로고침"><i class="fa-solid fa-arrow-rotate-right"></i></button>
 					</td>
@@ -105,8 +106,9 @@ function searchList() {
 							<button type="button" class="btn" onclick="searchList();">검색</button>
 						</form>
 					</td>
+					
 					<td align="right" width="100">
-						<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/club/list.do';">내모임</button>
+						<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/club/my.do';">내모임</button>
 					</td>
 					<td align="right" width="100">
 						<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/club/write.do';">등록하기</button>

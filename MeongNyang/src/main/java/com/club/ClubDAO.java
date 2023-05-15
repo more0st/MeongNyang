@@ -330,86 +330,165 @@ public class ClubDAO {
 		return list;
 	}
 	
-//	//내모임 리스트
-//	public List<ClubDTO> myClubList(int offset, int size, String condition, String keyword) {
-//		List<ClubDTO> list = new ArrayList<ClubDTO>();
-//		PreparedStatement pstmt = null;
-//		ResultSet rs = null;
-//		StringBuilder sb = new StringBuilder();
-//
-//		try {
-//			sb.append(" SELECT c.clubNum, userName, subject, hitCount, imageFilename, ");
-//			sb.append("       TO_CHAR(reg_date, 'YYYY-MM-DD') reg_date, "
-//					+ " maxMember, nowMember  ");
-//			sb.append(" FROM club c ");
-//			sb.append(" JOIN member m ON c.userId = m.userId ");
-//			sb.append(" LEFT OUTER JOIN ( ");
-//			sb.append("     SELECT fileNum, clubNum, imageFilename FROM ( ");
-//			sb.append("        SELECT fileNum, clubNum, imageFilename, ");
-//			sb.append("            ROW_NUMBER() OVER(PARTITION BY clubNum ORDER BY fileNum ASC) rank ");
-//			sb.append("        FROM clubImgFile");
-//			sb.append("     ) WHERE rank = 1 ");
-//			sb.append(" ) i ON c.clubNum = i.clubNum ");
-//			if (condition.equals("all")) {
-//				sb.append(" WHERE INSTR(subject, ?) >= 1 OR INSTR(content, ?) >= 1 ");
-//			} else if (condition.equals("reg_date")) {
-//				keyword = keyword.replaceAll("(\\-|\\/|\\.)", "");
-//				sb.append(" WHERE TO_CHAR(reg_date, 'YYYYMMDD') = ?");
-//			} else {
-//				sb.append(" WHERE INSTR(" + condition + ", ?) >= 1 ");
-//			}
-//			sb.append(" ORDER BY clubnum DESC ");
-//			sb.append(" OFFSET ? ROWS FETCH FIRST ? ROWS ONLY ");
-//
-//			pstmt = conn.prepareStatement(sb.toString());
-//			
-//			if (condition.equals("all")) {
-//				pstmt.setString(1, keyword);
-//				pstmt.setString(2, keyword);
-//				pstmt.setInt(3, offset);
-//				pstmt.setInt(4, size);
-//			} else {
-//				pstmt.setString(1, keyword);
-//				pstmt.setInt(2, offset);
-//				pstmt.setInt(3, size);
-//			}
-//
-//			rs = pstmt.executeQuery();
-//			
-//			while (rs.next()) {
-//				ClubDTO dto = new ClubDTO();
-//
-//				dto.setClubNum(rs.getLong("clubNum"));
-//				dto.setUserName(rs.getString("userName"));
-//				dto.setSubject(rs.getString("subject"));
-//				dto.setHitCount(rs.getInt("hitCount"));
-//				dto.setReg_date(rs.getString("reg_date"));
-//				dto.setMaxMember(rs.getInt("maxMember"));
-//				dto.setNowMember(rs.getInt("nowMember"));
-//				dto.setImageFilename(rs.getString("imageFilename"));
-//
-//				
-//				list.add(dto);
-//			}
-//		} catch (SQLException e) {
-//			e.printStackTrace();
-//		} finally {
-//			if (rs != null) {
-//				try {
-//					rs.close();
-//				} catch (SQLException e2) {
-//				}
-//			}
-//			if (pstmt != null) {
-//				try {
-//					pstmt.close();
-//				} catch (SQLException e2) {
-//				}
-//			}
-//		}
-//
-//		return list;
-//	}
+	
+	
+	//내모임 리스트(조건)
+	public List<ClubDTO> myClubList(int offset, int size, String condition, String keyword, String userId) {
+		List<ClubDTO> list = new ArrayList<ClubDTO>();
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		StringBuilder sb = new StringBuilder();
+
+		try {
+			sb.append(" SELECT c.clubNum, userName, subject, hitCount, imageFilename, ");
+			sb.append("       TO_CHAR(reg_date, 'YYYY-MM-DD') reg_date, "
+					+ " maxMember, nowMember  ");
+			sb.append(" FROM club c ");
+			sb.append(" JOIN member m ON c.userId = m.userId ");
+			sb.append(" JOIN clubMember cm ON c.clubNum = cm.clubNum ");
+			sb.append(" LEFT OUTER JOIN ( ");
+			sb.append("     SELECT fileNum, clubNum, imageFilename FROM ( ");
+			sb.append("        SELECT fileNum, clubNum, imageFilename, ");
+			sb.append("            ROW_NUMBER() OVER(PARTITION BY clubNum ORDER BY fileNum ASC) rank ");
+			sb.append("        FROM clubImgFile");
+			sb.append("     ) WHERE rank = 1 ");
+			sb.append(" ) i ON c.clubNum = i.clubNum ");
+			sb.append(" WHERE cm.userId =  ? ");
+	
+	
+			if (condition.equals("all")) {
+				sb.append(" AND INSTR(subject, ?) >= 1 OR INSTR(content, ?) >= 1 ");
+			} else if (condition.equals("reg_date")) {
+				keyword = keyword.replaceAll("(\\-|\\/|\\.)", "");
+				sb.append(" AND TO_CHAR(reg_date, 'YYYYMMDD') = ?");
+			} else {
+				sb.append(" AND INSTR(" + condition + ", ?) >= 1 ");
+			}
+			sb.append(" ORDER BY clubnum DESC ");
+			sb.append(" OFFSET ? ROWS FETCH FIRST ? ROWS ONLY ");
+
+			pstmt = conn.prepareStatement(sb.toString());
+			
+			if (condition.equals("all")) {
+				pstmt.setString(1, userId);
+				pstmt.setString(2, keyword);
+				pstmt.setString(3, keyword);
+				pstmt.setInt(4, offset);
+				pstmt.setInt(5, size);
+			} else {
+				pstmt.setString(1, userId);
+				pstmt.setString(2, keyword);
+				pstmt.setInt(3, offset);
+				pstmt.setInt(4, size);
+			}
+
+			rs = pstmt.executeQuery();
+			
+			while (rs.next()) {
+				ClubDTO dto = new ClubDTO();
+
+				dto.setClubNum(rs.getLong("clubNum"));
+				dto.setUserName(rs.getString("userName"));
+				dto.setSubject(rs.getString("subject"));
+				dto.setHitCount(rs.getInt("hitCount"));
+				dto.setReg_date(rs.getString("reg_date"));
+				dto.setMaxMember(rs.getInt("maxMember"));
+				dto.setNowMember(rs.getInt("nowMember"));
+				dto.setImageFilename(rs.getString("imageFilename"));
+
+				
+				list.add(dto);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			if (rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException e2) {
+				}
+			}
+			if (pstmt != null) {
+				try {
+					pstmt.close();
+				} catch (SQLException e2) {
+				}
+			}
+		}
+
+		return list;
+	}
+	
+	
+	
+	//내모임 리스트
+	public List<ClubDTO> myClubList(int offset, int size, String userId) {
+		List<ClubDTO> list = new ArrayList<ClubDTO>();
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		StringBuilder sb = new StringBuilder();
+
+		try {
+			sb.append(" SELECT c.clubNum, userName, subject, hitCount, imageFilename, ");
+			sb.append("       TO_CHAR(reg_date, 'YYYY-MM-DD') reg_date, "
+					+ " maxMember, nowMember  ");
+			sb.append(" FROM club c ");
+			sb.append(" JOIN member m ON c.userId = m.userId ");
+			sb.append(" JOIN clubMember cm ON c.clubNum = cm.clubNum ");
+			sb.append(" LEFT OUTER JOIN ( ");
+			sb.append("     SELECT fileNum, clubNum, imageFilename FROM ( ");
+			sb.append("        SELECT fileNum, clubNum, imageFilename, ");
+			sb.append("            ROW_NUMBER() OVER(PARTITION BY clubNum ORDER BY fileNum ASC) rank ");
+			sb.append("        FROM clubImgFile");
+			sb.append("     ) WHERE rank = 1 ");
+			sb.append(" ) i ON c.clubNum = i.clubNum ");
+			sb.append(" WHERE cm.userId =  ? ");
+	
+			sb.append(" ORDER BY c.clubnum DESC ");
+			sb.append(" OFFSET ? ROWS FETCH FIRST ? ROWS ONLY ");
+
+			pstmt = conn.prepareStatement(sb.toString());
+			
+				pstmt.setString(1, userId);
+				pstmt.setInt(2, offset);
+				pstmt.setInt(3, size);
+
+			rs = pstmt.executeQuery();
+			
+			while (rs.next()) {
+				ClubDTO dto = new ClubDTO();
+
+				dto.setClubNum(rs.getLong("clubNum"));
+				dto.setUserName(rs.getString("userName"));
+				dto.setSubject(rs.getString("subject"));
+				dto.setHitCount(rs.getInt("hitCount"));
+				dto.setReg_date(rs.getString("reg_date"));
+				dto.setMaxMember(rs.getInt("maxMember"));
+				dto.setNowMember(rs.getInt("nowMember"));
+				dto.setImageFilename(rs.getString("imageFilename"));
+
+				
+				list.add(dto);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			if (rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException e2) {
+				}
+			}
+			if (pstmt != null) {
+				try {
+					pstmt.close();
+				} catch (SQLException e2) {
+				}
+			}
+		}
+
+		return list;
+	}
 	
 	
 	
@@ -664,21 +743,21 @@ public class ClubDAO {
 			
 			pstmt.executeUpdate();
 			
-//			pstmt.close();
-//			pstmt = null;
-//
-//			if (dto.getImageFiles() != null) {
-//				sql = "INSERT INTO clubImgFile(fileNum, num, imageFilename) VALUES "
-//						+ " (sphotoFile_seq.NEXTVAL, ?, ?)";
-//				pstmt = conn.prepareStatement(sql);
-//				
-//				for (int i = 0; i < dto.getImageFiles().length; i++) {
-//					pstmt.setLong(1, dto.getNum());
-//					pstmt.setString(2, dto.getImageFiles()[i]);
-//					
-//					pstmt.executeUpdate();
-//				}
-//			}
+			pstmt.close();
+			pstmt = null;
+
+			if (dto.getImageFiles() != null) {
+				sql = "INSERT INTO clubImgFile(fileNum, clubNum, imageFilename) VALUES "
+						+ " (club_seq.NEXTVAL, ?, ?)";
+				pstmt = conn.prepareStatement(sql);
+				
+				for (int i = 0; i < dto.getImageFiles().length; i++) {
+					pstmt.setLong(1, dto.getClubNum());
+					pstmt.setString(2, dto.getImageFiles()[i]);
+					
+					pstmt.executeUpdate();
+				}
+			}
 			
 
 		} catch (SQLException e) {

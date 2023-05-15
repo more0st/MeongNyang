@@ -47,6 +47,8 @@ public class ClubServlet extends MyUploadServlet {
 		// uri에 따른 작업 구분
 		if (uri.indexOf("list.do") != -1) {
 			list(req, resp);
+		} else if (uri.indexOf("my.do") != -1) {
+			mylist(req, resp);
 		} else if (uri.indexOf("write.do") != -1) {
 			writeForm(req, resp);
 		} else if (uri.indexOf("write_ok.do") != -1) {
@@ -74,6 +76,9 @@ public class ClubServlet extends MyUploadServlet {
 		// 모임 리스트
 		ClubDAO dao = new ClubDAO();
 		MyUtil util = new MyUtil();
+		
+		HttpSession session = req.getSession();
+		SessionInfo info = (SessionInfo) session.getAttribute("member");
 		
 		String cp = req.getContextPath();
 		
@@ -116,12 +121,14 @@ public class ClubServlet extends MyUploadServlet {
 			int offset = (current_page - 1) * size;
 			if(offset < 0) offset = 0;
 			
+			String userId = info.getUserId();
 			List<ClubDTO> list = null;
 			if (keyword.length() == 0) {
+				//list = dao.myClubList(offset, size, userId);
 				list = dao.listClub(offset, size);
 			} else if(keyword.length()>=1) {
 				list = dao.listClub(offset, size, condition, keyword);
-			} //else{ list = dao.myClubList(offset, size, condition, keyword)}
+			}
 
 			String query = "";
 			if (keyword.length() != 0) {
@@ -138,6 +145,9 @@ public class ClubServlet extends MyUploadServlet {
 			
 			String paging = util.paging(current_page, total_page, listUrl);
 			
+			
+			
+			
 			// 포워딩할 JSP에 전달할 속성
 			req.setAttribute("list", list);
 			req.setAttribute("page", current_page);
@@ -148,11 +158,96 @@ public class ClubServlet extends MyUploadServlet {
 			req.setAttribute("paging", paging);
 			req.setAttribute("condition", condition);
 			req.setAttribute("keyword", keyword);
+			req.setAttribute("userId", userId);
 			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		forward(req, resp, "/WEB-INF/views/club/list.jsp");
+		
+	}
+	
+	
+	protected void mylist(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		// 모임 리스트
+		ClubDAO dao = new ClubDAO();
+		MyUtil util = new MyUtil();
+		
+		HttpSession session = req.getSession();
+		SessionInfo info = (SessionInfo) session.getAttribute("member");
+		
+		String cp = req.getContextPath();
+		
+		try {
+			String page = req.getParameter("page");
+			int current_page = 1;
+			if (page != null) {
+				current_page = Integer.parseInt(page);
+			}
+			
+			// 검색
+			String condition = req.getParameter("condition");
+			String keyword = req.getParameter("keyword");
+			if (condition == null) {
+				condition = "all";
+				keyword = "";
+			}
+
+			// GET 방식인 경우 디코딩
+			if (req.getMethod().equalsIgnoreCase("GET")) {
+				keyword = URLDecoder.decode(keyword, "utf-8");
+			}
+			
+			// 전체 데이터 개수
+			int dataCount;
+			if (keyword.length() == 0) {
+				dataCount = dao.dataCount();
+			} else {
+				dataCount = dao.dataCount(condition, keyword);
+			}
+			
+			// 전체 페이지 수
+			int size = 10;
+			int total_page = util.pageCount(dataCount, size);
+			if (current_page > total_page) {
+				current_page = total_page;
+			}
+			
+			// 게시물 가져오기
+			int offset = (current_page - 1) * size;
+			if(offset < 0) offset = 0;
+			
+			String userId = info.getUserId();
+			
+			List<ClubDTO> list = null;
+			if (keyword.length() == 0) {
+				list =  dao.myClubList(offset, size,  userId);
+			} else if(keyword.length()>=1) {
+				list =  dao.myClubList(offset, size, condition, keyword, userId);
+			}
+			
+			// 페이징 처리
+			String listUrl = cp + "/club/mylist.do";
+			String articleUrl = cp + "/club/article.do?page=" + current_page;
+			
+			String paging = util.paging(current_page, total_page, listUrl);
+			
+			
+			// 포워딩할 JSP에 전달할 속성
+			req.setAttribute("list", list);
+			req.setAttribute("page", current_page);
+			req.setAttribute("total_page", total_page);
+			req.setAttribute("dataCount", dataCount);
+			req.setAttribute("size", size);
+			req.setAttribute("articleUrl", articleUrl);
+			req.setAttribute("paging", paging);
+			req.setAttribute("userId", userId);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		forward(req, resp, "/WEB-INF/views/club/list.jsp");
+		
 		
 	}
 	
