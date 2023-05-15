@@ -90,7 +90,6 @@ public class MarketServlet extends MyUploadServlet{
 			// 게시물 가져오기
 			int offset = (current_page - 1) * size;
 			if(offset < 0) offset = 0;
-			
 			List<MarketDTO> list = dao.listMarket(offset, size);
 			
 			// 페이징 처리
@@ -176,6 +175,7 @@ public class MarketServlet extends MyUploadServlet{
 			dto.setContent(dto.getContent().replaceAll("\n", "<br>"));
 			
 			List<MarketDTO> listFile = dao.listPhotoFile(marketNum);
+			dao.updateHitCount(marketNum);
 			
 			MarketDTO preReadDto = dao.preReadPhoto(marketNum, info.getUserId());
 			MarketDTO nextReadDto = dao.nextReadPhoto(marketNum, info.getUserId());
@@ -196,8 +196,44 @@ public class MarketServlet extends MyUploadServlet{
 	
 	protected void updateForm(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		
-		req.setAttribute("mode", "update");
-		forward(req, resp, "/WEB-INF/views/market/write.jsp");
+		MarketDAO dao = new MarketDAO();
+		
+		HttpSession session = req.getSession();
+		SessionInfo info = (SessionInfo) session.getAttribute("member");
+
+		String cp = req.getContextPath();
+
+		String page = req.getParameter("page");
+		try {
+			long marketNum = Long.parseLong(req.getParameter("marketNum"));
+			MarketDTO dto = dao.readMarket(marketNum);
+
+			if (dto == null) {
+				resp.sendRedirect(cp + "/market/list.do?page=" + page);
+				return;
+			}
+
+			// 게시물을 올린 사용자가 아니면
+			if (!dto.getSellerId().equals(info.getUserId())) {
+				resp.sendRedirect(cp + "/market/list.do?page=" + page);
+				return;
+			}
+
+			List<MarketDTO> listFile = dao.listPhotoFile(marketNum);
+
+			req.setAttribute("dto", dto);
+			req.setAttribute("page", page);
+			req.setAttribute("listFile", listFile);
+
+			req.setAttribute("mode", "update");
+
+			forward(req, resp, "/WEB-INF/views/market/write.jsp");
+			return;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		resp.sendRedirect(cp + "/market/list.do?page=" + page);
 	}
 	
 	protected void updateSubmit(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -216,12 +252,13 @@ public class MarketServlet extends MyUploadServlet{
 			}
 
 			String page = req.getParameter("page");
-
 			try {
 				MarketDTO dto = new MarketDTO();
 				dto.setMarketNum(Long.parseLong(req.getParameter("marketNum")));
+				dto.setPrice(Integer.parseInt(req.getParameter("price")));
 				dto.setSubject(req.getParameter("subject"));
 				dto.setContent(req.getParameter("content"));
+				dto.setAddr(req.getParameter("addr"));
 
 				Map<String, String[]> map = doFileUpload(req.getParts(), pathname);
 				if (map != null) {

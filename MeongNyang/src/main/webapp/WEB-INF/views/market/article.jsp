@@ -114,7 +114,7 @@ function modal() {
 						<td colspan="2">
 							이전글 :
 							<c:if test="${not empty preReadDto}">
-								<a href="${pageContext.request.contextPath}/market/article.do?${query}&marketNum=${preReadDto.marketNum}">${preReadDto.subject}</a>
+								<a href="${pageContext.request.contextPath}/market/article.do?page=${page}&marketNum=${preReadDto.marketNum}">${preReadDto.subject}</a>
 							</c:if>
 						</td>
 					</tr>
@@ -122,7 +122,7 @@ function modal() {
 						<td colspan="2">
 							다음글 :
 							<c:if test="${not empty nextReadDto}">
-								<a href="${pageContext.request.contextPath}/market/article.do?${query}&marketNum=${nextReadDto.marketNum}">${nextReadDto.subject}</a>
+								<a href="${pageContext.request.contextPath}/market/article.do?page=${page}&marketNum=${nextReadDto.marketNum}">${nextReadDto.subject}</a>
 							</c:if>
 						</td>
 					</tr>
@@ -134,7 +134,7 @@ function modal() {
 					<td width="50%">
 						<c:choose>
 							<c:when test="${sessionScope.member.userId==dto.sellerId}">
-								<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/market/update.do?num=${dto.marketNum}&page=${page}';">수정</button>
+								<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/market/update.do?marketNum=${dto.marketNum}&page=${page}';">수정</button>
 							</c:when>
 							<c:otherwise>
 								<button type="button" class="btn" disabled="disabled">수정</button>
@@ -152,7 +152,7 @@ function modal() {
 					</td>
 					<td align="right">
 						<button type="button" class="btn" onclick="modal();">구매하기</button>
-						<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/market/list.do?${query}';">리스트</button>
+						<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/market/list.do?page=${page}';">리스트</button>
 					</td>
 				</tr>
 			</table>
