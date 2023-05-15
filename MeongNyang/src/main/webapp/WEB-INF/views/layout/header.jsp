@@ -34,7 +34,7 @@
 			<li><a href="#">커뮤니티</a>
 			   	<ul class="sub-menu">
                		<li><a href="${pageContext.request.contextPath}/map/list.do">멍냥지도</a></li>
-               		<li><a href="${pageContext.request.contextPath}/photo/list.do">멍냥갤러리</a></li>
+               		<li><a href="${pageContext.request.contextPath}/gallery/list.do">멍냥갤러리</a></li>
                		<li><a href="${pageContext.request.contextPath}/club/list.do">멍냥모임</a></li>
             	</ul>
 
