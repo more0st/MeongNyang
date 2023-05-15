@@ -15,6 +15,35 @@
 	padding-top: 15px;
 }
 
+.img-box {
+	max-width: 700px;
+	padding: 5px;
+	overflow-x: auto;
+}
+.img-box img {
+	width: 350px; height: 300px;
+	margin-right: 5px;
+	flex: 0 0 auto;
+	cursor: pointer;
+}
+
+/* 모달대화상자 */
+.ui-widget-header { /* 타이틀바 */
+	background: none;
+	border: none;
+	border-bottom: 1px solid #ccc;
+	border-radius: 0;
+}
+.ui-dialog .ui-dialog-title {
+	padding-top: 5px; padding-bottom: 5px;
+}
+.ui-widget-content { /* 내용 */
+   /* border: none; */
+   border-color: #ccc; 
+}
+
+.photo-layout img { width: 570px; height: 450px; }
+
 .table-article tr>td { padding-left: 5px; padding-right: 5px; }
 </style>
 <script type="text/javascript">
@@ -122,6 +151,19 @@ window.addEventListener('load',() => {
 	});
 });
 
+function imageViewer(img) {
+	const viewer = $(".photo-layout");
+	let s="<img src='"+img+"'>";
+	viewer.html(s);
+	
+	$(".dialog-photo").dialog({
+		title:"이미지",
+		width: 600,
+		height: 530,
+		modal: true
+	});
+}
+
 
 </script>
 
@@ -134,8 +176,8 @@ window.addEventListener('load',() => {
 	
 <main>
 	<div class="container body-container">
-	    <div class="body-title">
-			<h2> 글보기 </h2>
+	    <div class="body-title" style="text-align: center;">
+			<img src="${pageContext.request.contextPath}/resource/images/mappage.png" style="width: 250px;">
 	    </div>
 	    <div style="box-shadow: 0 0 15px 0 rgb(2 59 109 / 10%);border-radius: 30px; margin: 0 auto ; width: 70%; margin-bottom: 50px;">
 	    <div class="body-main mx-auto">
@@ -164,9 +206,9 @@ window.addEventListener('load',() => {
 						</td>
 					</tr>
 					
-					<tr style="border-bottom: none;">
+					<tr style="border-bottom: none; text-align: center;" >
 						<td colspan="2" height="110">
-							<div class="img-box">
+							<div class="img-box"  >
 								<c:forEach var="vo" items="${listFile}">
 									<img src="${pageContext.request.contextPath}/uploads/map/${vo.imageFilename}"
 										onclick="imageViewer('${pageContext.request.contextPath}/uploads/map/${vo.imageFilename}');">
@@ -175,6 +217,11 @@ window.addEventListener('load',() => {
 						</td>	
 					</tr>
 					
+					<tr style="text-align: center;">
+						<td>
+							<div id="kakaomap" style="width:500px;height:400px;"></div>
+						</td>
+					</tr>
 					
 					<tr>
 						<td colspan="2">
@@ -312,10 +359,6 @@ window.addEventListener('load',() => {
 				            </div>
 						</td>
 				    </tr>
-				
-
-					
-				
 			</table>
 		
 		</div>
@@ -330,6 +373,23 @@ window.addEventListener('load',() => {
     <jsp:include page="/WEB-INF/views/layout/footer.jsp"></jsp:include>
 </footer>
 
+<div class="dialog-photo">
+      <div class="photo-layout"></div>
+</div>
+
 <jsp:include page="/WEB-INF/views/layout/staticFooter.jsp"/>
+
+<script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=01680d6fa50eecc6cbcc23d4888731c2"></script>
+
+<script>
+		var container = document.getElementById('kakaomap');
+		var options = {
+			center: new kakao.maps.LatLng(33.450701, 126.570667),
+			level: 3
+		};
+
+		var map = new kakao.maps.Map(container, options);
+	</script>
+
 </body>
 </html>

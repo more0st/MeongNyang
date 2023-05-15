@@ -295,7 +295,6 @@ public class MapServlet extends MyUploadServlet{
 			
 			req.setAttribute("dto", dto);
 			req.setAttribute("page", page);
-			req.setAttribute("mode", "update");
 			req.setAttribute("listFile", listFile);
 			
 			req.setAttribute("mode", "update");
@@ -324,22 +323,24 @@ public class MapServlet extends MyUploadServlet{
 		}
 
 		String page = req.getParameter("page");
-		long num = 0;
+		//long num = 0;
+		
 		try {
 			MapDTO dto = new MapDTO();
 			
 			
-			num = Long.parseLong(req.getParameter("mapNum"));
-			dto.setMapNum(num);
+			// num = Long.parseLong(req.getParameter("mapNum"));
+			// dto.setMapNum(num);
+			
+			dto.setMapNum(Long.parseLong(req.getParameter("mapNum")));
 			dto.setSubject(req.getParameter("subject"));
 			dto.setContent(req.getParameter("content"));
 			dto.setAddr(req.getParameter("addr"));
-			// dto.setFileNum(Long.parseLong(req.getParameter("fileNum")));
 			dto.setUserId(info.getUserId());
 			
 			Map<String, String[]> map = doFileUpload(req.getParts(), pathname);
 			if (map != null) {
-				String[] saveFiles = map.get("imageFilename");
+				String[] saveFiles = map.get("saveFilenames");
 				dto.setImageFiles(saveFiles);
 			}
 
@@ -348,7 +349,9 @@ public class MapServlet extends MyUploadServlet{
 			e.printStackTrace();
 		}
 
-		resp.sendRedirect(cp + "/map/article.do?page=" +page+ "&num="+ num);
+		resp.sendRedirect(cp + "/map/list.do?page=" + page);
+
+		// resp.sendRedirect(cp + "/map/article.do?page=" +page+ "&num="+ num);
 		
 	}
 		

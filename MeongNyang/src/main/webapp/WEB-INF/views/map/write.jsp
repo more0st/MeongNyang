@@ -100,6 +100,15 @@ function deleteImg(fileNum) {
 							<textarea name="content" class="form-control">${dto.content}</textarea>
 						</td>
 					</tr>
+
+					<tr> 
+						<td valign="top">주&nbsp;&nbsp;&nbsp;&nbsp;소</td>
+						<td> 
+							<textarea name="addr" class="form-control">${dto.addr}</textarea>
+						</td>
+					</tr>
+					
+					
 					
 					<tr>
 					<td>이미지</td>

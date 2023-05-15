@@ -546,14 +546,24 @@ public class MapDAO {
 				pstmt.setLong(4, dto.getMapNum());
 				pstmt.setString(5, dto.getUserId());
 				
-				//sql += "UPDATE mapImg set imgageFilename =? WHERE FileNum = ? AND userId=?";
-				
-				//pstmt.setString(1, dto.getImageFilename());
-				//pstmt.setLong(2, dto.getFileNum());
-				//pstmt.setString(3, dto.getUserId());
-
-				
 				pstmt.executeUpdate();
+				
+				pstmt.close();
+				pstmt = null;
+
+				if (dto.getImageFiles() != null) {
+					sql = "INSERT INTO mapImg(fileNum, mapNum, imageFilename) VALUES "
+							+ " (mapImg_seq.NEXTVAL, ?, ?)";
+					pstmt = conn.prepareStatement(sql);
+
+					for (int i = 0; i < dto.getImageFiles().length; i++) {
+						pstmt.setLong(1, dto.getMapNum());
+						pstmt.setString(2, dto.getImageFiles()[i]);
+
+					}
+					pstmt.executeUpdate();
+				}
+
 
 			} catch (SQLException e) {
 				e.printStackTrace();
