@@ -329,6 +329,92 @@ public class ClubDAO {
 
 		return list;
 	}
+	
+//	//내모임 리스트
+//	public List<ClubDTO> myClubList(int offset, int size, String condition, String keyword) {
+//		List<ClubDTO> list = new ArrayList<ClubDTO>();
+//		PreparedStatement pstmt = null;
+//		ResultSet rs = null;
+//		StringBuilder sb = new StringBuilder();
+//
+//		try {
+//			sb.append(" SELECT c.clubNum, userName, subject, hitCount, imageFilename, ");
+//			sb.append("       TO_CHAR(reg_date, 'YYYY-MM-DD') reg_date, "
+//					+ " maxMember, nowMember  ");
+//			sb.append(" FROM club c ");
+//			sb.append(" JOIN member m ON c.userId = m.userId ");
+//			sb.append(" LEFT OUTER JOIN ( ");
+//			sb.append("     SELECT fileNum, clubNum, imageFilename FROM ( ");
+//			sb.append("        SELECT fileNum, clubNum, imageFilename, ");
+//			sb.append("            ROW_NUMBER() OVER(PARTITION BY clubNum ORDER BY fileNum ASC) rank ");
+//			sb.append("        FROM clubImgFile");
+//			sb.append("     ) WHERE rank = 1 ");
+//			sb.append(" ) i ON c.clubNum = i.clubNum ");
+//			if (condition.equals("all")) {
+//				sb.append(" WHERE INSTR(subject, ?) >= 1 OR INSTR(content, ?) >= 1 ");
+//			} else if (condition.equals("reg_date")) {
+//				keyword = keyword.replaceAll("(\\-|\\/|\\.)", "");
+//				sb.append(" WHERE TO_CHAR(reg_date, 'YYYYMMDD') = ?");
+//			} else {
+//				sb.append(" WHERE INSTR(" + condition + ", ?) >= 1 ");
+//			}
+//			sb.append(" ORDER BY clubnum DESC ");
+//			sb.append(" OFFSET ? ROWS FETCH FIRST ? ROWS ONLY ");
+//
+//			pstmt = conn.prepareStatement(sb.toString());
+//			
+//			if (condition.equals("all")) {
+//				pstmt.setString(1, keyword);
+//				pstmt.setString(2, keyword);
+//				pstmt.setInt(3, offset);
+//				pstmt.setInt(4, size);
+//			} else {
+//				pstmt.setString(1, keyword);
+//				pstmt.setInt(2, offset);
+//				pstmt.setInt(3, size);
+//			}
+//
+//			rs = pstmt.executeQuery();
+//			
+//			while (rs.next()) {
+//				ClubDTO dto = new ClubDTO();
+//
+//				dto.setClubNum(rs.getLong("clubNum"));
+//				dto.setUserName(rs.getString("userName"));
+//				dto.setSubject(rs.getString("subject"));
+//				dto.setHitCount(rs.getInt("hitCount"));
+//				dto.setReg_date(rs.getString("reg_date"));
+//				dto.setMaxMember(rs.getInt("maxMember"));
+//				dto.setNowMember(rs.getInt("nowMember"));
+//				dto.setImageFilename(rs.getString("imageFilename"));
+//
+//				
+//				list.add(dto);
+//			}
+//		} catch (SQLException e) {
+//			e.printStackTrace();
+//		} finally {
+//			if (rs != null) {
+//				try {
+//					rs.close();
+//				} catch (SQLException e2) {
+//				}
+//			}
+//			if (pstmt != null) {
+//				try {
+//					pstmt.close();
+//				} catch (SQLException e2) {
+//				}
+//			}
+//		}
+//
+//		return list;
+//	}
+	
+	
+	
+	
+	
 
 		
 	// 조회수 증가하기
@@ -951,64 +1037,94 @@ public class ClubDAO {
 			
 
 
-//		//멤버가 존재하는지 확인
-//		public ClubDTO checkMemberList(long num, String userId) {
-//		PreparedStatement pstmt = null;
-//		ResultSet rs = null;
-//		String sql;
-//		ClubDTO dto = null;
-//		String a;
-//		String b;
-//		
-//		try {
-//			sql =  " SELECT clubNum, userId FROM clubMember "
-//                 + " WHERE clubNum = ? AND userId = ? " ;
-//			
-//			pstmt = conn.prepareStatement(sql);
-//			
-//			pstmt.setLong(1, num);
-//			pstmt.setString(2, userId);
-//			
-//			rs = pstmt.executeQuery();
-//			
-//			if(rs.next()) {
-//				dto = new ClubDTO();
-//				
-//				dto.setClubNum(rs.getLong("clubNum"));
-//				dto.setUserId(rs.getString("userId"));
-//
-//			}
-//			/*
-//			a = Long.toString(dto.getClubNum());
-//			b = dto.getUserId();
-//			String c= Long.toString(num);
-//			if(a.contains(c)||b.contains(userId)) {
-//				return true;
-//			}else {
-//				return false;
-//			}
-//			*/
-//			
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		} finally {
-//			if (rs != null) {
-//				try {
-//					rs.close();
-//				} catch (SQLException e2) {
-//				}
-//			}
-//			if (pstmt != null) {
-//				try {
-//					pstmt.close();
-//				} catch (SQLException e2) {
-//				}
-//			}
-//		}
-//		
-//		
-//		return dto;
-//	}
+		//멤버가 존재하는지 확인
+		public boolean isMemberCheck(long num, String userId) {
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		String sql;
+		boolean result = false;
+		
+		try {
+			sql =  " SELECT clubNum, userId FROM clubMember "
+                 + " WHERE clubNum = ? AND userId = ? " ;
+			
+			pstmt = conn.prepareStatement(sql);
+			
+			pstmt.setLong(1, num);
+			pstmt.setString(2, userId);
+			
+			rs = pstmt.executeQuery();
+			
+			if(rs.next()) {
+				result = true;
+
+			}
+			
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			if (rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException e2) {
+				}
+			}
+			if (pstmt != null) {
+				try {
+					pstmt.close();
+				} catch (SQLException e2) {
+				}
+			}
+		}
+		
+		
+		return result;
+	}
+		
+		//멤버가 존재하는지 확인
+				public int statusCheck(long num, String userId) {
+				PreparedStatement pstmt = null;
+				ResultSet rs = null;
+				String sql;
+				int result = 2;
+				
+				try {
+					sql =  " SELECT status FROM clubMember "
+		                 + " WHERE clubNum = ? AND userId = ? " ;
+					
+					pstmt = conn.prepareStatement(sql);
+					
+					pstmt.setLong(1, num);
+					pstmt.setString(2, userId);
+					
+					rs = pstmt.executeQuery();
+					
+					if(rs.next()) {
+						result = rs.getInt("status");
+
+					}
+					
+				} catch (Exception e) {
+					e.printStackTrace();
+				} finally {
+					if (rs != null) {
+						try {
+							rs.close();
+						} catch (SQLException e2) {
+						}
+					}
+					if (pstmt != null) {
+						try {
+							pstmt.close();
+						} catch (SQLException e2) {
+						}
+					}
+				}
+				
+				
+				return result;
+			}
 	
 }
 		

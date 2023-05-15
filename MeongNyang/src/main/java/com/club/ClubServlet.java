@@ -119,9 +119,9 @@ public class ClubServlet extends MyUploadServlet {
 			List<ClubDTO> list = null;
 			if (keyword.length() == 0) {
 				list = dao.listClub(offset, size);
-			} else {
+			} else if(keyword.length()>=1) {
 				list = dao.listClub(offset, size, condition, keyword);
-			}
+			} //else{ list = dao.myClubList(offset, size, condition, keyword)}
 
 			String query = "";
 			if (keyword.length() != 0) {
@@ -207,12 +207,16 @@ public class ClubServlet extends MyUploadServlet {
 		ClubDAO dao = new ClubDAO();
 		MyUtil util = new MyUtil();
 		
+		HttpSession session = req.getSession();
+		SessionInfo info = (SessionInfo) session.getAttribute("member");
+		
 		String cp = req.getContextPath();
 		
 		String page = req.getParameter("page");
 		String query = "page=" + page;
 
 		try {
+			String userId = info.getUserId();
 			long num = Long.parseLong(req.getParameter("num"));
 			String condition = req.getParameter("condition");
 			String keyword = req.getParameter("keyword");
@@ -247,7 +251,9 @@ public class ClubServlet extends MyUploadServlet {
 			
 			List<ClubDTO> list = dao.memberList(num);
 			
-
+			boolean result = dao.isMemberCheck(num, userId);
+			
+			int status = dao.statusCheck(num, userId);
 			
 			// JSP로 전달할 속성
 			req.setAttribute("dto", dto);
@@ -258,6 +264,9 @@ public class ClubServlet extends MyUploadServlet {
 			req.setAttribute("listFile", listFile);
 			req.setAttribute("memberCount", memberCount);
 			req.setAttribute("list", list);
+			req.setAttribute("result", result);
+			req.setAttribute("status", status);
+			req.setAttribute("mode", "update");
 
 			// 포워딩
 			forward(req, resp, "/WEB-INF/views/club/article.jsp");
@@ -302,7 +311,6 @@ public class ClubServlet extends MyUploadServlet {
 			req.setAttribute("mode", "update");
 			req.setAttribute("listFile", listFile);
 			
-			req.setAttribute("mode", "update");
 
 			forward(req, resp, "/WEB-INF/views/club/write.jsp");
 			return;

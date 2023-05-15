@@ -290,20 +290,27 @@ function imageViewer(img) {
 					</td>
 					
 					<td align="right">
-						<button type="button" class="btn showMember" >멤버보기</button>
+						<c:choose>
+				    		<c:when test="${ result }">
+								<button type="button" class="btn showMember" >멤버보기</button>
+				    		</c:when>
+				    	</c:choose>
 						
 						<!--가입하기버튼 정원수초과하면 비활성화 -> 현재수>=정원수, 멤버일 경우 비활성화->멤버리스트가 있으면(not empty)
 						  -->
 						<c:choose>
-				    		<c:when test="${ memberCount < dto.maxMember || empty list}">
+				    		<c:when test="${ memberCount < dto.maxMember && !result }">
 				    			<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/club/signUp.do?num=${dto.clubNum}';">가입하기</button>
 				    		</c:when>
-				    		<c:otherwise>
-				    			<button type="button" class="btn" disabled="disabled">가입하기</button>
-				    		</c:otherwise>
 				    	</c:choose>
 							<!-- 탈퇴하기 버튼 가입한멤버이면(리더빼고) 활성화 해야함 -->
-							<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/club/byebye.do?num=${dto.clubNum}';">탈퇴하기</button>
+							
+						<c:choose>
+				    		<c:when test="${ result && status != 1 }">
+				    			<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/club/byebye.do?num=${dto.clubNum}';">탈퇴하기</button>
+				    		</c:when>
+				    	</c:choose>
+				    	
 					</td>
 					<td align="right">
 						<button type="button" class="btn" >좋아요</button>
@@ -313,7 +320,7 @@ function imageViewer(img) {
 				</tr>
 			</table>
 			
-			
+				<input type="hidden" name="num" value="${dto.clubNum }">
 					<!-- 멤버리스트 -->
 					<div class=" popup-dialog" style="display: none;">
 							<c:forEach var="list" items="${list }">

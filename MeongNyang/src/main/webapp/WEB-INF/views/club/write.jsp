@@ -10,6 +10,14 @@
 <title>spring</title>
 <jsp:include page="/WEB-INF/views/layout/staticHeader.jsp"/>
 <style type="text/css">
+
+.img-box img {
+	width: 37px; height: 37px;
+	margin-right: 5px;
+	flex: 0 0 auto;
+	cursor: pointer;
+}
+
 .body-main {
 	max-width: 700px;
 	padding-top: 15px;
@@ -59,21 +67,18 @@ function sendOk() {
         f.maxMember.focus();
         return;
     }
-    /* 등록에서는 괜찮은데 수정에서 수정버튼이 아예 안먹음
-    <c:if test="${mode=='update'}">
-    if(str < ${dto.nowMember} ){
-    	alert("현재 인원수 보다 적습니다. ");
-        f.maxMember.focus();
-        return;
-    </c:if>
-    */
-    /* 수정에서는 괜찮은데 등록에서 등록버튼이 아예 안먹음
-    if(str < ${dto.nowMember} ){
+
+    
+    let mode = "${mode}";
+    let cnt = "${dto.nowMember}";
+    if(cnt == "") cnt = 0;
+
+    
+    if(mode=="update" && str < cnt ){
     	alert("현재 정원수 보다 적습니다. ");
         f.maxMember.focus();
         return;
     }
-    */
 
     f.action = "${pageContext.request.contextPath}/club/${mode}_ok.do";
     f.submit();
@@ -159,8 +164,8 @@ function sendOk() {
 							<td> 
 								<div class="img-box">
 									<c:forEach var="vo" items="${listFile}">
-										<img src="${pageContext.request.contextPath}/uploads/sphoto/${vo.imageFilename}"
-											onclick="deleteFile('${vo.fileNum}');">
+										<img src="${pageContext.request.contextPath}/uploads/club/${vo.imageFilename}"
+											onclick="deleteFile('${vo.fileNum}');" >
 									</c:forEach>
 								</div>
 							</td>
