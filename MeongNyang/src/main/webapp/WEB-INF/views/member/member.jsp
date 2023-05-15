@@ -142,7 +142,7 @@ function changeEmail() {
 	    
 	    <div class="body-main mx-auto">
 	    <div class="body-title">
-			<h2> 회원가입 </h2>
+			<h2> ${title} </h2>
 	    </div>
 			<form name="memberForm" method="post">
 			<table class="table table-border table-form">
@@ -243,7 +243,7 @@ function changeEmail() {
 				<tr>
 					<td>우편번호</td>
 					<td>
-						<input type="text" name="postNum" id="postNum" maxlength="7" class="form-control" value="${dto.zip}" readonly="readonly" style="width: 50%;">
+						<input type="text" name="postNum" id="postNum" maxlength="7" class="form-control" value="" readonly="readonly" style="width: 50%;">
 						<button type="button" class="btn" onclick="daumPostcode();">우편번호검색</button>
 					</td>
 				</tr>
@@ -280,7 +280,7 @@ function changeEmail() {
 					    <button type="button" class="btn" name="btnOk" onclick="memberOk();"> ${mode=="member"?"회원가입":"정보수정"} </button>
 					    <button type="reset" class="btn"> 다시입력 </button>
 					    <button type="button" class="btn" 
-					    	onclick="javascript:location.href='${pageContext.request.contextPath}/member/login.do';"> ${mode=="member"?"가입취소":"수정취소"} </button>
+					    	onclick="javascript:location.href='${pageContext.request.contextPath}/';"> ${mode=="member"?"가입취소":"수정취소"} </button>
 					</td>
 				</tr>
 				

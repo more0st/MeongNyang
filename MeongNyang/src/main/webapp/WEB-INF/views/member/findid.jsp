@@ -7,7 +7,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>spring</title>
+<title>아이디 찾기</title>
 <jsp:include page="/WEB-INF/views/layout/staticHeader.jsp"/>
 
 <style type="text/css">
@@ -39,14 +39,21 @@
 function sendOk() {
 	const f = document.pwdForm;
 
-	let str = f.userPwd.value;
-	if(!str) {
-		alert("패스워드를 입력하세요. ");
-		f.userPwd.focus();
+	let strName = f.userName.value;
+	let strEmail = f.email.value;
+	
+	if(!strName) {
+		alert("이름을 입력하세요. ");
+		f.userName.focus();
+		return;
+	}
+	if(!strEmail) {
+		alert("이메일을 입력하세요. ");
+		f.userEmail.focus();
 		return;
 	}
 
-	f.action = "${pageContext.request.contextPath}/";
+	f.action = "${pageContext.request.contextPath}/member/id_find.do";
 	f.submit();
 }
 </script>
@@ -80,15 +87,13 @@ function sendOk() {
 						</div>
 						<div>
 							<button type="button" class="btnConfirm" onclick="sendOk();">확인</button>
-							<input type="hidden" name="mode" value="${mode}">
+							<input type="hidden" name="mode" value="">
 						</div>
 					</form>
 				</div>
 			</div>
 			<div class="members-message">
 				<p class="text-center">${message}</p>
-				<!-- 없는 회원입니다 -->
-				<!-- 또는 아이디 출력 -->
 			</div>
 	    </div>
 	</div>

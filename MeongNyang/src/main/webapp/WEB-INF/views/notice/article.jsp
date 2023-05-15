@@ -228,14 +228,14 @@ window.addEventListener('load',() => {
 <main>
 	<div class="container body-container">
 	    <div class="body-title">
-			<h2> 공지사항로고 넣기 </h2>
+			<h2><img src="${pageContext.request.contextPath}/resource/images/noticepage.png" style="width: 250px;"></h2>
 	    </div>
 	    <div style="box-shadow: 0 0 15px 0 rgb(2 59 109 / 10%);border-radius: 30px; margin: 0 auto ; width: 70%; margin-bottom: 50px;">
 	    <div class="body-main mx-auto" >
 			<table class="table table-border table-article">
 				<thead>
 					<tr>
-						<td colspan="2" align="center" style="font-weight: 900; color: tomato; font-size: 20px;">
+						<td colspan="2" align="left" style="font-weight: 900; color: tomato; font-size: 20px;">
 							${dto.subject}
 						</td>
 					</tr>
