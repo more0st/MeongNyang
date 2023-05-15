@@ -25,7 +25,10 @@
 .table-list .hit { width: 70px; color: #787878; }
 </style>
 <script type="text/javascript">
-
+function searchList() {
+	const f = document.searchForm;
+	f.submit();
+}
 
 </script>
 
@@ -60,6 +63,8 @@
 						<th class="name">작성자</th>
 						<th class="date">작성일</th>
 						<th class="hit">조회수</th>
+						<th class="pay_date">판매날짜</th>
+						<th class="content">내용</th>
 					</tr>
 				</thead>
 				
@@ -73,13 +78,15 @@
 							<td>${dto.sellerid}</td>
 							<td>${dto.reg_date}</td>
 							<td>${dto.hitCount}</td>
+							<td>${dto.pay_date}</td>
+							<td>${dto.content}</td>
 						</tr>
 					</c:forEach>
-				</tbody>
+				</tbody>	
 			</table>
 			
 			<div class="page-navigation">
-				${dataCount == 0 ? "등록된 게시물이 없습니다." : paging}
+				${dataCount == 0 ? "" : paging}
 			</div>
 			
 			<table class="table">

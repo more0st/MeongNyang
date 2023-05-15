@@ -13,16 +13,21 @@ public class MyPageDAO {
 	private Connection conn = DBConn.getConnection();
 
 	// 데이터 개수
-	public int dataCount() {
+	public int dataCount(String userId) {
 		int result = 0;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		String sql;
 		
 		try {
-			sql = "SELECT COUNT(*) FROM market";
+			sql = "SELECT COUNT(*) FROM market WHERE sellerid= ?";
+			
+			
 			pstmt = conn.prepareStatement(sql);
+			pstmt.setString(1, userId);
+
 			rs = pstmt.executeQuery();
+
 			if(rs.next()) {
 				result = rs.getInt(1);
 			}
@@ -48,28 +53,32 @@ public class MyPageDAO {
 	}
 
 	// 검색에서의 데이터 개수
-	public int dataCount(String condition, String keyword) {
+	public int dataCount(String userId ,String condition, String keyword) {
 		int result = 0;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		String sql;
 		
 		try {
-			sql = "SELECT COUNT(*) FROM market";
+			sql = "SELECT COUNT(*) FROM market WHERE sellerid=?";
 			if(condition.equals("all")) {
-				sql += " WHERE INSTR(subject, ?) >= 1 OR INSTR(content, ? ) >= 1";
+				sql += " AND INSTR(subject, ?) >= 1 OR INSTR(content, ? ) >= 1";
 			} else if(condition.equals("reg_data")) {
 				keyword = keyword.replaceAll("(\\-|\\.|\\/)", "");
-				sql += " WHERE TO_CHAR(reg_date, 'YYYYMMDD') = ?";
+				sql += " AND TO_CHAR(reg_date, 'YYYYMMDD') = ?";
 			} else {	// subject, content, name
-				sql += " WHERE INSTR(" + condition + ", ?) >= 1";
+				sql += " AND INSTR(" + condition + ", ?) >= 1";
 			}
+			
+
+
 			
 			pstmt = conn.prepareStatement(sql);
 			
-			pstmt.setString(1, keyword);
+			pstmt.setString(1, userId);
+			pstmt.setString(2, keyword);
 			if(condition.equals("all")) {
-				pstmt.setString(2, keyword);
+				pstmt.setString(3, keyword);
 			}
 			
 			rs = pstmt.executeQuery();
@@ -98,22 +107,30 @@ public class MyPageDAO {
 		return result;
 	}
 
+	
+
 	// 게시물 리스트
-	public List<MyPageDTO> listBoard(int offset, int size) {
-		List<MyPageDTO> list = new ArrayList<>();
+	public List<MyPageDTO> listBoard(String userId, int offset, int size) {
+		List<MyPageDTO> list = new ArrayList<MyPageDTO>();
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		String sql;
 		
 		try {
-			sql = "SELECT marketnum,sellerid,buyerid,subject,hitCount, TO_CHAR(reg_date, 'YYYY-MM-DD') reg_date, TO_CHAR(pay_date, 'YYYY-MM-DD') pay_date"
-					+ " FROM market ORDER BY marketnum DESC "
+			sql = "SELECT marketnum,sellerid,buyerid,subject,content,hitCount, TO_CHAR(reg_date, 'YYYY-MM-DD') reg_date, TO_CHAR(pay_date, 'YYYY-MM-DD') pay_date"
+					+ " FROM market"
+					+ " WHERE sellerid = ? ORDER BY marketnum DESC "
 					+ " OFFSET ? ROWS FETCH FIRST ? ROWS ONLY";
 				
+			
+			//  select * from market where = '세션에서 받아온 아이디';
+			
 			pstmt = conn.prepareStatement(sql);
 			
-			pstmt.setInt(1, offset);
-			pstmt.setInt(2, size);
+			
+			pstmt.setString(1, userId);
+			pstmt.setInt(2, offset);
+			pstmt.setInt(3, size);
 			
 			rs = pstmt.executeQuery();
 			while(rs.next() ) {
@@ -123,6 +140,7 @@ public class MyPageDAO {
 				dto.setSellerid(rs.getString("sellerid"));
 				dto.setBuyerid(rs.getString("buyerid"));
 				dto.setSubject(rs.getString("subject"));
+				dto.setContent(rs.getString("content"));
 				dto.setHitCount(rs.getInt("hitCount"));
 				dto.setReg_date(rs.getString("reg_date"));
 				dto.setPay_date(rs.getString("pay_date"));
@@ -151,45 +169,52 @@ public class MyPageDAO {
 		
 		return list;
 	}
-	
-	//
-	public List<MyPageDTO> listBoard(int offset, int size, String condition, String keyword) {
-		List<MyPageDTO> list = new ArrayList<>();
+
+
+	// 검색 게시물 리스트
+	public List<MyPageDTO> listBoard(String userId, int offset, int size, String condition, String keyword) {
+		List<MyPageDTO> list = new ArrayList<MyPageDTO>();
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
-		String sql;
-		
+		StringBuilder sb = new StringBuilder();
+
 		try {
-			sql = "SELECT marketnum,sellerid,buyerid,subject,hitCount, TO_CHAR(reg_date, 'YYYY-MM-DD') reg_date, TO_CHAR(pay_date, 'YYYY-MM-DD') pay_date FROM market";
-			
-			if(condition.equals("all")) {
-				sql += " WHERE INSTR(subject, ?) >= 1 OR INSTR(content, ?) >= 1 ";
-			} else if(condition.equals("reg_date")) {
-				keyword= keyword.replaceAll("(\\-|\\.|\\/)", "");
-				sql += " WHERE TO_CHAR(reg_date, 'YYYYMMDD') = ?";
+			sb.append(" SELECT marketnum,sellerid,buyerid,subject,hitCount, ");
+			sb.append("      TO_CHAR(reg_date, 'YYYY-MM-DD') reg_date, TO_CHAR(pay_date, 'YYYY-MM-DD') pay_date ");
+			sb.append(" FROM market a ");
+			sb.append(" JOIN member b ON a.sellerId = b.userId ");
+			sb.append(" WHERE sellerid=?");
+			if (condition.equals("all")) {
+				sb.append(" AND INSTR(subject, ?) >= 1 OR INSTR(content, ?) >= 1 ");
+			} else if (condition.equals("reg_date")) {
+				keyword = keyword.replaceAll("(\\-|\\/|\\.)", "");
+				sb.append(" AND TO_CHAR(reg_date, 'YYYYMMDD') = ?");
 			} else {
-				sql += " WHERE INSTR(" + condition + ", ?) >= 1";
+				sb.append(" AND INSTR(" + condition + ", ?) >= 1 ");
 			}
-			sql += " ORDER BY num DESC";
-			sql += " OFFSET ? ROWS FETCH FIRST ? ROWS ONLY ";
+			sb.append(" ORDER BY marketnum DESC ");
+			sb.append(" OFFSET ? ROWS FETCH FIRST ? ROWS ONLY ");
+
+			pstmt = conn.prepareStatement(sb.toString());
 			
-			pstmt = conn.prepareStatement(sql);
-			
-			if(condition.equals("all")) {
-				pstmt.setString(1, keyword);
+			if (condition.equals("all")) {
+				pstmt.setString(1, userId);
+				pstmt.setString(2, keyword);
+				pstmt.setString(3, keyword);
+				pstmt.setInt(4, offset);
+				pstmt.setInt(5, size);
+			} else {
+				pstmt.setString(1, userId);
 				pstmt.setString(2, keyword);
 				pstmt.setInt(3, offset);
 				pstmt.setInt(4, size);
-			} else {
-				pstmt.setString(1, keyword);
-				pstmt.setInt(2, offset);
-				pstmt.setInt(3, size);
 			}
-			
+
 			rs = pstmt.executeQuery();
-			while(rs.next()) {
+			
+			while (rs.next()) {
 				MyPageDTO dto = new MyPageDTO();
-				
+
 				dto.setMarketnum(rs.getLong("marketnum"));
 				dto.setSellerid(rs.getString("sellerid"));
 				dto.setBuyerid(rs.getString("buyerid"));
@@ -200,28 +225,25 @@ public class MyPageDAO {
 				
 				list.add(dto);
 			}
-			
-		} catch (Exception e) {
+		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
-			if(rs != null) {
+			if (rs != null) {
 				try {
 					rs.close();
-				} catch (Exception e2) {
+				} catch (SQLException e2) {
 				}
 			}
-
 			if (pstmt != null) {
 				try {
 					pstmt.close();
-				} catch (Exception e2) {
+				} catch (SQLException e2) {
 				}
 			}
 		}
-		
+
 		return list;
 	}
-	
 	
 	// 조회수 증가하기
 	public void updateHitCount(long marketnum) throws SQLException {
@@ -299,7 +321,8 @@ public class MyPageDAO {
 		return dto;
 	}
 
-	
+
+	/*
 	// 이전글
 	public MyPageDTO prereadBoard(long marketnum) {
 		MyPageDTO dto = null;
@@ -350,6 +373,80 @@ public class MyPageDAO {
 		
 		return dto;
 	}
+	
+	
+	// 다음글
+	public MyPageDTO nextReadBoard(long marketnum) {
+		MyPageDTO dto = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		StringBuilder sb = new StringBuilder();
+
+		try {
+			if(keyword != null && keyword.length() != 0) {
+				// 검색
+				sb.append(" SELECT marketnum, subject");
+				sb.append(" FROM market ");
+				sb.append(" WHERE marketnum > ? ");
+				if(condition.equals("all")) {
+					sb.append(" AND (INSTR(subject, ?) >= 1 OR INSTR(content, ?) >= 1) ");
+				} else if(condition.equals("reg_date")) {
+					keyword = keyword.replaceAll("(\\-|\\/|\\.)","");
+					sb.append(" AND (TO_CHAR(reg_date, 'YYYYMMDD') = ?) ");
+				} else {
+					sb.append(" AND (INSTR(" + condition + ", ?) >= 1");
+				}
+				sb.append(" ORDER BY marketnum ASC");
+				sb.append(" FETCH FIRST 1 ROWS ONLY");
+				
+				pstmt = conn.prepareStatement(sb.toString());
+				pstmt.setLong(1, marketnum);
+				pstmt.setString(2, keyword);
+				if(condition.equals("all")) {
+					pstmt.setString(3, keyword);
+				}
+			} else {
+				// 검색이 아닐때
+				sb.append("SELECT marketnum, subject");
+				sb.append(" FROM market ");
+				sb.append(" WHERE marketnum > ? ");
+				sb.append(" ORDER BY marketnum ASC");
+				sb.append(" FETCH FIRST 1 ROWS ONLY");
+				
+				pstmt = conn.prepareStatement(sb.toString());
+				pstmt.setLong(1, marketnum);
+			} 
+			
+			rs = pstmt.executeQuery();
+			
+			if(rs.next()) {
+				dto = new MyPageDTO();
+				dto.setMarketnum(rs.getLong("marketnum"));
+				dto.setSubject(rs.getString("subject"));
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			if(rs != null) {
+				try {
+					rs.close();
+				} catch (Exception e2) {
+				}
+			}
+			
+			if(pstmt != null) {
+				try {
+					pstmt.close();
+				} catch (Exception e2) {
+				}
+			}
+		}
+	
+		return dto;
+	}
+	*/
+	
 	
 	// 이전글
 	public MyPageDTO preReadBoard(long marketnum, String condition, String keyword) {
@@ -421,6 +518,7 @@ public class MyPageDAO {
 	
 		return dto;
 	}
+	
 
 	// 다음글
 	public MyPageDTO nextReadBoard(long marketnum, String condition, String keyword) {
@@ -492,5 +590,4 @@ public class MyPageDAO {
 	
 		return dto;
 	}
-
 }

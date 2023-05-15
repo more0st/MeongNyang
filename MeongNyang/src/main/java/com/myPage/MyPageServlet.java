@@ -46,13 +46,20 @@ public class MyPageServlet extends MyServlet{
 
 	private void list(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		// 게시물 리스트
-		MyPageDAO dao = new MyPageDAO();	////////////////////////////////// 이름 수정
+		MyPageDAO dao = new MyPageDAO();	
 		MyUtil util = new MyUtil();
-
+		
 		String cp = req.getContextPath();
 		
 		try {
 			// 파라미터 : [페이지번호], [검색컬럼,검색값]          (페이지번호가 올수도 있고 오지않을수도잇음)
+		
+			
+			// 로그인한 아이디로만 글 뜨게
+			HttpSession session = req.getSession();
+			SessionInfo info = (SessionInfo) session.getAttribute("member");
+			
+
 			
 			// 페이지번호
 			String page = req.getParameter("page");
@@ -77,13 +84,13 @@ public class MyPageServlet extends MyServlet{
 			// 전체 데이터 개수
 			int dataCount;
 			if(keyword.length() == 0) {	// 검색이 아닐때
-				dataCount = dao.dataCount();
+				dataCount = dao.dataCount(info.getUserId());
 			} else {
-				dataCount = dao.dataCount(condition, keyword);
+				dataCount = dao.dataCount(info.getUserId(), condition, keyword);
 			}
 			
 			// 전체 페이지수
-			int size = 2;
+			int size = 5;
 			int total_page = util.pageCount(dataCount, size);
 			if(current_page > total_page) {
 				current_page = total_page;
@@ -96,10 +103,11 @@ public class MyPageServlet extends MyServlet{
 			List<MyPageDTO> list = null;
 			
 			if(keyword.length() == 0) {
-				list = dao.listBoard(offset, size);
-			} else {
-				list = dao.listBoard(offset, size, condition, keyword);
-			}
+				list = dao.listBoard(info.getUserId(), offset, size);		// 게시물 리스트
+			} 
+			  else {
+				list = dao.listBoard(info.getUserId(), offset, size, condition, keyword);		// 검색에서 게시물 리스트
+			} 
 			
 			// 페이징 처리
 			String query = "";
@@ -115,6 +123,8 @@ public class MyPageServlet extends MyServlet{
 			}
 
 			String paging = util.paging(current_page, total_page, listUrl);
+	
+			
 			
 			// 포워딩할 JSP에 전달할 속성(attribute)
 			req.setAttribute("list", list);
@@ -146,7 +156,7 @@ public class MyPageServlet extends MyServlet{
 		String query = "page=" + page;
 		
 		try {
-			long num = Long.parseLong(req.getParameter("num"));
+			long marketnum = Long.parseLong(req.getParameter("num"));
 			String condition = req.getParameter("condition");
 			String keyword = req.getParameter("keyword");
 			if(condition == null) {
@@ -160,10 +170,10 @@ public class MyPageServlet extends MyServlet{
 			}
 			
 			/// 조회수 증가
-			dao.updateHitCount(num);
+			dao.updateHitCount(marketnum);
 			
 			// 게시글 가져오기
-			MyPageDTO dto = dao.readBoard(num);
+			MyPageDTO dto = dao.readBoard(marketnum);
 			if(dto == null) {
 				resp.sendRedirect(cp + "/myPage/buyList.do?" + query);
 				return;
@@ -173,8 +183,8 @@ public class MyPageServlet extends MyServlet{
 			dto.setContent(dto.getContent().replaceAll("\n", "<br>"));
 			
 			// 이전글 다음글
-			MyPageDTO preReadDto = dao.preReadBoard(num, condition, keyword);
-			MyPageDTO nextReadDto = dao.nextReadBoard(num, condition, keyword);
+			MyPageDTO preReadDto = dao.preReadBoard(marketnum, condition, keyword);
+			MyPageDTO nextReadDto = dao.nextReadBoard(marketnum, condition, keyword);
 			
 			// 포워딩할 JSP에 넘겨줄 속성
 			req.setAttribute("dto", dto);
