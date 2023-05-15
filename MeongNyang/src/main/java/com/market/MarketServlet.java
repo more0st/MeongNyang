@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import com.member.SessionInfo;
+import com.util.FileManager;
 import com.util.MyUploadServlet;
 import com.util.MyUtil;
 
@@ -80,7 +81,7 @@ public class MarketServlet extends MyUploadServlet{
 			int dataCount = dao.dataCount();
 
 			// 전체페이지수
-			int size = 12;
+			int size = 9;
 			int total_page = util.pageCount(dataCount, size);
 			if (current_page > total_page) {
 				current_page = total_page;
@@ -168,17 +169,22 @@ public class MarketServlet extends MyUploadServlet{
 			long marketNum = Long.parseLong(req.getParameter("marketNum"));
 
 			MarketDTO dto = dao.readMarket(marketNum);
-			if (dto == null || !dto.getSellerId().equals(info.getUserId())) {
+			if (dto == null) {
 				resp.sendRedirect(cp + "/market/list.do?page=" + page);
 				return;
 			}
 			dto.setContent(dto.getContent().replaceAll("\n", "<br>"));
 			
 			List<MarketDTO> listFile = dao.listPhotoFile(marketNum);
+			
+			MarketDTO preReadDto = dao.preReadPhoto(marketNum, info.getUserId());
+			MarketDTO nextReadDto = dao.nextReadPhoto(marketNum, info.getUserId());
 
 			req.setAttribute("dto", dto);
 			req.setAttribute("listFile", listFile);
 			req.setAttribute("page", page);
+			req.setAttribute("preReadDto", preReadDto);
+			req.setAttribute("nextReadDto", nextReadDto);
 
 			forward(req, resp, "/WEB-INF/views/market/article.jsp");
 			return;
@@ -190,20 +196,92 @@ public class MarketServlet extends MyUploadServlet{
 	
 	protected void updateForm(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		
-		// JSP로 포워딩
-		forward(req, resp, "/WEB-INF/views/market/list.jsp");
+		req.setAttribute("mode", "update");
+		forward(req, resp, "/WEB-INF/views/market/write.jsp");
 	}
 	
 	protected void updateSubmit(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		
-		// JSP로 포워딩
-		forward(req, resp, "/WEB-INF/views/market/list.jsp");
+		MarketDAO dao = new MarketDAO();
+		
+		HttpSession session = req.getSession();
+		SessionInfo info = (SessionInfo)session.getAttribute("member");
+		
+		try {
+			String cp = req.getContextPath();
+			
+			if (req.getMethod().equalsIgnoreCase("GET")) {
+				resp.sendRedirect(cp + "/market/list.do");
+				return;
+			}
+
+			String page = req.getParameter("page");
+
+			try {
+				MarketDTO dto = new MarketDTO();
+				dto.setMarketNum(Long.parseLong(req.getParameter("marketNum")));
+				dto.setSubject(req.getParameter("subject"));
+				dto.setContent(req.getParameter("content"));
+
+				Map<String, String[]> map = doFileUpload(req.getParts(), pathname);
+				if (map != null) {
+					String[] saveFiles = map.get("saveFilenames");
+					dto.setImageFiles(saveFiles);
+				}
+
+				dao.updateMarket(dto);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+			resp.sendRedirect(cp + "/market/list.do?page=" + page);
+		} catch (Exception e) {
+			// TODO: handle exception
+		}
+		
+		
 	}
 	
 	protected void delete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		
-		// JSP로 포워딩
-		forward(req, resp, "/WEB-INF/views/market/list.jsp");
+		MarketDAO dao = new MarketDAO();
+		
+		HttpSession session = req.getSession();
+		SessionInfo info = (SessionInfo) session.getAttribute("member");
+
+		String cp = req.getContextPath();
+		
+		String page = req.getParameter("page");
+
+		try {
+			long marketNum = Long.parseLong(req.getParameter("marketNum"));
+
+			MarketDTO dto = dao.readMarket(marketNum);
+			if (dto == null) {
+				resp.sendRedirect(cp + "/market/list.do?page=" + page);
+				return;
+			}
+
+			// 게시물을 올린 사용자가 아니면
+			if (!dto.getSellerId().equals(info.getUserId())) {
+				resp.sendRedirect(cp + "/market/list.do?page=" + page);
+				return;
+			}
+
+			// 이미지 파일 지우기
+			List<MarketDTO> listFile = dao.listPhotoFile(marketNum);
+			for (MarketDTO vo : listFile) {
+				FileManager.doFiledelete(pathname, vo.getImageFilename());
+			}
+			dao.deletePhotoFile("all", marketNum);
+
+			// 테이블 데이터 삭제
+			dao.deletePhoto(marketNum);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		resp.sendRedirect(cp + "/market/list.do?page=" + page);
 	}
 
 }

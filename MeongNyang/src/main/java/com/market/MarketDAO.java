@@ -81,7 +81,18 @@ public class MarketDAO {
 		String sql;
 		
 		try {
-			sql = "";
+			sql = "UPDATE market SET SUBJECT = ?, CONTENT = ?, ADDR = ?, PRICE = ? "
+					+ "WHERE MarketNum = ?";
+			pstmt = conn.prepareStatement(sql);
+			
+			pstmt.setString(1, dto.getSubject());
+			pstmt.setString(2, dto.getContent());
+			pstmt.setString(3, dto.getAddr());
+			pstmt.setInt(4, dto.getPrice());
+			pstmt.setLong(5, dto.getMarketNum());
+			
+			pstmt.executeUpdate();
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw e;
@@ -95,12 +106,17 @@ public class MarketDAO {
 		}
 	}
 	
-	public void deleteMarket(MarketDTO dto) throws SQLException {
+	public void deleteMarket(long marketNum) throws SQLException {
 		PreparedStatement pstmt = null;
 		String sql;
 		
 		try {
-			sql = "";
+			sql = "DELETE FROM market WHERE marketNum = ?";
+			pstmt = conn.prepareStatement(sql);
+			
+			pstmt.setLong(1, marketNum);
+			
+			pstmt.executeUpdate();
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw e;
@@ -295,5 +311,150 @@ public class MarketDAO {
 		}
 
 		return list;
+	}
+	
+	public MarketDTO preReadPhoto(long MARKETNUM, String userId) {
+		MarketDTO dto = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		StringBuilder sb = new StringBuilder();
+
+		try {
+			sb.append(" SELECT MARKETNUM, subject FROM market ");
+			sb.append(" WHERE MARKETNUM > ? AND SELLERID = ? ");
+			sb.append(" ORDER BY MARKETNUM ASC ");
+			sb.append(" FETCH FIRST 1 ROWS ONLY ");
+			
+			pstmt = conn.prepareStatement(sb.toString());
+			
+			pstmt.setLong(1, MARKETNUM);
+			pstmt.setString(2, userId);
+
+			rs = pstmt.executeQuery();
+
+			if (rs.next()) {
+				dto = new MarketDTO();
+				
+				dto.setMarketNum(rs.getLong("MARKETNUM"));
+				dto.setSubject(rs.getString("subject"));
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			if (rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException e) {
+				}
+			}
+
+			if (pstmt != null) {
+				try {
+					pstmt.close();
+				} catch (SQLException e) {
+				}
+			}
+		}
+
+		return dto;
+	}
+
+	public MarketDTO nextReadPhoto(long MARKETNUM, String userId) {
+		MarketDTO dto = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		StringBuilder sb = new StringBuilder();
+
+		try {
+			sb.append(" SELECT MARKETNUM, subject FROM market ");
+			sb.append(" WHERE MARKETNUM < ? AND SELLERID = ? ");
+			sb.append(" ORDER BY MARKETNUM DESC ");
+			sb.append(" FETCH FIRST 1 ROWS ONLY ");
+			
+			pstmt = conn.prepareStatement(sb.toString());
+			
+			pstmt.setLong(1, MARKETNUM);
+			pstmt.setString(2, userId);
+
+			rs = pstmt.executeQuery();
+
+			if (rs.next()) {
+				dto = new MarketDTO();
+				
+				dto.setMarketNum(rs.getLong("MARKETNUM"));
+				dto.setSubject(rs.getString("subject"));
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			if (rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException e) {
+				}
+			}
+
+			if (pstmt != null) {
+				try {
+					pstmt.close();
+				} catch (SQLException e) {
+				}
+			}
+		}
+
+		return dto;
+	}
+	
+	public void deletePhoto(long num) throws SQLException {
+		PreparedStatement pstmt = null;
+		String sql;
+
+		try {
+			sql = "DELETE FROM marketimgfile WHERE marketnum=?";
+			pstmt = conn.prepareStatement(sql);
+			
+			pstmt.setLong(1, num);
+			
+			pstmt.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw e;
+		} finally {
+			if (pstmt != null) {
+				try {
+					pstmt.close();
+				} catch (SQLException e) {
+				}
+			}
+		}
+	}
+	
+	public void deletePhotoFile(String mode, long num) throws SQLException {
+		PreparedStatement pstmt = null;
+		String sql;
+
+		try {
+			if (mode.equals("all")) {
+				sql = "DELETE FROM marketimgfile WHERE marketnum = ?";
+			} else {
+				sql = "DELETE FROM marketimgfile WHERE imgNum = ?";
+			}
+			pstmt = conn.prepareStatement(sql);
+			
+			pstmt.setLong(1, num);
+
+			pstmt.executeUpdate();
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw e;
+		} finally {
+			if (pstmt != null) {
+				try {
+					pstmt.close();
+				} catch (SQLException e2) {
+				}
+			}
+		}
 	}
 }

@@ -40,10 +40,10 @@
 	
 }
 .market-box .item { border: 1px solid #DAD9FF; cursor: pointer; max-width: 220px;  }
-.item > img {  width: 100%; height: 100%; object-fit: cover; cursor: pointer; }
+.item > img {  width: 220px; height: 220px; object-fit: cover; cursor: pointer; border-radius : 20px; }
 .border{
 	border: 1px solid;
-	background: tomato;
+	background: #ffedea;
 }
 </style>
 <script type="text/javascript">

@@ -9,6 +9,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>spring</title>
 <jsp:include page="/WEB-INF/views/layout/staticHeader.jsp"/>
+<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
 <style type="text/css">
 .body-main {
 	max-width: 700px;
@@ -33,17 +36,24 @@
 	flex: 0 0 auto;
 	cursor: pointer;
 }
+
 </style>
 <script type="text/javascript">
 <c:if test="${sessionScope.member.userId==dto.sellerId || sessionScope.member.userId=='admin'}">
 	function deleteBoard() {
 	    if(confirm("게시글을 삭제 하시 겠습니까 ? ")) {
-		    let query = "num=${dto.marketNum}&${query}";
+		    let query = "marketNum=${dto.marketNum}&${query}";
 		    let url = "${pageContext.request.contextPath}/market/delete.do?" + query;
 	    	location.href = url;
 	    }
 	}
 </c:if>
+
+function modal() {
+	$("#modal").modal("show");
+};
+
+
 </script>
 
 </head>
@@ -65,6 +75,11 @@
 					<tr>
 						<td colspan="2" align="center">
 							${dto.subject}
+						</td>
+					</tr>
+					<tr>
+						<td colspan="2" align="center">
+							${dto.price}
 						</td>
 					</tr>
 				</thead>
@@ -99,7 +114,7 @@
 						<td colspan="2">
 							이전글 :
 							<c:if test="${not empty preReadDto}">
-								<a href="${pageContext.request.contextPath}/market/article.do?${query}&num=${preReadDto.num}">${preReadDto.subject}</a>
+								<a href="${pageContext.request.contextPath}/market/article.do?${query}&marketNum=${preReadDto.marketNum}">${preReadDto.subject}</a>
 							</c:if>
 						</td>
 					</tr>
@@ -107,7 +122,7 @@
 						<td colspan="2">
 							다음글 :
 							<c:if test="${not empty nextReadDto}">
-								<a href="${pageContext.request.contextPath}/bbs/article.do?${query}&num=${nextReadDto.num}">${nextReadDto.subject}</a>
+								<a href="${pageContext.request.contextPath}/market/article.do?${query}&marketNum=${nextReadDto.marketNum}">${nextReadDto.subject}</a>
 							</c:if>
 						</td>
 					</tr>
@@ -136,6 +151,7 @@
 				    	</c:choose>
 					</td>
 					<td align="right">
+						<button type="button" class="btn" onclick="modal();">구매하기</button>
 						<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/market/list.do?${query}';">리스트</button>
 					</td>
 				</tr>
@@ -144,6 +160,25 @@
 	    </div>
 	    </div>
 	</div>
+	
+<div class="modal" id="modal" role="dialog" aria-labelledby="remoteModalLabel" aria-hidden="true">
+	<div class="modal-dialog" style="width: 350px;">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal"
+					aria-hidden="true">×</button>
+				<h4 class="modal-title" id="myModalLabel">멍냥~</h4>
+			</div>
+			<div class="modal-body">
+				<p>결재 수단을 선택해주세요.</p>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-primary" onclick="meetingbuy();">현장구매</button>
+				<button type="button" class="btn btn-primary" onclick="Cardbuy();">카드결재</button>
+			</div>
+		</div>
+	</div>
+</div>	
 </main>
 
 <footer>
