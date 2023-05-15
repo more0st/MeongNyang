@@ -3,7 +3,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
 <!DOCTYPE html>
-<html>
+<html> 	
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -23,6 +23,8 @@
 .table-list .name { width: 100px; color: #787878; }
 .table-list .date { width: 100px; color: #787878; }
 .table-list .hit { width: 70px; color: #787878; }
+.table-list .pay_date { width: 70px; color: #787878; }
+.table-list .content { width: 70px; color: #787878; }
 </style>
 <script type="text/javascript">
 function searchList() {
@@ -73,7 +75,7 @@ function searchList() {
 						<tr>
 							<td>${dataCount - (page-1) * size - status.index}</td>
 							<td class="left">
-								<a href="${articleUrl}&num=${dto.marketnum}">${dto.subject}</a>
+								<a href="${articleUrl}&marketnum=${dto.marketnum}">${dto.subject}</a>
 							</td>
 							<td>${dto.sellerid}</td>
 							<td>${dto.reg_date}</td>
@@ -89,10 +91,10 @@ function searchList() {
 				${dataCount == 0 ? "" : paging}
 			</div>
 			
-			<table class="table">
+			<table class="table">		
 				<tr>
 					<td width="100">
-						<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/myPage/buyList.do';" title="새로고침"><i class="fa-solid fa-arrow-rotate-right"></i></button>
+						<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/myPage/myPage/buyList.do';" title="새로고침"><i class="fa-solid fa-arrow-rotate-right"></i></button>
 					</td>
 					<td align="center">
 						<form name="searchForm" action="${pageContext.request.contextPath}/myPage/buyList.do" method="post">

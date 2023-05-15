@@ -12,29 +12,22 @@
 <style type="text/css">
 .body-main {
 	max-width: 700px;
-	padding-top: 15px;
 }
 
-.table-article tr>td { padding-left: 5px; padding-right: 5px; }
+.table-list thead > tr:first-child{ background: #ffedea; }
+.table-list th, .table-list td { text-align: center; }
+.table-list .left { text-align: left; padding-left: 5px; }
+
+.table-list .num { width: 60px; color: #787878; }
+.table-list .subject { color: #787878; }
+.table-list .name { width: 100px; color: #787878; }
+.table-list .date { width: 100px; color: #787878; }
+.table-list .hit { width: 70px; color: #787878; }
 </style>
 <script type="text/javascript">
-<c:if test="${sessionScope.member.userId==dto.userId || sessionScope.member.userId=='admin'}">
-	function deleteBoard() {
-	    if(confirm("게시글을 삭제 하시 겠습니까 ? ")) {
-		    let query = "num=${dto.num}&${query}";
-		    let url = "${pageContext.request.contextPath}/bbs/delete.do?" + query;
-	    	location.href = url;
-	    }
-	}
-</c:if>
 
-//해당되는 객체가 숨겨져있는지 아닌지 확인하는 함수
-const isHidden = ele => {
-	const styles = window.getComputedStyle(ele); //인자로 넘겨 받은 요소의 모든 css 속성 값을 담은 객체 반환
-	return styles.display === 'none' || styles.visibility === 'hidden'; //숨겨져있는지 아닌지 확인
-	
-};
 </script>
+
 
 </head>
 <body>
@@ -46,9 +39,9 @@ const isHidden = ele => {
 <main>
 	<div class="container body-container">
 	    <div class="body-title">
-			<h2> 글보기 </h2>
+			<h2><i class="fa-regular fa-square"></i> 나의구매내역 </h2>
 	    </div>
-	    <div style="box-shadow: 0 0 15px 0 rgb(2 59 109 / 10%);border-radius: 30px; margin: 0 auto ; width: 70%; margin-bottom: 50px;">
+	    
 	    <div class="body-main mx-auto">
 			<table class="table table-border table-article">
 				<thead>
@@ -62,18 +55,28 @@ const isHidden = ele => {
 				<tbody>
 					<tr>
 						<td width="50%">
-							이름 : ${dto.sellerid}
+							작성자 : ${dto.sellerid}
 						</td>
 						<td align="right">
 							${dto.reg_date} | 조회 ${dto.hitCount}
 						</td>
 					</tr>
-					
 					<tr>
+						<td align="right">
+							구매자 : ${dto.sellerid} | 결제일 : ${dto.pay_date}
+						</td>
+					</tr>
+					
+					<tr style="border-bottom: none;">
 						<td colspan="2" valign="top" height="200">
 							${dto.content}
 						</td>
-					</tr>
+						<td>이미지</td>					
+						<td>
+							<div class="img-grid"><img class="item img-add" src="add_photo.png"></div>
+							<input type="file" name="selectFile" accept="image/*" multiple="multiple" style="display: none;" class="form-control">
+						</td>
+					</tr>					
 					
 					<tr>
 						<td colspan="2">
@@ -94,109 +97,19 @@ const isHidden = ele => {
 				</tbody>
 			</table>
 			
-
-	    </div>
-	    </div>
-	</div>
-	
-	
-	<!-- 댓글 폼 -->
-	<div class="body-container">
-
-	<div class="reply">
-		<form name="replyForm" method="post">
-			<div class='form-header'>
-				<span class="bold">댓글쓰기</span><span> - 타인을 비방하거나 개인정보를 유출하는 글의 게시를 삼가해 주세요.</span>
-			</div>
-			
-			<table class="table reply-form">
+			<table class="table">
 				<tr>
-					<td>
-						<textarea class='form-control' name="content" style="height: 120px;"></textarea>
+					<td width="50%">
+						
+					</td>
+					<td align="right">
+						<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/myPage/buyList.do?${query}';">리스트</button>
 					</td>
 				</tr>
-				<tr>
-				   <td align='right'>
-				        <button type='button' class='btn btnSendReply'>댓글 등록</button>
-				    </td>
-				 </tr>
 			</table>
-		</form>
-		
-		<div id="listReply">
-		
-			<div class='reply-info'>
-				<span class='reply-count'>댓글 15개</span>
-				<span>[목록, 1/3 페이지]</span>
-			</div>
-			
-			<table class='table reply-list'>
-			
-					<tr class='list-header'>
-						<td width='50%'>
-							<span class='bold'>홍길동</span>
-						</td>
-						<td width='50%' align='right'>
-							<span>2021-11-01</span> |
-							<span class='deleteReply' data-replyNum='10' data-pageNo='1'>삭제</span>
-						</td>
-					</tr>
-					<tr>
-						<td colspan='2' valign='top'>내용입니다.</td>
-					</tr>
-			
-					<tr>
-						<td>
-							<button type='button' class='btn btnReplyAnswerLayout' data-replyNum='10'>답글 <span id="answerCount10">3</span></button>
-						</td>
-						<td align='right'>
-							<button type='button' class='btn btnSendReplyLike' data-replyNum='10' data-replyLike='1' title="좋아요">좋아요 <span>3</span></button>
-							<button type='button' class='btn btnSendReplyLike' data-replyNum='10' data-replyLike='0' title="싫어요">싫어요 <span>1</span></button>	        
-						</td>
-					</tr>
-				
-				    <tr class='reply-answer'>
-				        <td colspan='2'>
-				            <div id='Answer10' class='answer-list'>
-				            
-								<div class='answer-article'>
-									<div class='answer-article-header'>
-										<div class='answer-left'>└</div>
-										<div class='answer-right'>
-											<div style='float: left;'><span class='bold'>스프링</span></div>
-											<div style='float: right;'>
-												<span>2021-11-01</span> |
-												<span class='deleteReplyAnswer' data-replyNum='10' data-answer='15'>삭제</span>
-											</div>
-										</div>
-									</div>
-									<div class='answer-article-body'>
-										답글입니다.
-									</div>
-								</div>
-												            
-				            </div>
-				            <div class="answer-form">
-				                <div class='answer-left'>└</div>
-				                <div class='answer-right'><textarea class='form-control' ></textarea></div>
-				            </div>
-				             <div class='answer-footer'>
-				                <button type='button' class='btn btnSendReplyAnswer' data-replyNum='10'>답글 등록</button>
-				            </div>
-						</td>
-				    </tr>
-				
 
-					
-				
-			</table>
-		
-		</div>
+	    </div>
 	</div>
-
-</div>
-	
-	
 </main>
 
 <footer>

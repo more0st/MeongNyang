@@ -279,7 +279,7 @@ public class MyPageDAO {
 		String sql;
 
 		try {
-			sql = "SELECT marketnum,sellerid,buyerid,subject,hitCount, reg_date, pay_date"
+			sql = "SELECT marketnum,sellerid,buyerid,subject,content,hitCount, reg_date, pay_date"
 					+ " FROM market"
 					+ " WHERE marketnum = ?";
 			pstmt = conn.prepareStatement(sql);
@@ -295,6 +295,7 @@ public class MyPageDAO {
 				dto.setSellerid(rs.getString("sellerid"));
 				dto.setBuyerid(rs.getString("buyerid"));
 				dto.setSubject(rs.getString("subject"));
+				dto.setContent(rs.getString("content"));
 				dto.setHitCount(rs.getInt("hitcount"));
 				dto.setReg_date(rs.getString("reg_date"));
 				dto.setPay_date(rs.getString("pay_date"));
@@ -322,9 +323,8 @@ public class MyPageDAO {
 	}
 
 
-	/*
 	// 이전글
-	public MyPageDTO prereadBoard(long marketnum) {
+	public MyPageDTO preReadBoard(long marketnum) {
 		MyPageDTO dto = null;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
@@ -374,7 +374,7 @@ public class MyPageDAO {
 		return dto;
 	}
 	
-	
+/*	
 	// 다음글
 	public MyPageDTO nextReadBoard(long marketnum) {
 		MyPageDTO dto = null;

@@ -116,7 +116,7 @@ public class MyPageServlet extends MyServlet{
 			}
 			
 			String listUrl = cp + "/myPage/buyList.do";
-			String articleUrl = cp + "/myPage/buyList.do?page=" + current_page;
+			String articleUrl = cp + "/myPage/buyArticle.do?page=" + current_page;
 			if(query.length() != 0) {
 				listUrl += "?" + query;
 				articleUrl += "&" + query;
@@ -150,13 +150,61 @@ public class MyPageServlet extends MyServlet{
 	private void article(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		// 글 보기
 		MyPageDAO dao = new MyPageDAO();
+
+		HttpSession session = req.getSession();
+		SessionInfo info = (SessionInfo) session.getAttribute("member");
+
+		String cp = req.getContextPath();
+		String page = req.getParameter("page");
+		
+		try {
+			long marketnum = Long.parseLong(req.getParameter("marketnum"));		// num 맞는지 확인
+
+			MyPageDTO dto = dao.readBoard(marketnum);
+			if (dto == null || !dto.getSellerid().equals(info.getUserId())) {
+				resp.sendRedirect(cp + "/myPage/buyList.do?page=" + page);
+				return;
+			}
+			
+			// 글내용 엔터를 <br>로
+			
+			/// 조회수 증가
+			dao.updateHitCount(marketnum);
+			
+			// 이전글 다음글
+//			MyPageDTO preReadDto = dao.preReadBoard(dto.getMarketnum());
+//			MyPageDTO nextReadDto = dao.nextReadBoard(dto.getMarketnum());
+
+			// 포워딩할 JSP에 넘겨줄 속성
+			req.setAttribute("dto", dto);
+			req.setAttribute("page", page);
+			
+			// 포워딩
+			forward(req,resp,"/WEB-INF/views/myPage/buyArticle.jsp");
+			return;
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		forward(req, resp, "/WEB-INF/views/myPage/buyArticle.jsp");
+	}
+
+	
+	
+	/*
+	private void article(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		// 글 보기
+		MyPageDAO dao = new MyPageDAO();
+		MyUtil util = new MyUtil();
+		
 		String cp = req.getContextPath();
 		
 		String page = req.getParameter("page");
 		String query = "page=" + page;
 		
 		try {
-			long marketnum = Long.parseLong(req.getParameter("num"));
+			long marketnum = Long.parseLong(req.getParameter("num"));		// num 맞는지 확인
 			String condition = req.getParameter("condition");
 			String keyword = req.getParameter("keyword");
 			if(condition == null) {
@@ -174,26 +222,28 @@ public class MyPageServlet extends MyServlet{
 			
 			// 게시글 가져오기
 			MyPageDTO dto = dao.readBoard(marketnum);
-			if(dto == null) {
+			if(dto == null) {	// 게시글이 없으면 다시 리스트로	
 				resp.sendRedirect(cp + "/myPage/buyList.do?" + query);
 				return;
 			}
+			dto.setContent(util.htmlSymbols(dto.getContent()));
+			
 			
 			// 글내용 엔터를 <br>로
 			dto.setContent(dto.getContent().replaceAll("\n", "<br>"));
 			
 			// 이전글 다음글
-			MyPageDTO preReadDto = dao.preReadBoard(marketnum, condition, keyword);
-			MyPageDTO nextReadDto = dao.nextReadBoard(marketnum, condition, keyword);
+			MyPageDTO preReadDto = dao.preReadBoard(dto.getMarketnum(), condition, keyword);
+			MyPageDTO nextReadDto = dao.nextReadBoard(dto.getMarketnum(), condition, keyword);
 			
 			// 포워딩할 JSP에 넘겨줄 속성
 			req.setAttribute("dto", dto);
+			req.setAttribute("page", page);
+			req.setAttribute("query", query);
 			req.setAttribute("preReadDto", preReadDto);
 			req.setAttribute("nextReadDto", nextReadDto);
 			
-			req.setAttribute("page", page);
-			req.setAttribute("query", query);
-			
+			// 포워딩
 			forward(req,resp,"/WEB-INF/views/myPage/buyArticle.jsp");
 			return;
 			
@@ -203,8 +253,8 @@ public class MyPageServlet extends MyServlet{
 		
 		resp.sendRedirect(cp + "/myPage/buyList.do?" + query);
 	}
-
 	
+	*/
 }
 
 
