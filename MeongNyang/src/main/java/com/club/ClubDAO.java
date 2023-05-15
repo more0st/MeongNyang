@@ -663,6 +663,23 @@ public class ClubDAO {
 			pstmt.setString(6, dto.getUserId());
 			
 			pstmt.executeUpdate();
+			
+//			pstmt.close();
+//			pstmt = null;
+//
+//			if (dto.getImageFiles() != null) {
+//				sql = "INSERT INTO clubImgFile(fileNum, num, imageFilename) VALUES "
+//						+ " (sphotoFile_seq.NEXTVAL, ?, ?)";
+//				pstmt = conn.prepareStatement(sql);
+//				
+//				for (int i = 0; i < dto.getImageFiles().length; i++) {
+//					pstmt.setLong(1, dto.getNum());
+//					pstmt.setString(2, dto.getImageFiles()[i]);
+//					
+//					pstmt.executeUpdate();
+//				}
+//			}
+			
 
 		} catch (SQLException e) {
 			e.printStackTrace();
