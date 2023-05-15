@@ -18,10 +18,6 @@
             	&nbsp;
 				<a href="${pageContext.request.contextPath}/member/logout.do" title="로그아웃"><img src="${pageContext.request.contextPath}/resource/images/logout.png" style="width: 30px;"></a>
             </c:if>
-            <c:if test="${sessionScope.member.userId == 'admin'}">
-            	&nbsp;
-				<a href="#" title="관리자"><i class="fa-solid fa-gear"></i></a>
-            </c:if>
 		</div>
 	</div>
 
@@ -44,7 +40,7 @@
 					<li><a href="${pageContext.request.contextPath}/qna/list.do">1:1 문의</a></li>
             	</ul>
 			</li>
-
+			<c:if test="${sessionScope.member.userId != null && sessionScope.member.userId != 'admin'}">
 			<li><a href="#">마이페이지</a>
 			   	<ul class="sub-menu">
 					<li><a href="${pageContext.request.contextPath}/myPage/buyList.do">나의 구매내역</a></li>
@@ -55,15 +51,15 @@
 					<li><a href="${pageContext.request.contextPath}/myPage2/memberRepair.do">회원정보수정</a></li>
             	</ul>
 			</li>
-			<!-- 만약 관리자계정으로 로그인하는 경우 마이페이지->관리페이지로 보이게 -->
+            </c:if>
+			<c:if test="${sessionScope.member.userId == 'admin' && sessionScope.member.userId != null}">
 			<li><a href="#">관리페이지</a>
 			   	<ul class="sub-menu">
 					<li><a href="${pageContext.request.contextPath}/admin/userList.do">전체 사용자 조회</a></li>
 					<li><a href="${pageContext.request.contextPath}/admin/userFix.do">사용자 관리</a></li>
             	</ul>
 			</li>
-
-
+            </c:if>
 		</ul>
 	</nav>
 
