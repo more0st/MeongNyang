@@ -32,6 +32,7 @@
                		<li><a href="${pageContext.request.contextPath}/map/list.do">멍냥지도</a></li>
                		<li><a href="${pageContext.request.contextPath}/gallery/list.do">멍냥갤러리</a></li>
                		<li><a href="${pageContext.request.contextPath}/club/list.do">멍냥모임</a></li>
+               		<li><a href="${pageContext.request.contextPath}/event/list.do">이벤트</a></li>
             	</ul>
 
 			<li><a href="#">고객센터</a>
