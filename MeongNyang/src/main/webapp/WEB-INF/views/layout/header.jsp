@@ -47,7 +47,7 @@
 					<li><a href="${pageContext.request.contextPath}/myPage/salesList.do">나의 판매내역</a></li>
 					<li><a href="${pageContext.request.contextPath}/myPage/writingList.do">작성글목록</a></li>
 					<li><a href="${pageContext.request.contextPath}/myPage/likeList.do">찜 목록</a></li>
-					<li><a href="${pageContext.request.contextPath}/message/list.do">쪽지함</a></li>
+					<li><a href="${pageContext.request.contextPath}/message/list_receive.do">쪽지함</a></li>
 					<li><a href="${pageContext.request.contextPath}/member/pwd.do?mode=update">회원정보수정</a></li>
             	</ul>
 			</li>
