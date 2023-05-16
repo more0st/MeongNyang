@@ -175,7 +175,7 @@ public class MessageServlet extends MyServlet {
 		
 		String cp = req.getContextPath();
 		if (req.getMethod().equalsIgnoreCase("GET")) {
-			resp.sendRedirect(cp + "/message/list.do");
+			resp.sendRedirect(cp + "/message/list_receive.do");
 			return;
 		}
 		
@@ -195,7 +195,7 @@ public class MessageServlet extends MyServlet {
 			e.printStackTrace();
 		}
 
-		resp.sendRedirect(cp + "/message/list.do");
+		resp.sendRedirect(cp + "/message/list_receive.do");
 	}
 /*
 	protected void article(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {

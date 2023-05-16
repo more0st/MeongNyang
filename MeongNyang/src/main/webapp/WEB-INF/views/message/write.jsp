@@ -106,7 +106,7 @@ function sendOk() {
 						<td align="center">
 							<button type="button" class="btn" onclick="sendOk();">쪽지보내기</button>
 							<button type="reset" class="btn">다시입력</button>
-							<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/message/list.do';">취소</button>
+							<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/message/list_receive.do';">취소</button>
 						</td>
 					</tr>
 				</table>
