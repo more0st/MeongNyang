@@ -298,7 +298,8 @@
 <jsp:include page="/WEB-INF/views/layout/staticFooter.jsp"/>
 <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=01680d6fa50eecc6cbcc23d4888731c2&libraries=services,clusterer,drawing"></script>
 <script>
-//마커를 담을 배열입니다
+
+//마커를 담을 배열
 var markers = [];
 let presentPosition;
  
@@ -309,12 +310,12 @@ var mapContainer = document.getElementById('map'), // 지도를 표시할 div
         level: 5 // 지도의 확대 레벨 
     }; 
  
-var map = new kakao.maps.Map(mapContainer, mapOption); // 지도를 생성합니다
+var map = new kakao.maps.Map(mapContainer, mapOption); // 지도를 생성
  
-// HTML5의 geolocation으로 사용할 수 있는지 확인합니다 
+// HTML5의 geolocation으로 사용할 수 있는지 확인
 if (navigator.geolocation) {
     
-    // GeoLocation을 이용해서 접속 위치를 얻어옵니다
+    // GeoLocation을 이용해서 접속 위치를 얻기
     navigator.geolocation.getCurrentPosition(function(position) {
         
         var lat = position.coords.latitude, // 위도
@@ -334,42 +335,41 @@ if (navigator.geolocation) {
 }
  
 ////////////////////장소 검색/////////////////////////////
-// 장소 검색 객체를 생성합니다
+// 장소 검색 객체를 생성
 var ps = new kakao.maps.services.Places();  
  
-// 검색 결과 목록이나 마커를 클릭했을 때 장소명을 표출할 인포윈도우를 생성합니다
+// 검색 결과 목록이나 마커를 클릭했을 때 장소명을 표출할 인포윈도우를 생성
 var infowindow = new kakao.maps.InfoWindow({zIndex:1});
  
 var searchButton = document.querySelector('button[type="submit"]');
 searchButton.addEventListener('click', function(e){
     e.preventDefault();
-    // 키워드로 장소를 검색합니다
+    // 키워드로 장소를 검색
     searchPlaces();
 })
  
  
-// 키워드 검색을 요청하는 함수입니다
+// 키워드 검색을 요청하는 함수
 function searchPlaces() {
     var keyword = document.getElementById('keyword').value;
  
     if (!keyword.replace(/^\s+|\s+$/g, '')) {
-        alert('키워드를 입력해주세요!');
+        alert('키워드를 입력해주세요 ! ');
         return false;
     }
  
-    // 장소검색 객체를 통해 키워드로 장소검색을 요청합니다
+    // 장소검색 객체를 통해 키워드로 장소검색을 요청
     ps.keywordSearch( keyword, placesSearchCB); 
 }
  
-// 장소검색이 완료됐을 때 호출되는 콜백함수 입니다
+// 장소검색이 완료됐을 때 호출되는 콜백함수 
 function placesSearchCB(data, status, pagination) {
     if (status === kakao.maps.services.Status.OK) {
  
-        // 정상적으로 검색이 완료됐으면
-        // 검색 목록과 마커를 표출합니다
+        // 정상적으로 검색이 완료됐으면 검색 목록과 마커를 표출
         displayPlaces(data);
  
-        // 페이지 번호를 표출합니다
+        // 페이지 번호를 표출
         displayPagination(pagination);
  
     } else if (status === kakao.maps.services.Status.ZERO_RESULT) {
@@ -385,7 +385,7 @@ function placesSearchCB(data, status, pagination) {
     }
 }
  
-// 검색 결과 목록과 마커를 표출하는 함수입니다
+// 검색 결과 목록과 마커를 표출하는 함수
 function displayPlaces(places) {
  
     var listEl = document.getElementById('placesList'), 
@@ -394,10 +394,10 @@ function displayPlaces(places) {
     bounds = new kakao.maps.LatLngBounds(), 
     listStr = '';
     
-    // 검색 결과 목록에 추가된 항목들을 제거합니다
+    // 검색 결과 목록에 추가된 항목들을 제거
     removeAllChildNods(listEl);
  
-    // 지도에 표시되고 있는 마커를 제거합니다
+    // 지도에 표시되고 있는 마커를 제거
     removeMarker();
     
     for ( var i=0; i<places.length; i++ ) {
@@ -405,18 +405,17 @@ function displayPlaces(places) {
         const lon = places[i].x;
         const lat = places[i].y;
  
-        // 마커를 생성하고 지도에 표시합니다
+        // 마커를 생성하고 지도에 표시
         var placePosition = new kakao.maps.LatLng(places[i].y, places[i].x),
             marker = addMarker(placePosition, i), 
             itemEl = getListItem(i, places[i]); // 검색 결과 항목 Element를 생성합니다
  
-        // 검색된 장소 위치를 기준으로 지도 범위를 재설정하기위해
-        // LatLngBounds 객체에 좌표를 추가합니다
+        // 검색된 장소 위치를 기준으로 지도 범위를 재설정하기위해 LatLngBounds 객체에 좌표를 추가합니다
         bounds.extend(placePosition);
  
         // 마커와 검색결과 항목에 mouseover 했을때
         // 해당 장소에 인포윈도우에 장소명을 표시합니다
-        // mouseout 했을 때는 인포윈도우를 닫습니다
+        // mouseout 했을 때는 인포윈도우를 닫기
         (function(marker, title) {
             kakao.maps.event.addListener(marker, 'mouseover', function() {
                 displayInfowindow(marker, title);
@@ -438,7 +437,7 @@ function displayPlaces(places) {
         // 마커와 검색 결과를 클릭했을때 좌표를 가져온다
 	(function(marker, title) {
 	    kakao.maps.event.addListener(marker, 'click', function() {
-	        // 클릭 이벤트가 발생하면 마커의 위치정보를 저장합니다.
+	        // 클릭 이벤트가 발생하면 마커의 위치정보를 저장
 	        var position = marker.getPosition();
 	        savePosition(position);
 	    });

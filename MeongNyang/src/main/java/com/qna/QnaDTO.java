@@ -10,6 +10,8 @@ public class QnaDTO {
 	private String replyContent;
 	private String replyReg_date;
 
+	private String userName;
+	
 	public long getQesNum() {
 		return qesNum;
 	}
@@ -66,4 +68,14 @@ public class QnaDTO {
 		this.replyReg_date = replyReg_date;
 	}
 
+	public String getUserName() {
+		return userName;
+	}
+
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
+
+	
+	
 }

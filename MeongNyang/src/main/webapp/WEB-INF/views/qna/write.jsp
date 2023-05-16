@@ -11,7 +11,7 @@
 <jsp:include page="/WEB-INF/views/layout/staticHeader.jsp"/>
 <style type="text/css">
 .body-main {
-	max-width: 700px;
+	max-width: 800px;
 	padding-top: 15px;
 }
 
@@ -23,12 +23,11 @@
 
 .table-form input[type=text], .table-form input[type=file], .table-form textarea {
 	width: 96%; }
-.table-form input[type=checkbox] { vertical-align: middle; }
 </style>
 
 <script type="text/javascript">
-function sendOk() {
-    const f = document.noticeForm;
+function sendBoard() {
+    const f = document.boardForm;
 	let str;
 	
     str = f.subject.value.trim();
@@ -45,21 +44,9 @@ function sendOk() {
         return;
     }
 
-    f.action = "${pageContext.request.contextPath}/notice/${mode}_ok.do";
+    f.action = "${pageContext.request.contextPath}/qna/${mode}_ok.do";
     f.submit();
 }
-
-<c:if test="${mode=='update'}">
-	function deleteFile(fileNum) {
-		if(! confirm("파일을 삭제 하시겠습니까 ?")) {
-			return;
-		}
-		
-		let query = "num=${dto.num}&fileNum=" + fileNum + "&page=${page}&size=${size}";
-		let url = "${pageContext.request.contextPath}/notice/deleteFile.do?" + query;
-		location.href = url;
-	}
-</c:if>
 </script>
 </head>
 <body>
@@ -71,26 +58,19 @@ function sendOk() {
 <main>
 	<div class="container body-container">
 	    <div class="body-title">
-			<h2><i class="fas fa-clipboard-list"></i> 공지사항 </h2>
-	    </div>
+			<h2><i class="fas fa-chalkboard-teacher"></i> 질문과 답변 </h2>
+	    </div>ㄴ
 	    
 	    <div class="body-main mx-auto">
-			<form name="noticeForm" method="post" enctype="multipart/form-data">
+			<form name="boardForm" method="post">
 				<table class="table table-border table-form">
-					<tr>
+					<tr> 
 						<td>제&nbsp;&nbsp;&nbsp;&nbsp;목</td>
 						<td> 
 							<input type="text" name="subject" maxlength="100" class="form-control" value="${dto.subject}">
 						</td>
 					</tr>
-	
-					<tr>
-						<td>공지여부</td>
-						<td> 
-							<p><input type="checkbox" name="notice" value="1" ${dto.notice==1 ? "checked='checked' ":"" }> <label>공지</label></p>
-						</td>
-					</tr>
-	
+					
 					<tr> 
 						<td>작성자</td>
 						<td> 
@@ -104,38 +84,23 @@ function sendOk() {
 							<textarea name="content" class="form-control">${dto.content}</textarea>
 						</td>
 					</tr>
-					
-					<tr>
-						<td>첨&nbsp;&nbsp;&nbsp;&nbsp;부</td>
-						<td> 
-							<input type="file" name="selectFile" class="form-control" multiple="multiple">
-						</td>
-					</tr>
-	
-					<c:if test="${mode=='update'}">
-						<c:forEach var="vo" items="${listFile}">
-							<tr>
-								<td>첨부된파일</td>
-								<td> 
-									<p>
-										<a href="javascript:deleteFile('${vo.fileNum}');"><i class="far fa-trash-alt"></i></a>
-										${vo.originalFilename}
-									</p>
-								</td>
-							</tr>
-						</c:forEach> 
-					</c:if>
 				</table>
 					
 				<table class="table">
 					<tr> 
 						<td align="center">
-							<button type="button" class="btn" onclick="sendOk();">${mode=='update'?'수정완료':'등록하기'}</button>
+							<button type="button" class="btn" onclick="sendBoard();">${mode=='update'?'수정완료':(mode=='reply'? '답변완료':'등록하기')}</button>
 							<button type="reset" class="btn">다시입력</button>
-							<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/notice/list.do?size=${size}';">${mode=='update'?'수정취소':'등록취소'}</button>
-							<input type="hidden" name="size" value="${size}">
+							<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/qna/list.do';">${mode=='update'?'수정취소':(mode=='reply'? '답변취소':'등록취소')}</button>
 							<c:if test="${mode=='update'}">
-								<input type="hidden" name="num" value="${dto.num}">
+								<input type="hidden" name="boardNum" value="${dto.boardNum}">
+								<input type="hidden" name="page" value="${page}">
+							</c:if>
+							<c:if test="${mode=='reply'}">
+								<input type="hidden" name="groupNum" value="${dto.groupNum}">
+								<input type="hidden" name="orderNo" value="${dto.orderNo}">
+								<input type="hidden" name="depth" value="${dto.depth}">
+								<input type="hidden" name="parent" value="${dto.boardNum}">
 								<input type="hidden" name="page" value="${page}">
 							</c:if>
 						</td>
@@ -144,6 +109,7 @@ function sendOk() {
 			</form>
 	    </div>
 	</div>
+
 </main>
 
 <footer>
