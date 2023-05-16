@@ -146,6 +146,18 @@ $(function(){
 		$(this).remove();
 	});
 });
+
+<c:if test="${mode=='update'}">
+function deleteFile(fileNum) {
+	if(! confirm("이미지를 삭제 하시겠습니까 ?")) {
+		return;
+	}
+	
+	let query = "marketNum=${dto.marketNum}&fileNum=" + fileNum + "&page=${page}";
+	let url = "${pageContext.request.contextPath}/market/deleteFile.do?" + query;
+	location.href = url;
+}
+</c:if>
 </script>
 </head>
 <body>
@@ -203,6 +215,20 @@ $(function(){
 							<input type="file" name="selectFile" accept="image/*" multiple="multiple" style="display: none;" class="form-control">
 						</td>
 					</tr>
+					
+					<c:if test="${mode=='update'}">
+						<tr>
+							<td>등록이미지</td>
+							<td> 
+								<div class="img-box">
+									<c:forEach var="vo" items="${listFile}">
+										<img src="${pageContext.request.contextPath}/uploads/market/${vo.imageFilename}"
+											onclick="deleteFile('${vo.fileNum}');">
+									</c:forEach>
+								</div>
+							</td>
+						</tr>
+					</c:if>
 				</table>
 					
 				<table class="table">

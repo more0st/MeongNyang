@@ -93,6 +93,22 @@ public class MarketDAO {
 			
 			pstmt.executeUpdate();
 			
+			pstmt.close();
+			pstmt = null;
+			
+			if (dto.getImageFiles() != null) {
+				sql = "INSERT INTO marketimgfile(imgnum, marketnum, imgname) VALUES "
+						+ " (MARKETIMGFILE_SEQ.NEXTVAL, ?, ?)";
+				pstmt = conn.prepareStatement(sql);
+				
+				for (int i = 0; i < dto.getImageFiles().length; i++) {
+					pstmt.setLong(1, dto.getMarketNum());
+					pstmt.setString(2, dto.getImageFiles()[i]);
+					
+					pstmt.executeUpdate();
+				}
+			}
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw e;
@@ -185,6 +201,77 @@ public class MarketDAO {
 		return list;
 	}
 	
+	public List<MarketDTO> listMarket(int offset, int size, String condition, String keyword){
+		List<MarketDTO> list = new ArrayList<>();
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		String sql;
+		
+		try {
+			sql = "SELECT ma.MARKETNUM, SELLERID, BUYERID, SUBJECT, CONTENT, ADDR, PRICE, REG_DATE, HITCOUNT, STATE, PAY_DATE, IMGNAME"
+					+ " FROM market ma"
+					+ " JOIN marketimgfile mf on ma.marketnum = mf.marketnum"
+					+ " JOIN (SELECT MARKETNUM, MIN(IMGNUM) IMGNUM FROM marketimgfile"
+					+ " GROUP BY MARKETNUM)mf2 on mf2.imgnum = mf.imgnum";
+			if (condition.equals("all")) {
+				sql += " WHERE INSTR(subject, ?) >= 1 OR INSTR(content, ?) >= 1 ";
+			} else if (condition.equals("reg_date")) {
+				keyword = keyword.replaceAll("(\\-|\\/|\\.)", "");
+				sql += " WHERE TO_CHAR(reg_date, 'YYYYMMDD') = ?";
+			} else {
+				sql += " WHERE INSTR(" + condition + ", ?) >= 1 ";
+			}
+				sql	+= " ORDER BY marketnum DESC OFFSET ? ROWS FETCH FIRST ? ROWS ONLY";
+			pstmt = conn.prepareStatement(sql);
+			
+			if (condition.equals("all")) {
+				pstmt.setString(1, keyword);
+				pstmt.setString(2, keyword);
+				pstmt.setInt(3, offset);
+				pstmt.setInt(4, size);
+			} else {
+				pstmt.setString(1, keyword);
+				pstmt.setInt(2, offset);
+				pstmt.setInt(3, size);
+			}
+			
+			rs = pstmt.executeQuery();
+			while(rs.next()) {
+				MarketDTO dto = new MarketDTO();
+				dto.setMarketNum(rs.getLong("MARKETNUM"));
+				dto.setSellerId(rs.getString("SELLERID"));
+				dto.setSubject(rs.getString("SUBJECT"));
+				dto.setContent(rs.getString("CONTENT"));
+				dto.setAddr(rs.getString("ADDR"));
+				dto.setPrice(rs.getInt("PRICE"));
+				dto.setReg_date(rs.getString("REG_DATE"));
+				dto.setHitCount(rs.getInt("HITCOUNT"));
+				dto.setState(rs.getInt("STATE"));
+				dto.setPay_date(rs.getString("PAY_DATE"));
+				dto.setImageFilename(rs.getString("IMGNAME"));
+				
+				list.add(dto);
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			if(pstmt != null) {
+				try {
+					pstmt.close();
+				} catch (Exception e2) {
+				}
+			}
+			if(rs != null) {
+				try {
+					rs.close();
+				} catch (Exception e2) {
+				}
+			}
+		}
+		return list;
+	}
+	
 	public int dataCount() {
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
@@ -192,7 +279,7 @@ public class MarketDAO {
 		int result = 0;
 		
 		try {
-			sql = "SELECT count(*) from market";
+			sql = "SELECT NVL(COUNT(*), 0) from market";
 			pstmt = conn.prepareStatement(sql);
 			
 			rs = pstmt.executeQuery();
@@ -215,6 +302,57 @@ public class MarketDAO {
 				}
 			}
 		}
+		return result;
+	}
+	
+	public int dataCount(String condition, String keyword) {
+		int result = 0;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		String sql;
+
+		try {
+			sql = "SELECT NVL(COUNT(*), 0) FROM market ";
+			if (condition.equals("all")) {
+				sql += "  WHERE INSTR(subject, ?) >= 1 OR INSTR(content, ?) >= 1 ";
+			} else if (condition.equals("reg_date")) {
+				keyword = keyword.replaceAll("(\\-|\\/|\\.)", "");
+				sql += "  WHERE TO_CHAR(reg_date, 'YYYYMMDD') = ? ";
+			} else {
+				sql += "  WHERE INSTR(" + condition + ", ?) >= 1 ";
+			}
+
+			pstmt = conn.prepareStatement(sql);
+			
+			pstmt.setString(1, keyword);
+			if (condition.equals("all")) {
+				pstmt.setString(2, keyword);
+			}
+
+			rs = pstmt.executeQuery();
+			
+			if (rs.next()) {
+				result = rs.getInt(1);
+			}
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			if (rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException e) {
+				}
+			}
+
+			if (pstmt != null) {
+				try {
+					pstmt.close();
+				} catch (SQLException e) {
+				}
+			}
+		}
+
 		return result;
 	}
 	
@@ -481,5 +619,47 @@ public class MarketDAO {
 				}
 			}
 		}
+	}
+	
+	public MarketDTO readPhotoFile(long fileNum) {
+		MarketDTO dto = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		String sql;
+
+		try {
+			sql = "SELECT imgnum, marketnum, imgname FROM marketimgfile WHERE imgnum = ?";
+			pstmt = conn.prepareStatement(sql);
+			
+			pstmt.setLong(1, fileNum);
+			
+			rs = pstmt.executeQuery();
+
+			if (rs.next()) {
+				dto = new MarketDTO();
+
+				dto.setFileNum(rs.getLong("imgnum"));
+				dto.setMarketNum(rs.getLong("marketnum"));
+				dto.setImageFilename(rs.getString("imgname"));
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			if (rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException e) {
+				}
+			}
+
+			if (pstmt != null) {
+				try {
+					pstmt.close();
+				} catch (SQLException e) {
+				}
+			}
+		}
+
+		return dto;
 	}
 }

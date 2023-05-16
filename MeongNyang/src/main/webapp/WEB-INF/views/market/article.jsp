@@ -9,9 +9,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>spring</title>
 <jsp:include page="/WEB-INF/views/layout/staticHeader.jsp"/>
-<link rel="stylesheet" href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
-<script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
 <style type="text/css">
 .body-main {
 	max-width: 700px;
@@ -37,6 +34,39 @@
 	cursor: pointer;
 }
 
+.reply { clear: both; padding: 20px 0 10px; }
+.reply .bold { font-weight: 600; }
+
+.reply .form-header { padding-bottom: 7px; }
+.reply-form  tr>td { padding: 2px 0 2px; }
+.reply-form textarea { width: 100%; height: 75px; }
+.reply-form button { padding: 8px 25px; }
+
+.reply .reply-info { padding-top: 25px; padding-bottom: 7px; }
+.reply .reply-info  .reply-count { color: #3EA9CD; font-weight: 700; }
+
+.reply .reply-list tr>td { padding: 7px 5px; }
+.reply .reply-list .bold { font-weight: 600; }
+
+.reply .deleteReply, .reply .deleteReplyAnswer { cursor: pointer; }
+.reply .notifyReply { cursor: pointer; }
+
+.reply-list .list-header { border: 1px solid #ccc; background: #f8f8f8; }
+.reply-list tr>td { padding-left: 7px; padding-right: 7px; }
+
+.reply-answer { display: none; }
+.reply-answer .answer-left { float: left; width: 5%; }
+.reply-answer .answer-right { float: left; width: 95%; }
+.reply-answer .answer-list { border-top: 1px solid #ccc; padding: 0 10px 7px; }
+.reply-answer .answer-form { clear: both; padding: 3px 10px 5px; }
+.reply-answer .answer-form textarea { width: 100%; height: 75px; }
+.reply-answer .answer-footer { clear: both; padding: 0 13px 10px 10px; text-align: right; }
+
+.answer-article { clear: both; }
+.answer-article .answer-article-header { clear: both; padding-top: 5px; }
+.answer-article .answer-article-body { clear:both; padding: 5px 5px; border-bottom: 1px solid #ccc; }
+
+.photo-layout img { width: 570px; height: 450px; }
 </style>
 <script type="text/javascript">
 <c:if test="${sessionScope.member.userId==dto.sellerId || sessionScope.member.userId=='admin'}">
@@ -50,10 +80,35 @@
 </c:if>
 
 function modal() {
-	$("#modal").modal("show");
+	const viewer = $(".buymodal");
+	let userId = "${dto.sellerId}";
+	let sessionId = "${sessionScope.member.userId}";
+	let s;
+	if(userId === sessionId){
+		s="<button class='btn'>판매확정</button> <button class='btn'>취소</button>";
+	}else{
+		s="<button>결재하기</button>";
+	}
+	viewer.html(s);
+	
+	$(".dialog-modal").dialog({
+		title: "결재",
+		modal: true
+	});
 };
 
-
+function imageViewer(img) {
+	const viewer = $(".photo-layout");
+	let s="<img src='"+img+"'>";
+	viewer.html(s);
+	
+	$(".dialog-photo").dialog({
+		title:"판매물품",
+		width: 600,
+		height: 530,
+		modal: true
+	});
+}
 </script>
 
 </head>
@@ -78,8 +133,11 @@ function modal() {
 						</td>
 					</tr>
 					<tr>
-						<td colspan="2" align="center">
-							${dto.price}
+						<td width="50%">
+							가격 : ${dto.price}
+						</td>
+						<td align="right">
+							거래지 : ${dto.addr}
 						</td>
 					</tr>
 				</thead>
@@ -104,8 +162,7 @@ function modal() {
 						<td colspan="2" height="110">
 							<div class="img-box">
 								<c:forEach var="vo" items="${listFile}">
-									<img src="${pageContext.request.contextPath}/uploads/market/${vo.imageFilename}"
-										onclick="imageViewer('${pageContext.request.contextPath}/uploads/market/${vo.imageFilename}');">
+									<img src="${pageContext.request.contextPath}/uploads/market/${vo.imageFilename}" onclick="imageViewer('${pageContext.request.contextPath}/uploads/market/${vo.imageFilename}');">
 								</c:forEach>
 							</div>
 						</td>	
@@ -151,39 +208,58 @@ function modal() {
 				    	</c:choose>
 					</td>
 					<td align="right">
-						<button type="button" class="btn" onclick="modal();">구매하기</button>
+					<c:choose>
+						<c:when test="${sessionScope.member.userId==dto.sellerId}">
+							<button type="button" class="btn" onclick="modal();">판매시작</button>
+						</c:when>
+						<c:otherwise>
+							<button type="button" class="btn" onclick="modal();">카드결재</button>
+						</c:otherwise>
+					</c:choose>	
 						<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/market/list.do?page=${page}';">리스트</button>
 					</td>
 				</tr>
 			</table>
+			
+			<div class="reply">
+				<form name="replyForm" method="post">
+					<div class='form-header'>
+						<span class="bold">댓글쓰기</span><span> - 타인을 비방하거나 개인정보를 유출하는 글의 게시를 삼가해 주세요.</span>
+					</div>
+					
+					<table class="table reply-form">
+						<tr>
+							<td>
+								<textarea class='form-control' name="content"></textarea>
+							</td>
+						</tr>
+						<tr>
+						   <td align='right'>
+								<button type='button' class='btn btnSendReply'>댓글 등록</button>
+							</td>
+						 </tr>
+					</table>
+				</form>
+				
+				<div id="listReply"></div>
+			</div>
 
 	    </div>
 	    </div>
 	</div>
-	
-<div class="modal" id="modal" role="dialog" aria-labelledby="remoteModalLabel" aria-hidden="true">
-	<div class="modal-dialog" style="width: 350px;">
-		<div class="modal-content">
-			<div class="modal-header">
-				<button type="button" class="close" data-dismiss="modal"
-					aria-hidden="true">×</button>
-				<h4 class="modal-title" id="myModalLabel">멍냥~</h4>
-			</div>
-			<div class="modal-body">
-				<p>결재 수단을 선택해주세요.</p>
-			</div>
-			<div class="modal-footer">
-				<button type="button" class="btn btn-primary" onclick="meetingbuy();">현장구매</button>
-				<button type="button" class="btn btn-primary" onclick="Cardbuy();">카드결재</button>
-			</div>
-		</div>
-	</div>
-</div>	
 </main>
 
 <footer>
     <jsp:include page="/WEB-INF/views/layout/footer.jsp"></jsp:include>
 </footer>
+
+<div class="dialog-photo">
+      <div class="photo-layout"></div>
+</div>
+
+<div class="dialog-modal">
+      <div class="buymodal"></div>
+</div>
 
 <jsp:include page="/WEB-INF/views/layout/staticFooter.jsp"/>
 </body>
