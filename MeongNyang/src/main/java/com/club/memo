@@ -37,11 +37,11 @@
 	clubReply 테이블
 	CREATE TABLE clubReply (
    replyNum   NUMBER      NOT NULL,
-   reply_content   VARCHAR2(4000)      NOT NULL,
-   reply_regDate   DATE      NULL,
+   content   VARCHAR2(4000)      NOT NULL,
+   reg_date   DATE      NULL,
    clubNum   NUMBER      NOT NULL,
    userId   VARCHAR2(50)      NOT NULL,
-   originalReplyNum   NUMBER      NULL
+   answer   NUMBER      NULL
 	);
 	
 	clubReply_seq

@@ -91,6 +91,109 @@ public class ClubDAO {
 		
 	}
 	
+	
+	//페이징처리를 위한 데이터 총개수
+		public int dataCount(String userId) {
+			int result = 0;
+			PreparedStatement pstmt = null;
+			ResultSet rs = null;
+			String sql;
+			
+			try {
+				sql = "SELECT NVL(COUNT(*), 0) FROM club WHERE userId = ?";
+				pstmt = conn.prepareStatement(sql);
+				
+				pstmt.setString(1, userId);
+				
+				rs = pstmt.executeQuery();
+				
+				if (rs.next()) {
+					result = rs.getInt(1);
+				}
+
+			} catch (SQLException e) {
+				e.printStackTrace();
+			} finally {
+				if (rs != null) {
+					try {
+						rs.close();
+					} catch (SQLException e) {
+					}
+				}
+
+				if (pstmt != null) {
+					try {
+						pstmt.close();
+					} catch (SQLException e) {
+					}
+				}
+			}
+
+			return result;
+			
+		}
+		
+		
+	//  페이징 처리를 위한 검색에서의 데이터 개수
+			public int dataCount(String condition, String keyword, String userId) {
+			int result = 0;
+			PreparedStatement pstmt = null;
+			ResultSet rs = null;
+			String sql;
+
+			try {
+				sql = "SELECT NVL(COUNT(*), 0) FROM club c "
+						+ " JOIN member m ON c.userId = m.userId ";
+				if (condition.equals("all")) {
+					sql +=" WHERE (c.userId =  ? AND INSTR(subject, ?) >= 1 ) OR ( c.userId =  ? AND INSTR(content, ?) >= 1 ) ";
+				} else if (condition.equals("reg_date")) {
+					keyword = keyword.replaceAll("(\\-|\\/|\\.)", "");
+					sql +=" WHERE c.userId =  ? AND TO_CHAR(reg_date, 'YYYYMMDD') = ?";
+				} else {
+					sql +=" WHERE c.userId =  ? AND INSTR(" + condition + ", ?) >= 1 ";
+				}
+				pstmt = conn.prepareStatement(sql);
+				
+				
+				if (condition.equals("all")) {
+					pstmt.setString(1, userId);
+					pstmt.setString(2, keyword);
+					pstmt.setString(3, userId);
+					pstmt.setString(4, keyword);
+				}else {
+					pstmt.setString(1, userId);
+					pstmt.setString(2, keyword);
+					
+				}
+
+				rs = pstmt.executeQuery();
+				
+				if (rs.next()) {
+					result = rs.getInt(1);
+				}
+
+			} catch (SQLException e) {
+				e.printStackTrace();
+			} finally {
+				if (rs != null) {
+					try {
+						rs.close();
+					} catch (SQLException e) {
+					}
+				}
+
+				if (pstmt != null) {
+					try {
+						pstmt.close();
+					} catch (SQLException e) {
+					}
+				}
+			}
+
+			return result;
+		}
+		
+	
 	//페이징처리를 위한 데이터 총개수
 	public int dataCount() {
 		int result = 0;
@@ -340,7 +443,7 @@ public class ClubDAO {
 		StringBuilder sb = new StringBuilder();
 
 		try {
-			sb.append(" SELECT c.clubNum, userName, subject, hitCount, imageFilename, ");
+			sb.append(" SELECT distinct c.clubNum, userName, subject, hitCount, imageFilename, ");
 			sb.append("       TO_CHAR(reg_date, 'YYYY-MM-DD') reg_date, "
 					+ " maxMember, nowMember  ");
 			sb.append(" FROM club c ");
@@ -353,16 +456,15 @@ public class ClubDAO {
 			sb.append("        FROM clubImgFile");
 			sb.append("     ) WHERE rank = 1 ");
 			sb.append(" ) i ON c.clubNum = i.clubNum ");
-			sb.append(" WHERE cm.userId =  ? ");
 	
 	
 			if (condition.equals("all")) {
-				sb.append(" AND INSTR(subject, ?) >= 1 OR INSTR(content, ?) >= 1 ");
+				sb.append(" WHERE (cm.userId =  ? AND INSTR(subject, ?) >= 1 ) OR ( cm.userId =  ? AND INSTR(content, ?) >= 1 ) ");
 			} else if (condition.equals("reg_date")) {
 				keyword = keyword.replaceAll("(\\-|\\/|\\.)", "");
-				sb.append(" AND TO_CHAR(reg_date, 'YYYYMMDD') = ?");
+				sb.append(" WHERE cm.userId =  ? AND TO_CHAR(reg_date, 'YYYYMMDD') = ?");
 			} else {
-				sb.append(" AND INSTR(" + condition + ", ?) >= 1 ");
+				sb.append(" WHERE cm.userId =  ? AND INSTR(" + condition + ", ?) >= 1 ");
 			}
 			sb.append(" ORDER BY clubnum DESC ");
 			sb.append(" OFFSET ? ROWS FETCH FIRST ? ROWS ONLY ");
@@ -372,9 +474,10 @@ public class ClubDAO {
 			if (condition.equals("all")) {
 				pstmt.setString(1, userId);
 				pstmt.setString(2, keyword);
-				pstmt.setString(3, keyword);
-				pstmt.setInt(4, offset);
-				pstmt.setInt(5, size);
+				pstmt.setString(3, userId);
+				pstmt.setString(4, keyword);
+				pstmt.setInt(5, offset);
+				pstmt.setInt(6, size);
 			} else {
 				pstmt.setString(1, userId);
 				pstmt.setString(2, keyword);
@@ -531,11 +634,18 @@ public class ClubDAO {
 		String sql;
 
 		try {
-			sql = "SELECT clubNum, c.userId, userName, subject, content, TO_CHAR(reg_date,'YYYY-MM-DD')reg_date, hitCount, "
-					+ " clubName, nowMember, maxMember "
+			sql = "SELECT c.clubNum, c.userId, userName, subject, content, TO_CHAR(reg_date,'YYYY-MM-DD')reg_date, hitCount, "
+					+ " clubName, nowMember, maxMember, "
+					+ " NVL(boardLikeCount, 0) boardLikeCount "
 					+ " FROM club c "
 					+ " JOIN member m ON c.userId=m.userId "
-					+ " WHERE clubNum = ? ";
+					
+					+ " LEFT OUTER JOIN ("
+					+ "      SELECT clubNum, COUNT(*) boardLikeCount FROM clubLike"
+					+ "      GROUP BY clubNum"
+					+ " ) bc ON c.clubNum = bc.clubNum"
+					
+					+ " WHERE c.clubNum = ? ";
 			pstmt = conn.prepareStatement(sql);
 			
 			pstmt.setLong(1, num);
@@ -555,6 +665,8 @@ public class ClubDAO {
 				dto.setClubName(rs.getString("clubName"));
 				dto.setNowMember(rs.getInt("nowMember"));
 				dto.setMaxMember(rs.getInt("maxMember"));
+				
+				dto.setBoardLikeCount(rs.getInt("boardLikeCount"));
 				
 			}
 		} catch (SQLException e) {
@@ -579,6 +691,51 @@ public class ClubDAO {
 	}
 		
 
+	
+	
+	// 로그인 유저의 게시글 공감 유무
+		public boolean isUserBoardLike(long num, String userId) {
+			boolean result = false;
+			PreparedStatement pstmt = null;
+			ResultSet rs = null;
+			String sql;
+			
+			try {
+				sql = "SELECT clubNum, userId FROM clubLike WHERE clubNum = ? AND userId = ?";
+				pstmt = conn.prepareStatement(sql);
+				
+				pstmt.setLong(1, num);
+				pstmt.setString(2, userId);
+				
+				rs = pstmt.executeQuery();
+				
+				if(rs.next()) {
+					result = true;
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			} finally {
+				if(rs != null) {
+					try {
+						rs.close();
+					} catch (Exception e2) {
+					}
+				}
+				
+				if(pstmt != null) {
+					try {
+						pstmt.close();
+					} catch (Exception e2) {
+					}
+				}
+				
+			}
+			
+			return result;
+		}
+	
+	
+	
 		
 	// 이전글
 	public ClubDTO preReadBoard(long num, String condition, String keyword) {
@@ -1221,6 +1378,114 @@ public class ClubDAO {
 				
 				return result;
 			}
+				
+				
+				
+	// 게시물의 공감 추가
+	public void insertBoardLike(long num, String userId) throws SQLException {
+		PreparedStatement pstmt = null;
+		String sql;
+		
+		try {
+			sql = "INSERT INTO clubLike(clubNum, userId) VALUES (?, ?)";
+			pstmt = conn.prepareStatement(sql);
+			
+			pstmt.setLong(1, num);
+			pstmt.setString(2, userId);
+			
+			pstmt.executeUpdate();
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw e;
+		} finally {
+			if(pstmt != null) {
+				try {
+					pstmt.close();
+				} catch (SQLException e) {
+				}
+			}
+		}
+		
+	}			
+	
+	
+	
+	// 게시글 공감 삭제
+	public void deleteBoardLike(long num, String userId) throws SQLException {
+		PreparedStatement pstmt = null;
+		String sql;
+		
+		try {
+			sql = "DELETE FROM clubLike WHERE clubNum = ? AND userId = ?";
+			pstmt = conn.prepareStatement(sql);
+			
+			pstmt.setLong(1, num);
+			pstmt.setString(2, userId);
+			
+			pstmt.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw e;
+		} finally {
+			if(pstmt != null) {
+				try {
+					pstmt.close();
+				} catch (Exception e2) {
+				}
+			}
+		}
+		
+	}
+				
+
+	// 게시물의 공감 개수
+	public int countBoardLike(long num) {
+		int result = 0;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		String sql;
+		
+		try {
+			sql = "SELECT NVL(COUNT(*), 0) FROM clubLike WHERE clubNum=?";
+			pstmt = conn.prepareStatement(sql);
+			
+			pstmt.setLong(1, num);
+			
+			rs = pstmt.executeQuery();
+			
+			if(rs.next()) {
+				result = rs.getInt(1);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			if(rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException e) {
+				}
+			}
+				
+			if(pstmt != null) {
+				try {
+					pstmt.close();
+				} catch (SQLException e) {
+				}
+			}
+		}
+		
+		return result;
+	}
+				
+				
+				
+				
+				
+				
+				
+				
+				
 	
 }
 		

@@ -9,7 +9,6 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>spring</title>
 <jsp:include page="/WEB-INF/views/layout/staticHeader.jsp"/>
-<link rel="stylesheet" href="https://use.fontawesome.com/releases/v6.3.0/css/all.css">
 
 <style type="text/css">
 .body-main {
@@ -55,7 +54,7 @@
 .bold { font-weight: bold;}
 
 </style>
-<script type="text/javascript" src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+
 <script type="text/javascript">
 <c:if test="${sessionScope.member.userId==dto.userId || sessionScope.member.userId=='admin'}">
 	function deleteBoard() {
@@ -67,6 +66,19 @@
 	}
 </c:if>
 
+function join(){
+	if(confirm("가입 하시겠습니까 ? ")){
+		location.href='${pageContext.request.contextPath}/club/signUp.do?num=${dto.clubNum}';
+	}
+}
+
+function bye(){
+	if(confirm("탈퇴 하시겠습니까 ? ")){
+		location.href='${pageContext.request.contextPath}/club/byebye.do?num=${dto.clubNum}';
+	}
+}
+
+
 //해당되는 객체가 숨겨져있는지 아닌지 확인하는 함수
 const isHidden = ele => {
 	const styles = window.getComputedStyle(ele); //인자로 넘겨 받은 요소의 모든 css 속성 값을 담은 객체 반환
@@ -74,92 +86,6 @@ const isHidden = ele => {
 	
 };
 
-//댓글 등록
-window.addEventListener('load',()=>{
-	const btnEL = document.querySelector('.btnSendReply');
-	
-	btnEL.addEventListener('click', e =>{
-		const El = e.target.closest('table');
-		let content = El.querySelector('textarea').value.trim();
-		if(!content) {
-			alert('내용을입력하세요');
-			El.querySelector('textarea').focus();
-			return;
-		}
-		
-		f.action = "${pageContext.request.contextPath}/club/replyWrite_ok.do";
-		f.submit();
-	});
-	
-});
-
-//댓글 삭제
-window.addEventListener('load',() => {
-	const listReplyEL = document.querySelector('#listReply');	
-
-	listReplyEL.addEventListener('click',e =>{
-		if(e.target.matches('.deleteReply')){
-			
-			if(! confirm('게시글을 삭제하시겠습니까 ? ')){
-				return;
-			}
-			let pageNo = e.target.getAttribute('data-pageNo');
-			let replyNum = e.target.getAttribute('data-replyNum');
-			
-			alert('삭제할 댓글번호 :'+replyNum+",페이지번호:"+pageNo);
-		}
-	
-	});
-});
-
-
-
-//답글 버튼 : 댓글별 답글 등록폼 및 답글 리스트 표시/숨김
-window.addEventListener('load',() => {
-	const listReplyEL = document.querySelector('#listReply');	
-	
-	listReplyEL.addEventListener('click',e =>{
-		if(e.target.matches('.btnReplyAnswerLayout')||e.target.parentElement.matches('.btnReplyAnswerLayout')){
-			let $El = e.target.closest('tr').nextElementSibling;//다음형제
-			
-			//$El.classList.toggle('reply-answer'); //tr태그라 화면이 이상하게나옴
-			//$El.style.display = 'block'; //tr태그엔 block속성 사용안됨, 화면이 이상하게 나옴
-			
-			if(isHidden($El)){//숨겨져있으면 table-row, 아니면 none
-				$El.style.display = 'table-row'; //tr태그에 보이게할수있는 속성은 table-row!!!
-			}else{
-				$El.style.display = 'none';
-			}
-		}
-	});
-});
-
-//답글 등록 버튼
-
-window.addEventListener('load',() => {
-	const listReplyEL = document.querySelector('#listReply');	
-	
-	listReplyEL.addEventListener('click',e =>{
-		if(e.target.matches('.btnSendReplyAnswer')){
-			let replyNum = e.target.getAttribute('data-replyNum');
-			
-			let El = e.target.closest('td');
-			let content = El.querySelector('textarea').value.trim();
-			if( ! content){
-				alert('내용을 입력해주세요');
-				El.querySelector('textarea').focus();
-				return;
-			}
-			
-			content = encodeURIComponent(content);//서버로 데이터 보내는것
-			
-			alert('댓글번호 : '+ replyNum+', 등록할 답글 : '+content);
-			
-			
-		}
-		
-	});
-});
 
 $(function(){
 	$(".showMember").click(function(){
@@ -184,6 +110,137 @@ function imageViewer(img) {
 
 </script>
 
+
+
+
+<script type="text/javascript">
+
+function login(){
+	location.href = " ${pageContext.request.contextPath}/member/login.do ";
+}
+
+
+//좋아요 기능 구현
+function ajaxFun(url,method,query,dataType,fn){//3.
+	$.ajax({
+		type : method,	//메소드(요청방식)-> (get, post, put, delete)
+		url : url,		//요청 받을 서버 주소
+		data : query,	//서버에 전송할 파라미터
+		dataType : dataType,	//서버에서 응답하는 형식(json, xml, text)
+		success : function(data){ //성공 , data = json
+			fn(data);
+		},
+		beforeSend : function(jqXHR){ //서버전송 전
+			jqXHR.setRequestHeader("AJAX",true); // 사용자 정의 헤더
+		},
+		error : function(jqXHR){
+			if(jqXHR.status === 403){
+				login();
+				return false;
+			}else if(jqXHR.status === 400){
+				alert("요청 처리가 실패 했습니다.");
+				return false;
+			}
+			console.log(jqXHR.responseText);
+		}
+	});
+	
+}
+
+//게시글 공감 여부
+$(function(){
+	$(".btnSendBoardLike").click(function(){
+		const $i = $(this).find("i");
+		let isNoLike = $i.css("color")=="rgb(0, 0, 0)";
+		let msg = isNoLike ? "게시글에 공감하십니까? " : "게시글 공감을 취소하시겠습니까?";
+		
+		if(! confirm(msg)){
+			return false;
+		}
+		
+		let url = "${pageContext.request.contextPath}/club/insertBoardLike.do";
+		let num = "${dto.clubNum}";
+		let qs = "num="+num+"&isNoLike="+isNoLike;
+		
+		const fn = function(data){
+			let state = data.state;
+			if(state === "true"){
+				let color = "black";
+				if(isNoLike){
+					color = "blue";
+				}
+				$i.css("color",color);
+				
+				let count = data.boardLikeCount;
+				$("#boardLikeCount").text(count);
+				
+			}else if(state ==="liked"){
+				alert("좋아요는 한번만 가능합니다.");
+			}
+		};
+		
+		ajaxFun(url,"post",qs,"json",fn);
+		
+	});
+});
+
+
+//댓글 리스트 및 페이징
+$(function(){
+	listPage(1);
+});
+
+function listPage(page){
+	let url = "${pageContext.request.contextPath}/club/listReply.do";
+	let qs = "num=${dto.clubNum}&pageNo="+page;
+	let selector = "#listReply";
+	
+	const fn = function(data){
+		$(selector).html(data);
+	}
+	
+	ajaxFun(url, "get", qs, "text", fn);
+		//ajaxFun(url,"get"qs,"html",fn); //가능
+}
+	
+	
+//댓글 등록
+$(function(){
+	$(".btnSendReply").click(function(){
+		let num = "${dto.clubNum}";
+		const $tb = $(this).closest("table");
+		let content = $tb.find("textarea").val().trim();
+		
+		if(! content){
+			$tb.find("textarea").focus();
+			return false;
+		}
+		
+		content = encodeURIComponent(content);
+		
+		let url = "$(pageContext.request.contextPath)/club/insertReply.do";
+		let qs = "num="+num+"&content="+content+"&answer=0";
+		
+		const fn = function(data){
+			$tb.find("textarea").val("");
+			let state = data.state;
+			if(state === "true"){
+				listPage(1);
+			}else {
+				alert("댓글을 추가하지 못했습니다.");
+			}
+		}
+		
+		ajaxFun(url,"post",qs,"json",fn);
+		
+	});
+});
+
+
+
+
+</script>
+
 </head>
 <body>
 
@@ -202,7 +259,7 @@ function imageViewer(img) {
 				<thead>
 					<tr>
 						<td colspan="2" align="center">
-							<h3>${dto.subject}</h3>
+							<h3>${dto.subject} </h3>
 						</td>
 					</tr>
 				</thead>
@@ -221,18 +278,19 @@ function imageViewer(img) {
 						
 					</tr>
 					
+						<tr>
+						<td width="50%">
+							<span class="bold">인원</span> : ${memberCount}/${dto.maxMember }
+						</td>
+						
+					</tr>
+					
 					<tr>
 						<td colspan="2" valign="top" height="200">
 							${dto.content}
 						</td>
 					</tr>
 					
-					<tr>
-						<td width="50%">
-							<span class="bold">인원</span> : ${memberCount}/${dto.maxMember }
-						</td>
-						
-					</tr>
 					
 					<tr style="border-bottom: none;">
 						<td colspan="2" height="110">
@@ -244,6 +302,9 @@ function imageViewer(img) {
 							</div>
 						</td>	
 					</tr>
+					
+				
+					
 					
 					<tr>
 						<td colspan="2">
@@ -300,20 +361,25 @@ function imageViewer(img) {
 						  -->
 						<c:choose>
 				    		<c:when test="${ memberCount < dto.maxMember && !result }">
-				    			<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/club/signUp.do?num=${dto.clubNum}';">가입하기</button>
+				    			<button type="button" class="btn" onclick="join();">가입하기</button>
 				    		</c:when>
 				    	</c:choose>
 							<!-- 탈퇴하기 버튼 가입한멤버이면(리더빼고) 활성화 해야함 -->
 							
 						<c:choose>
 				    		<c:when test="${ result && status != 1 }">
-				    			<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/club/byebye.do?num=${dto.clubNum}';">탈퇴하기</button>
+				    			<button type="button" class="btn" onclick="bye();">탈퇴하기</button>
 				    		</c:when>
 				    	</c:choose>
 				    	
 					</td>
 					<td align="right">
-						<button type="button" class="btn" >좋아요</button>
+						<button type="button" class="btn btnSendBoardLike" title="좋아요">
+								<i class="fas fa-thumbs-up" style= "color:${isUserLike? 'blue':'black'} "></i>&nbsp; &nbsp; 
+									<span id="boardLikeCount">${dto.boardLikeCount }</span> 
+							</button>
+						
+						
 						<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/club/list.do?${query}';">리스트</button>
 					</td>
 					
@@ -321,10 +387,11 @@ function imageViewer(img) {
 			</table>
 			
 				<input type="hidden" name="num" value="${dto.clubNum }">
+					
 					<!-- 멤버리스트 -->
 					<div class=" popup-dialog" style="display: none;">
 							<c:forEach var="list" items="${list }">
-								<p><i class="fa-solid fa-user" style="color: #fd855d;"></i>${list.userName }</p>
+									<p><i class="fa-solid fa-user" style="color: #fd855d;"></i>${list.userName }</p>
 							</c:forEach>
 					</div>
 
@@ -335,99 +402,31 @@ function imageViewer(img) {
 	
 	<!-- 댓글 쓰기폼 -->
 	<div class="body-container">
-
-	<div class="reply">
-		<form name="replyForm" method="post">
-			<div class='form-header'>
-				<span class="bold">댓글쓰기</span><span> - 타인을 비방하거나 개인정보를 유출하는 글의 게시를 삼가해 주세요.</span>
-			</div>
-			
-			<table class="table reply-form">
-				<tr>
-					<td>
-						<textarea class='form-control' name="content" style="height: 120px;"></textarea>
-					</td>
-				</tr>
-				<tr>
-				   <td align='right'>
-				        <button type='button' class='btn btnSendReply'>댓글 등록</button>
-				    </td>
-				 </tr>
-			</table>
-		</form>
-		
-		
-		
-		
-		<div id="listReply">
-		
-			<div class='reply-info'>
-				<span class='reply-count'>댓글 15개</span>
-				<span>[목록, 1/3 페이지]</span>
-			</div>
-			
-			<table class='table reply-list'>
-							<!-- 댓글리스트 -->
-					<tr class='list-header'>
-						<td width='50%'>
-							<span class='bold'>홍길동</span>
-						</td>
-						<td width='50%' align='right'>
-							<span>2021-11-01</span> |
-							<span class='deleteReply' data-replyNum='10' data-pageNo='1'>삭제</span>
-						</td>
-					</tr>
-					<tr>
-						<td colspan='2' valign='top'>내용입니다.</td>
-					</tr>
-			
-					<tr>
-						<td>
-							<button type='button' class='btn btnReplyAnswerLayout' data-replyNum='10'>답글 <span id="answerCount10">3</span></button>
-						</td>
-					</tr>
-				
-						<!-- 대댓글 리스트-->
-				    <tr class='reply-answer'>
-				        <td colspan='2'>
-				            <div id='Answer10' class='answer-list'>
-				            
-								<div class='answer-article'>
-									<div class='answer-article-header'>
-										<div class='answer-left'>└</div>
-										<div class='answer-right'>
-											<div style='float: left;'><span class='bold'>스프링</span></div>
-											<div style='float: right;'>
-												<span>2021-11-01</span> |
-												<span class='deleteReplyAnswer' data-replyNum='10' data-answer='15'>삭제</span>
-											</div>
-										</div>
-									</div>
-									<div class='answer-article-body'>
-										답글입니다.
-									</div>
-								</div>
-												            
-				            </div>
-				            
-				            <!-- 대댓글 쓰기 -->
-				            <div class="answer-form">
-				                <div class='answer-left'>└</div>
-				                <div class='answer-right'><textarea class='form-control' ></textarea></div>
-				            </div>
-				             <div class='answer-footer'>
-				                <button type='button' class='btn btnSendReplyAnswer' data-replyNum='10'>답글 등록</button>
-				            </div>
-						</td>
-				    </tr>
+			<div class="reply">
+				<form name="replyForm" method="post">
+					<div class='form-header'>
+						<span class="bold">댓글쓰기</span><span> - 타인을 비방하거나 개인정보를 유출하는 글의 게시를 삼가해 주세요.</span>
+					</div>
 					
+					<table class="table reply-form">
+						<tr>
+							<td>
+								<textarea class='form-control' name="content" style="height: 130px;"></textarea>
+							</td>
+						</tr>
+						<tr>
+						   <td align='right'>
+								<button type='button' class='btn btnSendReply'>댓글 등록</button>
+							</td>
+						 </tr>
+					</table>
+				</form>
 				
-			</table>
-		
-		</div>
-	</div>
+				<div id="listReply"></div>
+			</div>
+	
 
-</div>
+	</div>
 	
 	
 </main>

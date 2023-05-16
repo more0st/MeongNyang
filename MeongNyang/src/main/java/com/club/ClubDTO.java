@@ -16,11 +16,6 @@ public class ClubDTO {
 	private String join_date;
 	private int status;
 	
-	private long replyNum;
-	private String reply_content;
-	private String reply_regDate;
-	private long originalReplyNum;
-	
 	private long fileNum;
 	private String imageFilename;
 	
@@ -128,30 +123,6 @@ public class ClubDTO {
 	}
 	public void setStatus(int status) {
 		this.status = status;
-	}
-	public long getReplyNum() {
-		return replyNum;
-	}
-	public void setReplyNum(long replyNum) {
-		this.replyNum = replyNum;
-	}
-	public String getReply_content() {
-		return reply_content;
-	}
-	public void setReply_content(String reply_content) {
-		this.reply_content = reply_content;
-	}
-	public String getReply_regDate() {
-		return reply_regDate;
-	}
-	public void setReply_regDate(String reply_regDate) {
-		this.reply_regDate = reply_regDate;
-	}
-	public long getOriginalReplyNum() {
-		return originalReplyNum;
-	}
-	public void setOriginalReplyNum(long originalReplyNum) {
-		this.originalReplyNum = originalReplyNum;
 	}
 	public long getFileNum() {
 		return fileNum;

@@ -2,8 +2,10 @@ package com.club;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
@@ -13,6 +15,8 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+
+import org.json.JSONObject;
 
 import com.member.SessionInfo;
 import com.util.FileManager;
@@ -67,6 +71,30 @@ public class ClubServlet extends MyUploadServlet {
 			signUp(req, resp);
 		} else if (uri.indexOf("byebye.do") != -1) {
 			byebye(req, resp);
+		}  else if (uri.indexOf("insertBoardLike.do") != -1) {
+			//게시글 공감
+			insertBoardLike(req, resp);
+		} else if (uri.indexOf("insertReply.do") != -1) {
+			//댓글 등록
+			//insertReply(req, resp);
+		} else if (uri.indexOf("listReply.do") != -1) {
+			//댓글 리스트
+			//listReply(req, resp);
+		} else if (uri.indexOf("deleteReply.do") != -1) {
+			//댓글 삭제
+			deleteReply(req, resp);
+		} else if (uri.indexOf("insertReplyAnswer.do") != -1) {
+			//댓글의 답글 등록
+			insertReplyAnswer(req, resp);
+		} else if (uri.indexOf("listReplyAnswer.do") != -1) {
+			//댓글의 답글 삭제 리스트
+			listReplyAnswer(req, resp);
+		} else if (uri.indexOf("deleteReplyAnswer.do") != -1) {
+			//댓글의 답글 삭제
+			deleteReplyAnswer(req, resp);
+		} else if (uri.indexOf("countReplyAnswer.do") != -1) {
+			//댓글의 답글 개수
+			countReplyAnswer(req, resp);
 		}
 	}
 		
@@ -179,6 +207,7 @@ public class ClubServlet extends MyUploadServlet {
 		String cp = req.getContextPath();
 		
 		try {
+			String userId = info.getUserId();
 			String page = req.getParameter("page");
 			int current_page = 1;
 			if (page != null) {
@@ -201,9 +230,9 @@ public class ClubServlet extends MyUploadServlet {
 			// 전체 데이터 개수
 			int dataCount;
 			if (keyword.length() == 0) {
-				dataCount = dao.dataCount();
+				dataCount = dao.dataCount(userId);
 			} else {
-				dataCount = dao.dataCount(condition, keyword);
+				dataCount = dao.dataCount(condition, keyword,userId);
 			}
 			
 			// 전체 페이지 수
@@ -217,7 +246,6 @@ public class ClubServlet extends MyUploadServlet {
 			int offset = (current_page - 1) * size;
 			if(offset < 0) offset = 0;
 			
-			String userId = info.getUserId();
 			
 			List<ClubDTO> list = null;
 			if (keyword.length() == 0) {
@@ -240,13 +268,16 @@ public class ClubServlet extends MyUploadServlet {
 			req.setAttribute("dataCount", dataCount);
 			req.setAttribute("size", size);
 			req.setAttribute("articleUrl", articleUrl);
+			req.setAttribute("condition", condition);
+			req.setAttribute("keyword", keyword);
 			req.setAttribute("paging", paging);
 			req.setAttribute("userId", userId);
+			req.setAttribute("val", "my");
 			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-		forward(req, resp, "/WEB-INF/views/club/list.jsp");
+		forward(req, resp, "/WEB-INF/views/club/my.jsp");
 		
 		
 	}
@@ -335,6 +366,11 @@ public class ClubServlet extends MyUploadServlet {
 				return;
 			}
 			dto.setContent(util.htmlSymbols(dto.getContent()));
+			
+			
+			//로그인 유저의 게시글 공감 여부(좋아요)
+			boolean isUserLike = dao.isUserBoardLike(num, info.getUserId());
+			
 
 			// 이전글 다음글
 			ClubDTO preReadDto = dao.preReadBoard(dto.getClubNum(), condition, keyword);
@@ -362,6 +398,7 @@ public class ClubServlet extends MyUploadServlet {
 			req.setAttribute("result", result);
 			req.setAttribute("status", status);
 			req.setAttribute("mode", "update");
+			req.setAttribute("isUserLike", isUserLike );
 
 			// 포워딩
 			forward(req, resp, "/WEB-INF/views/club/article.jsp");
@@ -623,6 +660,169 @@ public class ClubServlet extends MyUploadServlet {
 		
 		
 	}
+	
+	
+	protected void insertBoardLike(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		//게시글 공감 저장: AJAX-JSON
+		ClubDAO dao = new ClubDAO();
+		
+		HttpSession session = req.getSession();
+		SessionInfo info = (SessionInfo) session.getAttribute("member");
+		
+		String state = "false";
+		int boardLikeCount = 0;
+		
+		try {
+			long num = Long.parseLong(req.getParameter("num"));
+			String isNoLike = req.getParameter("isNoLike");
+			
+			if(isNoLike.equals("true")){
+				dao.insertBoardLike(num, info.getUserId());//공감
+			} else {
+				dao.deleteBoardLike(num, info.getUserId());//공감 취소
+			}
+			
+			//공감개수
+			boardLikeCount = dao.countBoardLike(num);
+			
+			state = "true";
+			
+		} catch (SQLException e) {
+			state = "liked";
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		
+		JSONObject job = new JSONObject();
+		job.put("state", state);
+		job.put("boardLikeCount", boardLikeCount);
+		
+		resp.setContentType("text/html;charset=utf-8");//설정 안하면 한글 깨짐
+		PrintWriter out = resp.getWriter();
+		out.print(job.toString());
+		
+	}
+	
+//	protected void insertReply(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+//		//게시글 댓글/답글 저장 : AJAX-JSON
+//		ClubDAO dao = new ClubDAO();
+//		
+//		HttpSession session = req.getSession();
+//		SessionInfo info = (SessionInfo)session.getAttribute("member");
+//		
+//		String state = "false";
+//		
+//		try {
+//			ReplyDTO dto = new ReplyDTO();
+//			
+//			long num = Long.parseLong(req.getParameter("num"));
+//			dto.setClubNum(num);
+//			dto.setUserId(info.getUserId());
+//			dto.setContent(req.getParameter("content"));
+//			String answer = req.getParameter("answer");
+//			if(answer != null) {//answer가 넘어오지 않았으면 
+//				dto.setAnswer(Long.parseLong(answer));
+//			}
+//			
+//			dao.insertReply(dto);
+//			
+//			state = "true";
+//			
+//			
+//			
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//		
+//		JSONObject job = new JSONObject();
+//		job.put("state", state);
+//		
+//		resp.setContentType("text/html;charset=utf-8");//설정 안하면 한글 깨짐
+//		PrintWriter out = resp.getWriter();
+//		out.print(job.toString());
+//		
+//		
+//	}
+//	
+//	protected void listReply(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+//		//게시글 댓글 리스트 : AJAX-Text
+//		BoardDAO dao = new BoardDAO();
+//		MyUtil util = new MyUtil();
+//		
+//		try {
+//			long num = Long.parseLong(req.getParameter("num"));
+//			String pageNo = req.getParameter("pageNo");
+//			int current_page = 1;
+//			
+//			if(pageNo != null) {
+//				current_page = Integer.parseInt(pageNo);
+//			}
+//			
+//			int size = 5;
+//			int total_page = 0;
+//			int replyCount = 0;
+//			
+//			replyCount = dao.dataCountReply(num);
+//			total_page = util.pageCount(replyCount, size);
+//			if(current_page > total_page) {
+//				current_page = total_page;
+//			}
+//			
+//			int offset = (current_page - 1)*size;
+//			if(offset < 0) offset = 0;
+//			
+//			
+//			List<ReplyDTO> listReply = dao.listReply(num, offset, size);
+//			
+//			for(ReplyDTO dto : listReply) {
+//				dto.setContent(dto.getContent().replaceAll("\n", "<br>"));
+//			}
+//			
+//			String paging = util.pagingMethod(current_page, total_page, "listPage");
+//			
+//			req.setAttribute("listReply", listReply);
+//			req.setAttribute("pageNo",current_page);
+//			req.setAttribute("replyCount",replyCount);
+//			req.setAttribute("total_page",total_page);
+//			req.setAttribute("paging",paging);
+//			
+//			forward(req, resp, "/WEB-INF/views/bbs/listReply.jsp");
+//			return;
+//			
+//		} catch (Exception e) {
+//			e.printStackTrace();
+//		}
+//		
+//		resp.sendError(400);//문제가 있으면 400에러 던짐
+//	}
+	
+	protected void deleteReply(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		//게시글 댓글 삭제 : AJAX-Text
+		
+	}
+	
+	
+	protected void insertReplyAnswer(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		//게시글 댓글의 답글 추가 : AJAX-JSON
+		
+	}
+	
+	protected void listReplyAnswer(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		//게시글 댓글의 답글 리스트 : AJAX-Text
+		
+	}
+	
+	protected void deleteReplyAnswer(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		//게시글 댓글의 답글 삭제 : AJAX-JSON
+		
+	}
+	
+	protected void countReplyAnswer(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		//게시글 댓글의 답글 개수 : AJAX-JSON
+		
+	}
+	
 	
 	
 
