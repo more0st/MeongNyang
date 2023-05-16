@@ -1,4 +1,4 @@
-package com.myPage;
+package com.myPage2;
 
 import java.io.File;
 import java.io.IOException;
@@ -18,8 +18,8 @@ import com.util.MyServlet;
 import com.util.MyUtil;
 
 @MultipartConfig
-@WebServlet("/myPage/*")
-public class MyPageServlet extends MyServlet{
+@WebServlet("/myPage2/*")
+public class MyPage2Servlet extends MyServlet{
 	private static final long serialVersionUID = 1L;
 
 	private String pathname;
@@ -30,7 +30,6 @@ public class MyPageServlet extends MyServlet{
 
 		String uri = req.getRequestURI();
 
-		// 세션 정보
 		HttpSession session = req.getSession();
 		SessionInfo info = (SessionInfo) session.getAttribute("member");
 
@@ -42,31 +41,25 @@ public class MyPageServlet extends MyServlet{
 		String root = session.getServletContext().getRealPath("/");
 		pathname = root + "uploads" + File.separator + "market";
 
-		// uri에 따른 작업 구분
-		if (uri.indexOf("buyList.do") != -1) {		// 나의 구매내역 리스트
+		if (uri.indexOf("salesList.do") != -1) {	
 			list(req, resp);
-		} else if (uri.indexOf("buyArticle.do") != -1) {	// 클릭하면 글로 이동
-			article(req, resp);
-		} 
+		} else if (uri.indexOf("salesArticle.do") != -1) {
+			article(req,resp);
+		}
 	}
 
 	private void list(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		// 게시물 리스트
-		MyPageDAO dao = new MyPageDAO();	
+		// TODO Auto-generated method stub
+		MyPage2DAO dao = new MyPage2DAO();
 		MyUtil util = new MyUtil();
 		
 		String cp = req.getContextPath();
 		
 		try {
-			// 파라미터 : [페이지번호], [검색컬럼,검색값]          (페이지번호가 올수도 있고 오지않을수도잇음)
-		
 			
-			// 로그인한 아이디로만 글 뜨게
 			HttpSession session = req.getSession();
 			SessionInfo info = (SessionInfo) session.getAttribute("member");
-			
 
-			
 			// 페이지번호
 			String page = req.getParameter("page");
 			int current_page = 1;
@@ -106,7 +99,7 @@ public class MyPageServlet extends MyServlet{
 			int offset = (current_page - 1) * size;
 			if(offset < 0) offset = 0;
 			
-			List<MyPageDTO> list = null;
+			List<myPage2DTO> list = null;
 			
 			if(keyword.length() == 0) {
 				list = dao.listBoard(info.getUserId(), offset, size);		// 게시물 리스트
@@ -121,18 +114,15 @@ public class MyPageServlet extends MyServlet{
 				query = "condition=" + condition + "&keyword=" + URLEncoder.encode(keyword, "utf-8");
 			}
 			
-			String listUrl = cp + "/myPage/buyList.do";
-			String articleUrl = cp + "/myPage/buyArticle.do?page=" + current_page;
+			String listUrl = cp + "/myPage2/salesList.do";
+			String articleUrl = cp + "/myPage2/salesArticle.do?page=" + current_page;
 			if(query.length() != 0) {
 				listUrl += "?" + query;
 				articleUrl += "&" + query;
 			}
-
+			
 			String paging = util.paging(current_page, total_page, listUrl);
-	
-			
-			
-			// 포워딩할 JSP에 전달할 속성(attribute)
+
 			req.setAttribute("list", list);
 			req.setAttribute("page", current_page);
 			req.setAttribute("dataCount", dataCount);
@@ -147,16 +137,13 @@ public class MyPageServlet extends MyServlet{
 			e.printStackTrace();
 		}
 		
-		
-		// 포워딩에서/ 는 cp까지를 의미한다.
-		forward(req,resp,"/WEB-INF/views/myPage/buyList.jsp");
+		forward(req, resp, "/WEB-INF/views/myPage2/salesList.jsp");
 	}
-
-
+	
 	private void article(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		// 글 보기
-		MyPageDAO dao = new MyPageDAO();
 
+		MyPage2DAO dao = new MyPage2DAO();
+		
 		HttpSession session = req.getSession();
 		SessionInfo info = (SessionInfo) session.getAttribute("member");
 
@@ -166,108 +153,35 @@ public class MyPageServlet extends MyServlet{
 		try {
 			long marketnum = Long.parseLong(req.getParameter("marketnum"));		
 
-			MyPageDTO dto = dao.readBoard(marketnum);
-			if (dto == null || !dto.getBuyerid().equals(info.getUserId())) {
-				resp.sendRedirect(cp + "/myPage/buyList.do?page=" + page);
+			myPage2DTO dto = dao.readBoard(marketnum);
+			if (dto == null || !dto.getSellerid().equals(info.getUserId())) {
+				resp.sendRedirect(cp + "/myPage2/salesList.do?page=" + page);
 				return;
-			}
+			}	
 			
-			// 글내용 엔터를 <br>로
 			dto.setContent(dto.getContent().replaceAll("\n", "<br>"));
 
-			// 사진
-			List<MyPageDTO> listFile = dao.listPhotoFile(marketnum);
+			List<myPage2DTO> listFile = dao.listPhotoFile(marketnum);
 
-			/// 조회수 증가
 			dao.updateHitCount(marketnum);
-			
-			// 이전글 다음글
-			MyPageDTO preReadDto = dao.preReadBoard(marketnum, info.getUserId());
-			MyPageDTO nextReadDto = dao.nextReadBoard(marketnum, info.getUserId());
 
-			// 포워딩할 JSP에 넘겨줄 속성
+			myPage2DTO preReadDto = dao.preReadBoard(marketnum, info.getUserId());
+			myPage2DTO nextReadDto = dao.nextReadBoard(marketnum, info.getUserId());
+
 			req.setAttribute("dto", dto);
 			req.setAttribute("page", page);
 			req.setAttribute("listFile", listFile);
 			req.setAttribute("preReadDto", preReadDto);
 			req.setAttribute("nextReadDto", nextReadDto);
 			
-			// 포워딩
-			forward(req,resp,"/WEB-INF/views/myPage/buyArticle.jsp");
+			forward(req, resp, "/WEB-INF/views/myPage2/salesArticle.jsp");
 			return;
 			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		
-		forward(req, resp, "/WEB-INF/views/myPage/buyArticle.jsp");
+		forward(req, resp, "/WEB-INF/views/myPage2/salesArticle.jsp");
 	}
 
-	
-	
-	/*
-	private void article(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		// 글 보기
-		MyPageDAO dao = new MyPageDAO();
-		MyUtil util = new MyUtil();
-		
-		String cp = req.getContextPath();
-		
-		String page = req.getParameter("page");
-		String query = "page=" + page;
-		
-		try {
-			long marketnum = Long.parseLong(req.getParameter("num"));		// num 맞는지 확인
-			String condition = req.getParameter("condition");
-			String keyword = req.getParameter("keyword");
-			if(condition == null) {
-				condition = "all";
-				keyword = "";
-			}
-			keyword = URLDecoder.decode(keyword, "utf-8");
-			
-			if(keyword.length() != 0) {
-				query += "&condition=" + condition + "&keyword=" + URLEncoder.encode(keyword, "utf-8");
-			}
-			
-			/// 조회수 증가
-			dao.updateHitCount(marketnum);
-			
-			// 게시글 가져오기
-			MyPageDTO dto = dao.readBoard(marketnum);
-			if(dto == null) {	// 게시글이 없으면 다시 리스트로	
-				resp.sendRedirect(cp + "/myPage/buyList.do?" + query);
-				return;
-			}
-			dto.setContent(util.htmlSymbols(dto.getContent()));
-			
-			
-			// 글내용 엔터를 <br>로
-			dto.setContent(dto.getContent().replaceAll("\n", "<br>"));
-			
-			// 이전글 다음글
-			MyPageDTO preReadDto = dao.preReadBoard(dto.getMarketnum(), condition, keyword);
-			MyPageDTO nextReadDto = dao.nextReadBoard(dto.getMarketnum(), condition, keyword);
-			
-			// 포워딩할 JSP에 넘겨줄 속성
-			req.setAttribute("dto", dto);
-			req.setAttribute("page", page);
-			req.setAttribute("query", query);
-			req.setAttribute("preReadDto", preReadDto);
-			req.setAttribute("nextReadDto", nextReadDto);
-			
-			// 포워딩
-			forward(req,resp,"/WEB-INF/views/myPage/buyArticle.jsp");
-			return;
-			
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
-		resp.sendRedirect(cp + "/myPage/buyList.do?" + query);
-	}
-	
-	*/
 }
-
-

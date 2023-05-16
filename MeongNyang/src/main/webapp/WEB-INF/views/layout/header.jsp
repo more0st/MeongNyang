@@ -44,9 +44,9 @@
 			<li><a href="#">마이페이지</a>
 			   	<ul class="sub-menu">
 					<li><a href="${pageContext.request.contextPath}/myPage/buyList.do">나의 구매내역</a></li>
-					<li><a href="${pageContext.request.contextPath}/myPage/salesList.do">나의 판매내역</a></li>
-					<li><a href="${pageContext.request.contextPath}/myPage/writingList.do">작성글목록</a></li>
-					<li><a href="${pageContext.request.contextPath}/myPage/likeList.do">찜 목록</a></li>
+					<li><a href="${pageContext.request.contextPath}/myPage2/salesList.do">나의 판매내역</a></li>
+					<li><a href="${pageContext.request.contextPath}/myPage3/writingList.do">작성글목록</a></li>
+					<li><a href="${pageContext.request.contextPath}/myPage4/likeList.do">찜 목록</a></li>
 					<li><a href="${pageContext.request.contextPath}/message/list_receive.do">쪽지함</a></li>
 					<li><a href="${pageContext.request.contextPath}/member/pwd.do?mode=update">회원정보수정</a></li>
             	</ul>
