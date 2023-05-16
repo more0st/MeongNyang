@@ -6,28 +6,22 @@ import java.net.URLEncoder;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 
 import javax.servlet.ServletException;
-import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import com.member.SessionInfo;
-import com.util.FileManager;
-import com.util.MyUploadServlet;
+import com.util.MyServlet;
 import com.util.MyUtil;
 
-@MultipartConfig
 @WebServlet("/notice/*")
-public class NoticeServlet extends MyUploadServlet {
+public class NoticeServlet extends MyServlet {
 	private static final long serialVersionUID = 1L;
 
-	private String pathname;
 
-	@Override
 	protected void execute(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		req.setCharacterEncoding("utf-8");
 
@@ -87,10 +81,13 @@ public class NoticeServlet extends MyUploadServlet {
 				keyword = URLDecoder.decode(keyword, "utf-8");
 			}
 
-			// 한페이지 표시할 데이터 개수
+			
+			
 			String pageSize = req.getParameter("size");
 			int size = pageSize == null ? 10 : Integer.parseInt(pageSize);
 
+			
+			
 			int dataCount, total_page;
 
 			if (keyword.length() != 0) {
@@ -114,14 +111,12 @@ public class NoticeServlet extends MyUploadServlet {
 				list = dao.listNotice(offset, size);
 			}
 
-			//시간의 차이를 구해 new 게시물 표시처리
 			long gap;
 			Date curDate = new Date();
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 			for (NoticeDTO dto : list) {
 				Date date = sdf.parse(dto.getReg_date());
-				// gap = (curDate.getTime() - date.getTime()) / (1000*60*60*24); // 일자
 				gap = (curDate.getTime() - date.getTime()) / (1000 * 60 * 60); // 시간
 				dto.setGap(gap);
 
@@ -143,7 +138,6 @@ public class NoticeServlet extends MyUploadServlet {
 
 			String paging = util.paging(current_page, total_page, listUrl);
 
-			// 포워딩 jsp에 전달할 데이터
 			req.setAttribute("list", list);
 			req.setAttribute("articleUrl", articleUrl);
 			req.setAttribute("dataCount", dataCount);
@@ -158,7 +152,6 @@ public class NoticeServlet extends MyUploadServlet {
 			e.printStackTrace();
 		}
 
-		// JSP로 포워딩
 		forward(req, resp, "/WEB-INF/views/notice/list.jsp");
 	}
 
@@ -171,7 +164,6 @@ public class NoticeServlet extends MyUploadServlet {
 		
 		String size = req.getParameter("size");
 
-		// admin만 글을 등록
 		if (!info.getUserId().equals("admin")) {
 			resp.sendRedirect(cp + "/notice/list.do?size=" + size);
 			return;
@@ -195,15 +187,15 @@ public class NoticeServlet extends MyUploadServlet {
 			return;
 		}
 		
-		// admin만 글을 등록
 		if (!info.getUserId().equals("admin")) {
 			resp.sendRedirect(cp + "/notice/list.do");
 			return;
 		}
 		
 		NoticeDAO dao = new NoticeDAO();
-		
-		String size = req.getParameter("size");
+		//String size = req.getParameter("size");
+		String size = "10";
+
 		try {
 			NoticeDTO dto = new NoticeDTO();
 			
@@ -215,7 +207,7 @@ public class NoticeServlet extends MyUploadServlet {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
+		// 여기
 		//resp.sendRedirect(cp + "/notice/list.do?size=" + size);
 		resp.sendRedirect(cp + "/notice/list.do");
 		}
@@ -355,9 +347,9 @@ public class NoticeServlet extends MyUploadServlet {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
-		//resp.sendRedirect(cp + "/notice/list.do?page=" + page + "&size=" + size);
-		resp.sendRedirect(cp + "/notice/list.do?page=" + page);
+		//여기
+		resp.sendRedirect(cp + "/notice/list.do?page=" + page + "&size=" + size);
+		//resp.sendRedirect(cp + "/notice/list.do?page=" + page);
 
 	}
 
