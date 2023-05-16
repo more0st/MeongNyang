@@ -10,8 +10,10 @@ public class MarketDTO {
 	private int price;
 	private String reg_date;
 	private String pay_date;
+
 	private int hitCount;
 	private int state;
+	private int zzimCount;
 
 	private long fileNum;
 	private String imageFilename;
@@ -102,6 +104,11 @@ public class MarketDTO {
 		this.imageFiles = imageFiles;
 	}
 	
-
+	public int getZzimCount() {
+		return zzimCount;
+	}
+	public void setZzimCount(int zzimCount) {
+		this.zzimCount = zzimCount;
+	}
 	
 }

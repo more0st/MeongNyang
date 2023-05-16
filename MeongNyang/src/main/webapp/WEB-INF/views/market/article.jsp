@@ -69,6 +69,70 @@
 .photo-layout img { width: 570px; height: 450px; }
 </style>
 <script type="text/javascript">
+function login() {
+	loaction.href = "${pageContext.request.contextPath}/member/login.do";
+}
+
+function ajaxFun(url, method, query, dataType, fn) {
+	$.ajax({
+		type:method,			//메소드(get, post, put, delete)
+		url:url,				// 요청받을 서버 주소
+		data:query,				// 서버에 전송할 파라미터
+		dataType:dataType,		// 서버에서 응답할 형식(json, xml, text)
+		success:function(data){
+			fn(data);
+		},
+		beforeSend:function(jqXHR){
+			jqXHR.setRequestHeader("AJAX",true); // 사용자 정의 헤더
+		},
+		error:function(jqXHR){
+			if(jqXHR.status === 403){
+				login();
+				return false;
+			}else if(jqXHR.status===400){
+				alert("요청 처리가 실패 했습니다.");
+				return false;
+			}
+			console.log(jqXHR.responseText);
+		}
+	});
+}
+
+// 게시글 공감 여부
+$(function () {
+	$(".btnSendBoardLike").click(function () {
+		const $i = $(this).find("i");
+		let isNoLike = $i.css("color") == "rgb(0, 0, 0)";
+		let msg = isNoLike ? "게시글에 공감하십니까?" : "게시글 공감을 취소하시겠습니까 ?";
+		
+		if(! confirm(msg)){
+			return false;
+		}
+		
+		let url = "${pageContext.request.contextPath}/market/insertBoardLike.do";
+		let marketNum = "${dto.marketNum}";
+		let qs = "marketNum="+marketNum+"&isNoLike="+isNoLike;
+		
+		const fn = function(data){
+			let state = data.state;
+			if(state === "true"){
+				let color = "black";
+				if( isNoLike ){
+					color = "blue";
+				}
+				$i.css("color", color);
+				
+				let count = data.boardLikeCount;
+				$("#boardLikeCount").text(count);
+			}else if(state === "liked"){
+				alert("좋아요는 한번만 가능합니다.");
+			}
+		};
+		
+		ajaxFun(url, "post", qs, "json", fn);
+	});
+});
+
 <c:if test="${sessionScope.member.userId==dto.sellerId || sessionScope.member.userId=='admin'}">
 	function deleteBoard() {
 	    if(confirm("게시글을 삭제 하시 겠습니까 ? ")) {
@@ -109,6 +173,53 @@ function imageViewer(img) {
 		modal: true
 	});
 }
+
+$(function () {
+	listPage(1);
+});
+
+function listPage(page) {
+	let url = "${pageContext.request.contextPath}/market/listReply.do";
+	let qs = "marketNum=${dto.marketNum}&pageNo="+page;
+	let selector = "#listReply";
+	
+	const fn = function (data) {
+		$(selector).html(data);
+	}
+	
+	ajaxFun(url, "get", qs, "text", fn);
+	//ajaxFun(url, "get", qs, "html", fn); //가능
+	
+}
+
+$(function () {
+	$(".btnSendReply").click(function name() {
+		let marketNum = "${dto.marketNum}";
+		const $tb = $(this).closest("table");
+		let content = $tb.find("textarea").val().trim();
+		
+		if(! content){
+			$tb.find("textarea").focus();
+			return false;
+		}
+		content = encodeURIComponent(content);
+		
+		let url = "${pageContext.request.contextPath}/market/insertReply.do";
+		let qs = "marketNum="+marketNum+"&content="+content+"&rereplynum=0";
+		
+		const fn = function (data) {
+		 	$tb.find("textarea").val("");
+			let state = data.state;
+			if(state === "true"){
+				listPage(1);
+			}else{
+				alert("댓글을 추가하지 못했습니다.");
+			} 
+		}
+		
+		ajaxFun(url, "post", qs, "json", fn);
+	});
+});
 </script>
 
 </head>
@@ -155,6 +266,12 @@ function imageViewer(img) {
 					<tr>
 						<td colspan="2" valign="top" height="200">
 							${dto.content}
+						</td>
+					</tr>
+					
+					<tr>
+						<td colspan="2" align="center" style="border-bottom: 20px;">
+							<button type="button" class="btn btnSendBoardLike" title="찜"> <i class="fas fa-thumbs-up" style="color:${isUserLike?'blue':'black'}"></i>&nbsp;&nbsp;<span id="boardLikeCount">${dto.zzimCount }</span> </button>
 						</td>
 					</tr>
 					

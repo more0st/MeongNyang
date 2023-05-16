@@ -2,8 +2,10 @@ package com.market;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
@@ -13,6 +15,8 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+
+import org.json.JSONObject;
 
 import com.member.SessionInfo;
 import com.util.FileManager;
@@ -59,9 +63,16 @@ public class MarketServlet extends MyUploadServlet{
 			updateSubmit(req, resp);
 		} else if (uri.indexOf("delete.do") != -1) {
 			delete(req, resp);
-		}  else if (uri.indexOf("deleteFile.do") != -1) {
+		} else if (uri.indexOf("deleteFile.do") != -1) {
 			deleteFile(req, resp);
+		} else if(uri.indexOf("insertBoardLike.do") != -1) {
+			insertBoardLike(req, resp);
+		} else if(uri.indexOf("insertReply.do") != -1) {
+			insertReply(req, resp);
+		} else if(uri.indexOf("listReply.do") != -1) {
+			listReply(req, resp);
 		}
+		
 	}
 	
 	protected void list(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -218,6 +229,8 @@ public class MarketServlet extends MyUploadServlet{
 			List<MarketDTO> listFile = dao.listPhotoFile(marketNum);
 			dao.updateHitCount(marketNum);
 			
+			boolean isUserLike = dao.isUserBoardLike(marketNum, info.getUserId());
+			
 			MarketDTO preReadDto = dao.preReadPhoto(marketNum, info.getUserId());
 			MarketDTO nextReadDto = dao.nextReadPhoto(marketNum, info.getUserId());
 
@@ -227,6 +240,8 @@ public class MarketServlet extends MyUploadServlet{
 			req.setAttribute("preReadDto", preReadDto);
 			req.setAttribute("nextReadDto", nextReadDto);
 
+			req.setAttribute("isUserLike", isUserLike);
+			
 			forward(req, resp, "/WEB-INF/views/market/article.jsp");
 			return;
 		} catch (Exception e) {
@@ -400,6 +415,130 @@ public class MarketServlet extends MyUploadServlet{
 		}
 
 		resp.sendRedirect(cp + "/market/list.do?page=" + page);
+	}
+	
+	protected void insertBoardLike(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		// 게시글 공감 저장 : AJAX-JSON
+		MarketDAO dao = new MarketDAO();
+		
+		HttpSession session = req.getSession();
+		SessionInfo info = (SessionInfo)session.getAttribute("member");
+		
+		String state = "false";
+		int boardLikeCount = 0;
+		
+		try {
+			long num = Long.parseLong(req.getParameter("marketNum"));
+			String isNoLike = req.getParameter("isNoLike");
+			
+			if(isNoLike.equals("true")) {
+				dao.insertBoardLike(num, info.getUserId()); // 공감
+			}else {
+				dao.deleteBoardLike(num, info.getUserId()); // 공감취소
+			}
+			
+			// 공감 개수
+			boardLikeCount = dao.countBoardLike(num);
+			
+			state = "true";
+		} catch (SQLException e) {
+			state = "liked";
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		JSONObject job = new JSONObject();
+		job.put("state", state);
+		job.put("boardLikeCount", boardLikeCount);
+		
+		PrintWriter out = resp.getWriter();
+		out.print(job.toString());
+	}
+	
+	
+	protected void insertReply(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		// 게시글 댓글/답글 저장 : AJAX-JSON
+		MarketDAO dao = new MarketDAO();
+		
+		HttpSession session = req.getSession();
+		SessionInfo info = (SessionInfo)session.getAttribute("member");
+		
+		String state = "false";
+		try {
+			ReplyDTO dto = new ReplyDTO();
+			
+			long num = Long.parseLong(req.getParameter("marketNum"));
+			dto.setMarketNum(num);
+			dto.setUserId(info.getUserId());
+			dto.setContent(req.getParameter("content"));
+			String rereplynum = req.getParameter("rereplynum");
+			if(rereplynum != null) {
+				dto.setAnswer(Long.parseLong(rereplynum));
+			}
+			
+			dao.insertReply(dto);
+			
+			state = "true";
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		JSONObject job = new JSONObject();
+		job.put("state", state);
+		
+		resp.setContentType("text/html;charset=utf-8");
+		PrintWriter out = resp.getWriter();
+		out.print(job.toString());
+	}
+	
+	protected void listReply(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		// 게시글 댓글 리스트 : AJAX-Text
+		MarketDAO dao = new MarketDAO();
+		MyUtil util = new MyUtil();
+		try {
+			long num = Long.parseLong(req.getParameter("marketNum"));
+			String pageNo = req.getParameter("pageNo");
+			
+			int current_page = 1;
+			if(pageNo != null) {
+				current_page = Integer.parseInt(pageNo);
+			}
+			
+			int size = 5;
+			int total_page = 0;
+			int replyCount = 0;
+			
+			replyCount = dao.dataCountReply(num);
+			total_page = util.pageCount(replyCount, size);
+			if(current_page > total_page) {
+				current_page = total_page;
+			}
+			
+			int offset = (current_page - 1) * size;
+			if(offset < 0) offset = 0;
+			
+			List<ReplyDTO> listReply = dao.listReply(num, offset, size);
+			
+			for(ReplyDTO dto : listReply) {
+				dto.setContent(dto.getContent().replaceAll("\n", "<bR>"));
+			}
+			
+			String paging = util.pagingMethod(current_page, total_page, "listPage");
+			
+			req.setAttribute("listReply", listReply);
+			req.setAttribute("pageNo", pageNo);
+			req.setAttribute("replyCount", replyCount);
+			req.setAttribute("total_page", total_page);
+			req.setAttribute("paging", paging);
+			
+			forward(req, resp, "/WEB-INF/views/market/listReply.jsp");
+			return;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		resp.sendError(400);
 	}
 
 }

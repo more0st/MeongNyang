@@ -153,7 +153,7 @@ public class MarketDAO {
 		String sql;
 		
 		try {
-			sql = "SELECT ma.MARKETNUM, SELLERID, BUYERID, SUBJECT, CONTENT, ADDR, PRICE, REG_DATE, HITCOUNT, STATE, PAY_DATE, IMGNAME"
+			sql = "SELECT ma.MARKETNUM, SELLERID, BUYERID, SUBJECT, CONTENT, ADDR, PRICE, REG_DATE, HITCOUNT, STATE, PAY_DATE, IMGNAME, ZZIMCOUNT"
 					+ " FROM market ma"
 					+ " JOIN marketimgfile mf on ma.marketnum = mf.marketnum"
 					+ " JOIN (SELECT MARKETNUM, MIN(IMGNUM) IMGNUM FROM marketimgfile"
@@ -178,6 +178,7 @@ public class MarketDAO {
 				dto.setState(rs.getInt("STATE"));
 				dto.setPay_date(rs.getString("PAY_DATE"));
 				dto.setImageFilename(rs.getString("IMGNAME"));
+				dto.setZzimCount(rs.getInt("ZZIMCOUNT"));
 				
 				list.add(dto);
 			}
@@ -208,7 +209,7 @@ public class MarketDAO {
 		String sql;
 		
 		try {
-			sql = "SELECT ma.MARKETNUM, SELLERID, BUYERID, SUBJECT, CONTENT, ADDR, PRICE, REG_DATE, HITCOUNT, STATE, PAY_DATE, IMGNAME"
+			sql = "SELECT ma.MARKETNUM, SELLERID, BUYERID, SUBJECT, CONTENT, ADDR, PRICE, REG_DATE, HITCOUNT, STATE, PAY_DATE, IMGNAME, ZZIMCOUNT"
 					+ " FROM market ma"
 					+ " JOIN marketimgfile mf on ma.marketnum = mf.marketnum"
 					+ " JOIN (SELECT MARKETNUM, MIN(IMGNUM) IMGNUM FROM marketimgfile"
@@ -249,6 +250,7 @@ public class MarketDAO {
 				dto.setState(rs.getInt("STATE"));
 				dto.setPay_date(rs.getString("PAY_DATE"));
 				dto.setImageFilename(rs.getString("IMGNAME"));
+				dto.setZzimCount(rs.getInt("ZZIMCOUNT"));
 				
 				list.add(dto);
 			}
@@ -363,7 +365,7 @@ public class MarketDAO {
 		String sql;
 
 		try {
-			sql = "SELECT ma.MARKETNUM, SELLERID, BUYERID, SUBJECT, CONTENT, ADDR, PRICE, REG_DATE, HITCOUNT, STATE, PAY_DATE, IMGNAME "
+			sql = "SELECT ma.MARKETNUM, SELLERID, BUYERID, SUBJECT, CONTENT, ADDR, PRICE, REG_DATE, HITCOUNT, STATE, PAY_DATE, IMGNAME, ZZIMCOUNT "
 					+ " FROM market ma"
 					+ " JOIN marketimgfile mf on ma.marketnum = mf.marketnum"
 					+ " WHERE ma.MARKETNUM = ?";
@@ -386,6 +388,7 @@ public class MarketDAO {
 				dto.setState(rs.getInt("STATE"));
 				dto.setPay_date(rs.getString("PAY_DATE"));
 				dto.setImageFilename(rs.getString("IMGNAME"));
+				dto.setZzimCount(rs.getInt("ZZIMCOUNT"));
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -662,4 +665,261 @@ public class MarketDAO {
 
 		return dto;
 	}
+	
+	// 게시물의 공감 추가
+	public void insertBoardLike(long num, String userId) throws SQLException {
+		PreparedStatement pstmt = null;
+		String sql;
+		
+		try {
+			sql = "INSERT INTO zzim(marketnum, userId, reg_date) VALUES (?, ?, SYSDATE)";
+			pstmt = conn.prepareStatement(sql);
+			
+			pstmt.setLong(1, num);
+			pstmt.setString(2, userId);
+			
+			pstmt.executeUpdate();
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw e;
+		} finally {
+			if(pstmt != null) {
+				try {
+					pstmt.close();
+				} catch (SQLException e) {
+				}
+			}
+		}
+		
+	}
+	
+	public void deleteBoardLike(long num, String userId) throws SQLException {
+		PreparedStatement pstmt = null;
+		String sql;
+		
+		try {
+			sql = "DELETE FROM zzim WHERE marketnum = ? AND userId = ?";
+			pstmt = conn.prepareStatement(sql);
+			
+			pstmt.setLong(1, num);
+			pstmt.setString(2, userId);
+			
+			pstmt.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw e;
+		} finally {
+			if(pstmt != null) {
+				try {
+					pstmt.close();
+				} catch (Exception e2) {
+				}
+			}
+		}
+		
+	}
+	
+	public boolean isUserBoardLike(long num, String userId) {
+		boolean result = false;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		String sql;
+		
+		try {
+			sql = "SELECT marketnum, userId FROM zzim WHERE marketnum = ? AND userId = ?";
+			pstmt = conn.prepareStatement(sql);
+			
+			pstmt.setLong(1, num);
+			pstmt.setString(2, userId);
+			
+			rs = pstmt.executeQuery();
+			
+			if(rs.next()) {
+				result = true;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			if(rs != null) {
+				try {
+					rs.close();
+				} catch (Exception e2) {
+				}
+			}
+			
+			if(pstmt != null) {
+				try {
+					pstmt.close();
+				} catch (Exception e2) {
+				}
+			}
+			
+		}
+		
+		return result;
+	}
+	
+	
+	public int countBoardLike(long num) {
+		int result = 0;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		String sql;
+		
+		try {
+			sql = "SELECT NVL(COUNT(*), 0) FROM zzim WHERE marketnum=?";
+			pstmt = conn.prepareStatement(sql);
+			
+			pstmt.setLong(1, num);
+			
+			rs = pstmt.executeQuery();
+			
+			if(rs.next()) {
+				result = rs.getInt(1);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			if(rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException e) {
+				}
+			}
+				
+			if(pstmt != null) {
+				try {
+					pstmt.close();
+				} catch (SQLException e) {
+				}
+			}
+		}
+		
+		return result;
+	}
+	
+	
+	public void insertReply(ReplyDTO dto) throws SQLException {
+		PreparedStatement pstmt = null;
+		String sql;
+		
+		try {
+			sql = "INSERT INTO marketReply(REPLYNUM, MARKETNUM, USERID, CONTENT, REG_DATE, REREPLYNUM) "
+					+ " VALUES (MARKETREPLY_SEQ.NEXTVAL, ?, ?, ?, SYSDATE, ?)";
+			pstmt = conn.prepareStatement(sql);
+			
+			pstmt.setLong(1, dto.getMarketNum());
+			pstmt.setString(2, dto.getUserId());
+			pstmt.setString(3, dto.getContent());
+			pstmt.setLong(4, dto.getAnswer());
+			
+			pstmt.executeUpdate();
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw e;
+		} finally {
+			if(pstmt != null)
+				try {
+					pstmt.close();
+				} catch (SQLException e) {
+				}
+		}
+		
+	}
+	
+	// 게시물의 댓글 개수
+	public int dataCountReply(long num) {
+		int result = 0;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		String sql;
+		
+		try {
+			sql = "SELECT NVL(COUNT(*), 0) FROM marketReply WHERE MARKETNUM=? AND REREPLYNUM=0";
+			pstmt = conn.prepareStatement(sql);
+			
+			pstmt.setLong(1, num);
+			
+			rs = pstmt.executeQuery();
+			
+			if(rs.next()) {
+				result = rs.getInt(1);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			if(rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException e) {
+				}
+			}
+				
+			if(pstmt != null) {
+				try {
+					pstmt.close();
+				} catch (SQLException e) {
+				}
+			}
+		}
+		
+		return result;
+	}
+
+	// 게시물 댓글 리스트
+	public List<ReplyDTO> listReply(long num, int offset, int size) {
+		List<ReplyDTO> list = new ArrayList<>();
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		String sql;
+		try {
+			sql = "SELECT r.REPLYNUM, r.userId, userName, MARKETNUM, content, r.reg_date, NVL(answerCount, 0) answerCount FROM marketReply "
+					+ " r JOIN member m ON r.userId = m.userId LEFT OUTER  JOIN ( SELECT REREPLYNUM, COUNT(*) answerCount FROM marketReply "
+					+ " WHERE REREPLYNUM != 0 GROUP BY REREPLYNUM ) a ON r.REPLYNUM = a.REREPLYNUM "
+					+ " WHERE MARKETNUM = ? AND r.REREPLYNUM=0 ORDER BY r.replyNum DESC"
+					+ " OFFSET ? ROWS FETCH FIRST ? ROWS ONLY";
+			
+			pstmt = conn.prepareStatement(sql);
+			
+			pstmt.setLong(1, num);
+			pstmt.setInt(2, offset);
+			pstmt.setInt(3, size);
+
+			rs = pstmt.executeQuery();
+			
+			while(rs.next()) {
+				ReplyDTO dto = new ReplyDTO();
+				
+				dto.setReplyNum(rs.getLong("REPLYNUM"));
+				dto.setMarketNum(rs.getLong("MARKETNUM"));
+				dto.setUserId(rs.getString("userId"));
+				dto.setContent(rs.getString("content"));
+				dto.setReg_date(rs.getString("reg_date"));
+				dto.setAnswerCount(rs.getInt("answerCount"));
+				
+				list.add(dto);
+			}
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			if(rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException e) {
+				}
+			}
+			if(pstmt != null) {
+				try {
+					pstmt.close();
+				} catch (SQLException e) {
+				}
+			}
+		}
+		
+		return list;
+	}
+
 }
