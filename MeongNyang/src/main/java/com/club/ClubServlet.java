@@ -272,7 +272,7 @@ public class ClubServlet extends MyUploadServlet {
 			req.setAttribute("keyword", keyword);
 			req.setAttribute("paging", paging);
 			req.setAttribute("userId", userId);
-			req.setAttribute("val", "my");
+			req.setAttribute("val", "true");
 			
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -342,6 +342,7 @@ public class ClubServlet extends MyUploadServlet {
 		String query = "page=" + page;
 
 		try {
+			String val = req.getParameter("val");
 			String userId = info.getUserId();
 			long num = Long.parseLong(req.getParameter("num"));
 			String condition = req.getParameter("condition");
@@ -399,6 +400,7 @@ public class ClubServlet extends MyUploadServlet {
 			req.setAttribute("status", status);
 			req.setAttribute("mode", "update");
 			req.setAttribute("isUserLike", isUserLike );
+			req.setAttribute("val", val );
 
 			// 포워딩
 			forward(req, resp, "/WEB-INF/views/club/article.jsp");
@@ -747,7 +749,7 @@ public class ClubServlet extends MyUploadServlet {
 //	
 //	protected void listReply(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 //		//게시글 댓글 리스트 : AJAX-Text
-//		BoardDAO dao = new BoardDAO();
+//		ClubDAO dao = new ClubDAO();
 //		MyUtil util = new MyUtil();
 //		
 //		try {

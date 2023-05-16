@@ -11,6 +11,8 @@
 <jsp:include page="/WEB-INF/views/layout/staticHeader.jsp"/>
 
 <style type="text/css">
+.fas fa-thumbs-up , i {font-size: 18px}
+
 .body-main {
 	max-width: 700px;
 	padding-top: 15px;
@@ -76,6 +78,20 @@ function bye(){
 	if(confirm("탈퇴 하시겠습니까 ? ")){
 		location.href='${pageContext.request.contextPath}/club/byebye.do?num=${dto.clubNum}';
 	}
+}
+
+function listOrMy(){
+	
+	let val = "${val}";
+    if(val === "") val = false;
+	
+	if(val){
+		location.href='${pageContext.request.contextPath}/club/my.do?${query}';
+	}else {
+		location.href='${pageContext.request.contextPath}/club/list.do?${query}';
+		
+	}
+
 }
 
 
@@ -380,7 +396,7 @@ $(function(){
 							</button>
 						
 						
-						<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/club/list.do?${query}';">리스트</button>
+						<button type="button" class="btn" onclick="listOrMy();">리스트</button>
 					</td>
 					
 				</tr>

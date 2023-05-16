@@ -77,7 +77,7 @@ function searchList() {
 							<td>${dto.reg_date}</td>
 							<td>${dto.nowMember }/${dto.maxMember }</td>
 							<td>${dto.hitCount}</td>
-							<td>좋아요</td>
+							<td>${dto.boardLikeCount }</td>
 						</tr>
 					</c:forEach>
 				</tbody>

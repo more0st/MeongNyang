@@ -71,13 +71,13 @@ function searchList() {
 						<tr>
 							<td>${dataCount - (page-1) * size - status.index}</td>
 							<td style="text-align: center;">
-								<a href="${articleUrl}&num=${dto.clubNum}">${dto.subject}</a>
+								<a href="${articleUrl}&num=${dto.clubNum}&val=${val}">${dto.subject}</a>
 							</td>
 							<td>${dto.userName}</td>
 							<td>${dto.reg_date}</td>
 							<td>${dto.nowMember }/${dto.maxMember }</td>
 							<td>${dto.hitCount}</td>
-							<td>좋아요</td>
+							<td>${dto.boardLikeCount }</td>
 						</tr>
 					</c:forEach>
 				</tbody>
@@ -115,6 +115,8 @@ function searchList() {
 					</td>
 				</tr>
 			</table>
+			
+			<input type="hidden" name="val" value="${val }">
 
 	    </div>
 	  </div>

@@ -297,7 +297,8 @@ public class ClubDAO {
 		try {
 			sb.append(" SELECT c.clubNum, userName, subject, hitCount, imageFilename, ");
 			sb.append("       TO_CHAR(reg_date, 'YYYY-MM-DD') reg_date, "
-					+ " maxMember, nowMember  ");
+					+ " maxMember, nowMember,  ");
+			sb.append(" NVL(boardLikeCount, 0) boardLikeCount " );
 			sb.append(" FROM club c ");
 			sb.append(" JOIN member m ON c.userId = m.userId ");
 			sb.append(" LEFT OUTER JOIN ( ");
@@ -307,6 +308,10 @@ public class ClubDAO {
 			sb.append("        FROM clubImgFile");
 			sb.append("     ) WHERE rank = 1 ");
 			sb.append(" ) i ON c.clubNum = i.clubNum ");
+			sb.append(" LEFT OUTER JOIN (" );
+			sb.append("      SELECT clubNum, COUNT(*) boardLikeCount FROM clubLike" );
+			sb.append("     GROUP BY clubNum" );
+			sb.append(" ) bc ON c.clubNum = bc.clubNum " );
 			sb.append(" ORDER BY clubnum DESC ");
 			sb.append(" OFFSET ? ROWS FETCH FIRST ? ROWS ONLY ");
 
@@ -329,6 +334,8 @@ public class ClubDAO {
 				dto.setNowMember(rs.getInt("nowMember"));
 				dto.setImageFilename(rs.getString("imageFilename"));
 
+				dto.setBoardLikeCount(rs.getInt("boardLikeCount"));
+				
 				list.add(dto);
 			}
 
@@ -362,7 +369,8 @@ public class ClubDAO {
 		try {
 			sb.append(" SELECT c.clubNum, userName, subject, hitCount, imageFilename, ");
 			sb.append("       TO_CHAR(reg_date, 'YYYY-MM-DD') reg_date, "
-					+ " maxMember, nowMember  ");
+					+ " maxMember, nowMember,  ");
+			sb.append(" NVL(boardLikeCount, 0) boardLikeCount " );
 			sb.append(" FROM club c ");
 			sb.append(" JOIN member m ON c.userId = m.userId ");
 			sb.append(" LEFT OUTER JOIN ( ");
@@ -372,6 +380,11 @@ public class ClubDAO {
 			sb.append("        FROM clubImgFile");
 			sb.append("     ) WHERE rank = 1 ");
 			sb.append(" ) i ON c.clubNum = i.clubNum ");
+			sb.append(" LEFT OUTER JOIN (" );
+			sb.append("      SELECT clubNum, COUNT(*) boardLikeCount FROM clubLike" );
+			sb.append("     GROUP BY clubNum" );
+			sb.append(" ) bc ON c.clubNum = bc.clubNum " );
+			
 			if (condition.equals("all")) {
 				sb.append(" WHERE INSTR(subject, ?) >= 1 OR INSTR(content, ?) >= 1 ");
 			} else if (condition.equals("reg_date")) {
@@ -409,6 +422,8 @@ public class ClubDAO {
 				dto.setMaxMember(rs.getInt("maxMember"));
 				dto.setNowMember(rs.getInt("nowMember"));
 				dto.setImageFilename(rs.getString("imageFilename"));
+				
+				dto.setBoardLikeCount(rs.getInt("boardLikeCount"));
 
 				
 				list.add(dto);
@@ -445,7 +460,8 @@ public class ClubDAO {
 		try {
 			sb.append(" SELECT distinct c.clubNum, userName, subject, hitCount, imageFilename, ");
 			sb.append("       TO_CHAR(reg_date, 'YYYY-MM-DD') reg_date, "
-					+ " maxMember, nowMember  ");
+					+ " maxMember, nowMember,  ");
+			sb.append(" NVL(boardLikeCount, 0) boardLikeCount " );
 			sb.append(" FROM club c ");
 			sb.append(" JOIN member m ON c.userId = m.userId ");
 			sb.append(" JOIN clubMember cm ON c.clubNum = cm.clubNum ");
@@ -456,6 +472,10 @@ public class ClubDAO {
 			sb.append("        FROM clubImgFile");
 			sb.append("     ) WHERE rank = 1 ");
 			sb.append(" ) i ON c.clubNum = i.clubNum ");
+			sb.append(" LEFT OUTER JOIN (" );
+			sb.append("      SELECT clubNum, COUNT(*) boardLikeCount FROM clubLike" );
+			sb.append("     GROUP BY clubNum" );
+			sb.append(" ) bc ON c.clubNum = bc.clubNum " );
 	
 	
 			if (condition.equals("all")) {
@@ -499,6 +519,7 @@ public class ClubDAO {
 				dto.setNowMember(rs.getInt("nowMember"));
 				dto.setImageFilename(rs.getString("imageFilename"));
 
+				dto.setBoardLikeCount(rs.getInt("boardLikeCount"));
 				
 				list.add(dto);
 			}
@@ -534,7 +555,8 @@ public class ClubDAO {
 		try {
 			sb.append(" SELECT c.clubNum, userName, subject, hitCount, imageFilename, ");
 			sb.append("       TO_CHAR(reg_date, 'YYYY-MM-DD') reg_date, "
-					+ " maxMember, nowMember  ");
+					+ " maxMember, nowMember,  ");
+			sb.append(" NVL(boardLikeCount, 0) boardLikeCount " );
 			sb.append(" FROM club c ");
 			sb.append(" JOIN member m ON c.userId = m.userId ");
 			sb.append(" JOIN clubMember cm ON c.clubNum = cm.clubNum ");
@@ -545,6 +567,10 @@ public class ClubDAO {
 			sb.append("        FROM clubImgFile");
 			sb.append("     ) WHERE rank = 1 ");
 			sb.append(" ) i ON c.clubNum = i.clubNum ");
+			sb.append(" LEFT OUTER JOIN (" );
+			sb.append("      SELECT clubNum, COUNT(*) boardLikeCount FROM clubLike" );
+			sb.append("     GROUP BY clubNum" );
+			sb.append(" ) bc ON c.clubNum = bc.clubNum " );
 			sb.append(" WHERE cm.userId =  ? ");
 	
 			sb.append(" ORDER BY c.clubnum DESC ");
@@ -569,6 +595,8 @@ public class ClubDAO {
 				dto.setMaxMember(rs.getInt("maxMember"));
 				dto.setNowMember(rs.getInt("nowMember"));
 				dto.setImageFilename(rs.getString("imageFilename"));
+				
+				dto.setBoardLikeCount(rs.getInt("boardLikeCount"));
 
 				
 				list.add(dto);
