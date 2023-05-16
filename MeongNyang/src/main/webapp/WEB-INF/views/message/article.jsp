@@ -18,15 +18,13 @@
 .table-article tr>td { padding-left: 5px; padding-right: 5px; }
 </style>
 <script type="text/javascript">
-<c:if test="${sessionScope.member.userId==( category=='receive' ? dto.receiveId : dto.sendId ) || sessionScope.member.userId=='admin'}">
 	function deleteBoard() {
 	    if(confirm("게시글을 삭제 하시 겠습니까 ? ")) {
-		    let query = "num=${dto.messageNum}&${query}";
+		    let query = "num=${dto.messageNum}&category=${category}&page=${page}";
 		    let url = "${pageContext.request.contextPath}/message/delete.do?" + query;
 	    	location.href = url;
 	    }
 	}
-</c:if>
 
 //해당되는 객체가 숨겨져있는지 아닌지 확인하는 함수
 const isHidden = ele => {
@@ -47,7 +45,14 @@ const isHidden = ele => {
 <main>
 	<div class="container body-container">
 	    <div class="body-title">
-			<h2> 글보기 </h2>
+			<c:choose>
+	   			<c:when test="${category == 'receive' }">
+					<h2> 받은 쪽지함 </h2>
+				</c:when>
+				<c:otherwise>
+					<h2> 보낸 쪽지함 </h2>
+				</c:otherwise>
+			</c:choose>
 	    </div>
 	    <div style="box-shadow: 0 0 15px 0 rgb(2 59 109 / 10%);border-radius: 30px; margin: 0 auto ; width: 70%; margin-bottom: 50px;">
 	    <div class="body-main mx-auto">
@@ -63,10 +68,10 @@ const isHidden = ele => {
 				<tbody>
 					<tr>
 						<td width="50%">
-							이름 : ${dto.sendName}
+							보낸사람 : ${dto.sendName} | 받은사람 : ${dto.receiveName }
 						</td>
 						<td align="right">
-							${dto.send_date} | 조회 5
+							${dto.send_date}
 						</td>
 					</tr>
 					
@@ -83,15 +88,9 @@ const isHidden = ele => {
 			<table class="table">
 				<tr>
 					<td width="50%">
-						<c:choose>
-							<c:when test="${sessionScope.member.userId==( category=='receive' ? dto.receiveId : dto.sendId )}">
-								<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/bbs/update.do?num=${dto.num}&page=${page}';">수정</button>
-							</c:when>
-							<c:otherwise>
-								<button type="button" class="btn" disabled="disabled">수정</button>
-							</c:otherwise>
-						</c:choose>
+				    	<button type="button" class="btn" onclick="deleteBoard();">삭제</button>
 				    	
+				    	<!-- 
 						<c:choose>
 				    		<c:when test="${sessionScope.member.userId==( category=='receive' ? dto.receiveId : dto.sendId ) || sessionScope.member.userId=='admin'}">
 				    			<button type="button" class="btn" onclick="deleteBoard();">삭제</button>
@@ -100,9 +99,10 @@ const isHidden = ele => {
 				    			<button type="button" class="btn" disabled="disabled">삭제</button>
 				    		</c:otherwise>
 				    	</c:choose>
+				    	 -->
 					</td>
 					<td align="right">
-						<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/message/list_${category}.do?${query}';">리스트</button>
+						<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/message/list_${category}.do?';">리스트</button>
 					</td>
 				</tr>
 			</table>

@@ -33,8 +33,8 @@ public class MessageDAO {
 			pstmt.close();
 			pstmt = null;
 			
-			sql = "INSERT INTO message(messageNum, subject, content, send_date, sendId, receiveId) "
-					+ " VALUES (message_seq.NEXTVAL, ?, ?, SYSDATE, ?, ?)";
+			sql = "INSERT INTO message(messageNum, subject, content, send_date, sendId, receiveId, sendState, receiveState) "
+					+ " VALUES (message_seq.NEXTVAL, ?, ?, SYSDATE, ?, ?, 1, 1)";
 			pstmt = conn.prepareStatement(sql);
 			
 			pstmt.setString(1, dto.getSubject());
@@ -68,9 +68,9 @@ public class MessageDAO {
 			sql = "SELECT NVL(COUNT(*), 0) FROM message ";
 			
 			if(category.equals("receive")) {
-				sql += "  WHERE receiveId = ?";
+				sql += "  WHERE receiveId = ? AND receiveState = 1";
 			} else if(category.equals("send")) {
-				sql += "  WHERE sendId = ?";
+				sql += "  WHERE sendId = ? AND sendState = 1";
 			}
 			
 			pstmt = conn.prepareStatement(sql);
@@ -175,9 +175,9 @@ public class MessageDAO {
 			sb.append(" JOIN member m2 ON m2.userId = ms.sendId ");
 			
 			if(category.equals("receive")) {
-				sb.append(" WHERE receiveId = ? ");
+				sb.append(" WHERE receiveId = ? AND receiveState = 1");
 			} else if(category.equals("send")) {
-				sb.append(" WHERE sendId = ? ");
+				sb.append(" WHERE sendId = ? AND sendState = 1");
 			}
 			
 			sb.append(" ORDER BY messageNum DESC ");
@@ -352,30 +352,28 @@ public class MessageDAO {
 		return dto;
 	}
 
-/*
+
 	// 게시물 삭제
-	public void deleteBoard(long num, String userId) throws SQLException {
+	public void deleteBoard(long num, String category) throws SQLException {
 		PreparedStatement pstmt = null;
 		String sql;
 
 		try {
-			if (userId.equals("admin")) {
-				sql = "DELETE FROM bbs WHERE num=?";
+				sql = "UPDATE message SET ";
+				
+				if(category.equals("receive")) {
+					sql += " receiveState = 0";
+				} else if(category.equals("send")) {
+					sql += "  sendState = 0";
+				}
+				sql += "  WHERE messageNum=?";
+				
 				pstmt = conn.prepareStatement(sql);
 				
 				pstmt.setLong(1, num);
 				
 				pstmt.executeUpdate();
-			} else {
-				sql = "DELETE FROM bbs WHERE num=? AND userId=?";
-				
-				pstmt = conn.prepareStatement(sql);
-				
-				pstmt.setLong(1, num);
-				pstmt.setString(2, userId);
-				
-				pstmt.executeUpdate();
-			}
+		
 		} catch (SQLException e) {
 			e.printStackTrace();
 			throw e;
@@ -388,5 +386,5 @@ public class MessageDAO {
 			}
 		}
 	}
-	*/
+	
 }

@@ -47,7 +47,7 @@ public class MessageServlet extends MyServlet {
 		} else if (uri.indexOf("article.do") != -1) {
 			article(req, resp);
 		} else if (uri.indexOf("delete.do") != -1) {
-			//delete(req, resp);
+			delete(req, resp);
 		}
 		
 	}
@@ -265,11 +265,11 @@ public class MessageServlet extends MyServlet {
 		resp.sendRedirect(cp + "/message/list_"+category+".do?" + query);
 	}
 
-	/*
+	
 
 	protected void delete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		// 삭제
-		BoardDAO dao = new BoardDAO();
+		MessageDAO dao = new MessageDAO();
 
 		HttpSession session = req.getSession();
 		SessionInfo info = (SessionInfo) session.getAttribute("member");
@@ -278,9 +278,12 @@ public class MessageServlet extends MyServlet {
 		
 		String page = req.getParameter("page");
 		String query = "page=" + page;
-
+		String category = req.getParameter("category");
+		
 		try {
 			long num = Long.parseLong(req.getParameter("num"));
+			
+			/*
 			String condition = req.getParameter("condition");
 			String keyword = req.getParameter("keyword");
 			if (condition == null) {
@@ -292,13 +295,14 @@ public class MessageServlet extends MyServlet {
 			if (keyword.length() != 0) {
 				query += "&condition=" + condition + "&keyword=" + URLEncoder.encode(keyword, "UTF-8");
 			}
-
-			dao.deleteBoard(num, info.getUserId());
+			 */
+			
+			dao.deleteBoard(num, category);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
-		resp.sendRedirect(cp + "/bbs/list.do?" + query);
+		resp.sendRedirect(cp + "/message/list_"+category+".do?" + query);
 	}
-*/
+
 }

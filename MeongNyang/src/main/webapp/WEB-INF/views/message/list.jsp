@@ -66,7 +66,14 @@ function searchList() {
 <main>
 	<div class="container body-container">
 	   <div class="body-title">
-			<h2> 쪽지함 </h2>
+	  		<c:choose>
+	   			<c:when test="${category == 'receive' }">
+					<h2> 받은 쪽지함 </h2>
+				</c:when>
+				<c:otherwise>
+					<h2> 보낸 쪽지함 </h2>
+				</c:otherwise>
+			</c:choose>
 	   </div>
 	   
 	   <div class="nav_sub" style="box-shadow: 0 0 15px 0 rgb(2 59 109 / 10%); border-radius: 30px; width: 12%;">
