@@ -281,7 +281,7 @@ window.addEventListener('load',() => {
 					<td width="50%">
 						<c:choose>
 							<c:when test="${sessionScope.member.userId==dto.userId}">
-								<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/notice/update.do?noticeNum=${dto.noticeNum}&page=${page}';">수정</button>
+								<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/notice/update.do?noticeNum=${dto.noticeNum}&page=${page}&size=${size}';">수정</button>
 							</c:when>
 							<c:otherwise>
 								<button type="button" class="btn" disabled="disabled">수정</button>

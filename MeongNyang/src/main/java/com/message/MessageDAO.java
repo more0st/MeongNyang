@@ -299,25 +299,21 @@ public class MessageDAO {
 		return list;
 	}
 
-
+*/
 	// 해당 게시물 보기
-	public BoardDTO readBoard(long num) {
-		BoardDTO dto = null;
+	public MessageDTO readBoard(long num) {
+		MessageDTO dto = null;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		String sql;
 
 		try {
 			// 게시물별 좋아요 개수: boardLikeCount
-			sql = "SELECT b.num, b.userId, userName, subject, content, reg_date, hitCount, "
-					+ " NVL(boardLikeCount, 0) boardLikeCount "
-					+ " FROM bbs b "
-					+ " JOIN member1 m ON b.userId=m.userId "
-					+ " LEFT OUTER JOIN (" 
-					+ "   SELECT num, COUNT(*) boardLikeCount FROM bbsLike "
-					+ "   GROUP BY num "
-					+ "  ) bc ON b.num = bc.num "
-					+ " WHERE b.num = ? ";
+			sql = "SELECT messageNum, subject, content, m1.userName receiveName, m2.userName sendName, send_date, sendId, receiveId "
+					+ " FROM message ms "
+					+ " JOIN member m1 ON m1.userId = ms.receiveId "
+					+ " JOIN member m2 ON m2.userId = ms.sendId "
+					+ " WHERE messageNum = ? ";
 			pstmt = conn.prepareStatement(sql);
 			
 			pstmt.setLong(1, num);
@@ -325,16 +321,14 @@ public class MessageDAO {
 			rs = pstmt.executeQuery();
 
 			if (rs.next()) {
-				dto = new BoardDTO();
+				dto = new MessageDTO();
 				
-				dto.setNum(rs.getLong("num"));
-				dto.setUserId(rs.getString("userId"));
-				dto.setUserName(rs.getString("userName"));
+				dto.setMessageNum(rs.getLong("messageNum"));
 				dto.setSubject(rs.getString("subject"));
 				dto.setContent(rs.getString("content"));
-				dto.setHitCount(rs.getInt("hitCount"));
-				dto.setReg_date(rs.getString("reg_date"));
-				dto.setBoardLikeCount(rs.getInt("boardLikeCount"));
+				dto.setReceiveName(rs.getString("receiveName"));
+				dto.setSendName(rs.getString("sendName"));
+				dto.setSend_date(rs.getString("send_date"));
 				
 			}
 		} catch (SQLException e) {
@@ -358,7 +352,7 @@ public class MessageDAO {
 		return dto;
 	}
 
-
+/*
 	// 게시물 삭제
 	public void deleteBoard(long num, String userId) throws SQLException {
 		PreparedStatement pstmt = null;

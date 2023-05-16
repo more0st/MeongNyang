@@ -94,6 +94,7 @@ function sendOk() {
 							<button type="button" class="btn" onclick="sendOk();">${mode=='update'?'수정완료':'등록하기'}</button>
 							<button type="reset" class="btn">다시입력</button>
 							<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/notice/list.do';">${mode=='update'?'수정취소':'등록취소'}</button>
+							<input type="hidden" name="size" value="${size}">
 							<c:if test="${mode=='update'}">
 								<input type="hidden" name="noticeNum" value="${dto.noticeNum}">
 								<input type="hidden" name="page" value="${page}">

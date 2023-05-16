@@ -105,7 +105,7 @@ function searchList() {
 						<tr>
 							<td>${dataCount - (page-1) * size - status.index}</td>
 							<td class="left">
-								<a href="${articleUrl}&num=${dto.messageNum}">${dto.subject}</a>
+								<a href="${articleUrl}&num=${dto.messageNum}&category=${category}">${dto.subject}</a>
 							</td>
 							<td>${dto.sendName}</td>
 							<td>${dto.receiveName}</td>

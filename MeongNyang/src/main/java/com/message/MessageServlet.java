@@ -45,7 +45,7 @@ public class MessageServlet extends MyServlet {
 		} else if (uri.indexOf("write_ok.do") != -1) {
 			writeSubmit(req, resp);
 		} else if (uri.indexOf("article.do") != -1) {
-			//article(req, resp);
+			article(req, resp);
 		} else if (uri.indexOf("delete.do") != -1) {
 			//delete(req, resp);
 		}
@@ -197,19 +197,22 @@ public class MessageServlet extends MyServlet {
 
 		resp.sendRedirect(cp + "/message/list_receive.do");
 	}
-/*
+
 	protected void article(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		// 글보기
-		BoardDAO dao = new BoardDAO();
+		MessageDAO dao = new MessageDAO();
 		MyUtil util = new MyUtil();
 		
 		String cp = req.getContextPath();
 		
 		String page = req.getParameter("page");
+		String category = req.getParameter("category");
 		String query = "page=" + page;
 
 		try {
 			long num = Long.parseLong(req.getParameter("num"));
+			
+			/*
 			String condition = req.getParameter("condition");
 			String keyword = req.getParameter("keyword");
 			if (condition == null) {
@@ -221,40 +224,48 @@ public class MessageServlet extends MyServlet {
 			if (keyword.length() != 0) {
 				query += "&condition=" + condition + "&keyword=" + URLEncoder.encode(keyword, "UTF-8");
 			}
-
+			*/
+			
 			// 조회수 증가
-			dao.updateHitCount(num);
-
+			//dao.updateHitCount(num);
+		
 			// 게시물 가져오기
-			BoardDTO dto = dao.readBoard(num);
+			MessageDTO dto = dao.readBoard(num);
 			if (dto == null) { // 게시물이 없으면 다시 리스트로
-				resp.sendRedirect(cp + "/bbs/list.do?" + query);
+				resp.sendRedirect(cp + "/message/list_"+category+".do?" + query);
 				return;
 			}
+			
 			dto.setContent(util.htmlSymbols(dto.getContent()));
 
+			/*
 			// 이전글 다음글
 			BoardDTO preReadDto = dao.preReadBoard(dto.getNum(), condition, keyword);
 			BoardDTO nextReadDto = dao.nextReadBoard(dto.getNum(), condition, keyword);
-
+			 */
+			
 			// JSP로 전달할 속성
 			req.setAttribute("dto", dto);
 			req.setAttribute("page", page);
 			req.setAttribute("query", query);
+			req.setAttribute("category", category);
+			
+			/*
 			req.setAttribute("preReadDto", preReadDto);
 			req.setAttribute("nextReadDto", nextReadDto);
-
+			*/
+			
 			// 포워딩
-			forward(req, resp, "/WEB-INF/views/bbs/article.jsp");
+			forward(req, resp, "/WEB-INF/views/message/article.jsp");
 			return;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 
-		resp.sendRedirect(cp + "/bbs/list.do?" + query);
+		resp.sendRedirect(cp + "/message/list_"+category+".do?" + query);
 	}
 
-	
+	/*
 
 	protected void delete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		// 삭제
