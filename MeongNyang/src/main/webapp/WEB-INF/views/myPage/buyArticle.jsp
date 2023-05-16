@@ -12,19 +12,31 @@
 <style type="text/css">
 .body-main {
 	max-width: 700px;
+	padding-top: 15px;
 }
 
-.table-list thead > tr:first-child{ background: #ffedea; }
-.table-list th, .table-list td { text-align: center; }
-.table-list .left { text-align: left; padding-left: 5px; }
+.table-article tr>td { padding-left: 5px; padding-right: 5px; }
 
-.table-list .num { width: 60px; color: #787878; }
-.table-list .subject { color: #787878; }
-.table-list .name { width: 100px; color: #787878; }
-.table-list .date { width: 100px; color: #787878; }
-.table-list .hit { width: 70px; color: #787878; }
+.img-box {
+	max-width: 700px;
+	padding: 5px;
+	box-sizing: border-box;
+	border: 1px solid #ccc;
+	display: flex; /* 자손요소를 flexbox로 변경 */
+	flex-direction: row; /* 정방향 수평나열 */
+	flex-wrap: nowrap;
+	overflow-x: auto;
+}
+.img-box img {
+	width: 100px; height: 100px;
+	margin-right: 5px;
+	flex: 0 0 auto;
+	cursor: pointer;
+}
+
 </style>
 <script type="text/javascript">
+
 
 </script>
 
@@ -39,9 +51,9 @@
 <main>
 	<div class="container body-container">
 	    <div class="body-title">
-			<h2><i class="fa-regular fa-square"></i> 나의구매내역 </h2>
+			<h2> 나의구매내역 </h2>
 	    </div>
-	    
+	    <div style="box-shadow: 0 0 15px 0 rgb(2 59 109 / 10%);border-radius: 30px; margin: 0 auto ; width: 70%; margin-bottom: 50px;">
 	    <div class="body-main mx-auto">
 			<table class="table table-border table-article">
 				<thead>
@@ -50,64 +62,65 @@
 							${dto.subject}
 						</td>
 					</tr>
+					<tr>
+						<td colspan="2" align="center">
+							${dto.price}
+						</td>
+					</tr>
 				</thead>
 				
 				<tbody>
 					<tr>
 						<td width="50%">
-							작성자 : ${dto.sellerid}
+							판매자 : ${dto.sellerid}
 						</td>
 						<td align="right">
 							${dto.reg_date} | 조회 ${dto.hitCount}
 						</td>
 					</tr>
+					
 					<tr>
-						<td align="right">
-							구매자 : ${dto.sellerid} | 결제일 : ${dto.pay_date}
+						<td colspan="2" valign="top" height="200">
+							${dto.content}
+						</td>
+					</tr>
+
+					<tr>
+						<td colspan="2" valign="top" height="200">
+							판매날짜 : ${dto.pay_date}
 						</td>
 					</tr>
 					
 					<tr style="border-bottom: none;">
-						<td colspan="2" valign="top" height="200">
-							${dto.content}
-						</td>
-						<td>이미지</td>					
-						<td>
-							<div class="img-grid"><img class="item img-add" src="add_photo.png"></div>
-							<input type="file" name="selectFile" accept="image/*" multiple="multiple" style="display: none;" class="form-control">
-						</td>
-					</tr>					
-					
+						<td colspan="2" height="110">
+							<div class="img-box">
+								<c:forEach var="vo" items="${listFile}">
+									<img src="${pageContext.request.contextPath}/uploads/market/${vo.imageFilename}"
+										onclick="imageViewer('${pageContext.request.contextPath}/uploads/market/${vo.imageFilename}');">
+								</c:forEach>
+							</div>
+						</td>	
+					</tr>
 					<tr>
 						<td colspan="2">
-							이전글 :
+							이전구매글 :
 							<c:if test="${not empty preReadDto}">
-								<a href="${pageContext.request.contextPath}/myPage/buyArticle.do?${query}&num=${preReadDto.num}">${preReadDto.subject}</a>
+								<a href="${pageContext.request.contextPath}/myPage/buyArticle.do?page=${page}&marketnum=${preReadDto.marketnum}">${preReadDto.subject}</a>
 							</c:if>
 						</td>
 					</tr>
 					<tr>
 						<td colspan="2">
-							다음글 :
+							다음구매글 :
 							<c:if test="${not empty nextReadDto}">
-								<a href="${pageContext.request.contextPath}/myPage/buyArticle.do?${query}&num=${nextReadDto.num}">${nextReadDto.subject}</a>
+								<a href="${pageContext.request.contextPath}/myPage/buyArticle.do?page=${page}&marketnum=${nextReadDto.marketnum}">${nextReadDto.subject}</a>
 							</c:if>
 						</td>
 					</tr>
 				</tbody>
 			</table>
-			
-			<table class="table">
-				<tr>
-					<td width="50%">
-						
-					</td>
-					<td align="right">
-						<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/myPage/buyList.do?${query}';">리스트</button>
-					</td>
-				</tr>
-			</table>
 
+	    </div>
 	    </div>
 	</div>
 </main>

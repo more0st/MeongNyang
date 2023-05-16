@@ -25,6 +25,29 @@
 .table-list .hit { width: 70px; color: #787878; }
 .table-list .pay_date { width: 70px; color: #787878; }
 .table-list .content { width: 70px; color: #787878; }
+
+.market-box {
+	margin-top: 3px; margin-bottom: 70px;
+	display: grid;
+	/* auto-fill :  남는 공간(빈 트랙)을 그대로 유지, minmax : '최소, 최대 크기'를 정의 */
+	/*grid-template-columns: repeat(auto-fill, minmax(180px, 3fr));*/
+	/*grid-template-columns: repeat(3, 180px);
+	grid-column-gap: 10px;
+	grid-row-gap: 100px;*/
+	display: flex;
+	justify-content: flex-start;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 10px;
+	
+}
+.market-box .item { border: 1px solid #DAD9FF; cursor: pointer; max-width: 220px;  }
+.item > img {  width: 220px; height: 220px; object-fit: cover; cursor: pointer; border-radius : 20px; }
+.border{
+	border: 1px solid;
+	background: #ffedea;
+}
+
 </style>
 <script type="text/javascript">
 function searchList() {
@@ -57,38 +80,24 @@ function searchList() {
 				</tr>
 			</table>
 			
-			<table class="table table-border table-list">
-				<thead>
-					<tr>
-						<th class="num">번호</th>
-						<th class="subject">제목</th>
-						<th class="name">작성자</th>
-						<th class="date">작성일</th>
-						<th class="hit">조회수</th>
-						<th class="pay_date">판매날짜</th>
-						<th class="content">내용</th>
-					</tr>
-				</thead>
-				
-				<tbody>
-					<c:forEach var="dto" items="${list}" varStatus="status">
-						<tr>
-							<td>${dataCount - (page-1) * size - status.index}</td>
-							<td class="left">
-								<a href="${articleUrl}&marketnum=${dto.marketnum}">${dto.subject}</a>
-							</td>
-							<td>${dto.sellerid}</td>
-							<td>${dto.reg_date}</td>
-							<td>${dto.hitCount}</td>
-							<td>${dto.pay_date}</td>
-							<td>${dto.content}</td>
-						</tr>
-					</c:forEach>
-				</tbody>	
-			</table>
+			<div class="market-box">
+				<c:forEach var="dto" items="${list}" varStatus="status">
+					<div class="item" title="${dto.subject}"
+						onclick="location.href='${articleUrl}&marketnum=${dto.marketnum}';">
+						<img src="${pageContext.request.contextPath}/uploads/market/${dto.imageFilename}">
+						<div class="border">
+						<div>제목 : ${dto.subject}</div>
+						<div>판매자 : ${dto.sellerid}</div>
+						<div>거래지 : ${dto.addr}</div>
+						<div>가격 : ${dto.price}원</div>
+						<div>판매날짜 : ${dto.pay_date}</div>
+						</div>
+					</div>
+				</c:forEach>
+			</div>
 			
 			<div class="page-navigation">
-				${dataCount == 0 ? "" : paging}
+				${dataCount == 0 ? "등록된 게시물이 없습니다." : paging}
 			</div>
 			
 			<table class="table">		

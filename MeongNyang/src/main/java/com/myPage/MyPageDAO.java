@@ -20,7 +20,7 @@ public class MyPageDAO {
 		String sql;
 		
 		try {
-			sql = "SELECT COUNT(*) FROM market WHERE sellerid= ?";
+			sql = "SELECT COUNT(*) FROM market WHERE buyerid= ?";
 			
 			
 			pstmt = conn.prepareStatement(sql);
@@ -60,7 +60,7 @@ public class MyPageDAO {
 		String sql;
 		
 		try {
-			sql = "SELECT COUNT(*) FROM market WHERE sellerid=?";
+			sql = "SELECT COUNT(*) FROM market WHERE buyerid=?";
 			if(condition.equals("all")) {
 				sql += " AND INSTR(subject, ?) >= 1 OR INSTR(content, ? ) >= 1";
 			} else if(condition.equals("reg_data")) {
@@ -117,16 +117,14 @@ public class MyPageDAO {
 		String sql;
 		
 		try {
-			sql = "SELECT marketnum,sellerid,buyerid,subject,content,hitCount, TO_CHAR(reg_date, 'YYYY-MM-DD') reg_date, TO_CHAR(pay_date, 'YYYY-MM-DD') pay_date"
-					+ " FROM market"
-					+ " WHERE sellerid = ? ORDER BY marketnum DESC "
+			sql = "SELECT a.marketnum,sellerid,buyerid,subject,content,addr, price, hitCount, TO_CHAR(reg_date, 'YYYY-MM-DD') reg_date, TO_CHAR(pay_date, 'YYYY-MM-DD') pay_date, state, imgname"
+					+ " FROM market a"
+					+ " JOIN marketimgfile b on a.marketnum = b.marketnum"
+					+ " JOIN (SELECT marketnum, MIN(imgnum) imgnum FROM marketimgfile"
+					+ " GROUP BY marketnum) c ON c.imgnum = b.imgnum"
+					+ " WHERE buyerid = ? ORDER BY marketnum DESC "
 					+ " OFFSET ? ROWS FETCH FIRST ? ROWS ONLY";
-				
-			
-			//  select * from market where = '세션에서 받아온 아이디';
-			
 			pstmt = conn.prepareStatement(sql);
-			
 			
 			pstmt.setString(1, userId);
 			pstmt.setInt(2, offset);
@@ -141,9 +139,13 @@ public class MyPageDAO {
 				dto.setBuyerid(rs.getString("buyerid"));
 				dto.setSubject(rs.getString("subject"));
 				dto.setContent(rs.getString("content"));
+				dto.setAddr(rs.getString("addr"));
+				dto.setPrice(rs.getString("price"));
 				dto.setHitCount(rs.getInt("hitCount"));
 				dto.setReg_date(rs.getString("reg_date"));
 				dto.setPay_date(rs.getString("pay_date"));
+				dto.setState(rs.getInt("state"));
+				dto.setImageFilename(rs.getString("imgname"));
 				
 			
 				list.add(dto);
@@ -179,11 +181,13 @@ public class MyPageDAO {
 		StringBuilder sb = new StringBuilder();
 
 		try {
-			sb.append(" SELECT marketnum,sellerid,buyerid,subject,hitCount, ");
-			sb.append("      TO_CHAR(reg_date, 'YYYY-MM-DD') reg_date, TO_CHAR(pay_date, 'YYYY-MM-DD') pay_date ");
-			sb.append(" FROM market a ");
-			sb.append(" JOIN member b ON a.sellerId = b.userId ");
-			sb.append(" WHERE sellerid=?");
+			sb.append("SELECT a.marketnum,sellerid,buyerid,subject,content,addr, price, hitCount, TO_CHAR(reg_date, 'YYYY-MM-DD') reg_date, TO_CHAR(pay_date, 'YYYY-MM-DD') pay_date, state, imgname");
+			sb.append(" FROM market a");
+			sb.append(" JOIN marketimgfile b on a.marketnum = b.marketnum");
+			sb.append(" JOIN (SELECT marketnum, MIN(imgnum) imgnum FROM marketimgfile");
+			sb.append(" GROUP BY marketnum) c ON c.imgnum = b.imgnum");
+			sb.append(" WHERE buyerid = ?");
+					
 			if (condition.equals("all")) {
 				sb.append(" AND INSTR(subject, ?) >= 1 OR INSTR(content, ?) >= 1 ");
 			} else if (condition.equals("reg_date")) {
@@ -192,6 +196,7 @@ public class MyPageDAO {
 			} else {
 				sb.append(" AND INSTR(" + condition + ", ?) >= 1 ");
 			}
+			
 			sb.append(" ORDER BY marketnum DESC ");
 			sb.append(" OFFSET ? ROWS FETCH FIRST ? ROWS ONLY ");
 
@@ -212,19 +217,26 @@ public class MyPageDAO {
 
 			rs = pstmt.executeQuery();
 			
-			while (rs.next()) {
+			while(rs.next() ) {
 				MyPageDTO dto = new MyPageDTO();
-
+				
 				dto.setMarketnum(rs.getLong("marketnum"));
 				dto.setSellerid(rs.getString("sellerid"));
 				dto.setBuyerid(rs.getString("buyerid"));
 				dto.setSubject(rs.getString("subject"));
+				dto.setContent(rs.getString("content"));
+				dto.setAddr(rs.getString("addr"));
+				dto.setPrice(rs.getString("price"));
 				dto.setHitCount(rs.getInt("hitCount"));
 				dto.setReg_date(rs.getString("reg_date"));
 				dto.setPay_date(rs.getString("pay_date"));
+				dto.setState(rs.getInt("state"));
+				dto.setImageFilename(rs.getString("imgname"));
 				
+			
 				list.add(dto);
 			}
+			
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
@@ -273,15 +285,16 @@ public class MyPageDAO {
 
 	// 해당 게시물 보기
 	public MyPageDTO readBoard(long marketnum) {
-		MyPageDTO dto = null;
+		MyPageDTO dto = new MyPageDTO();
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		String sql;
 
 		try {
-			sql = "SELECT marketnum,sellerid,buyerid,subject,content,hitCount, reg_date, pay_date"
-					+ " FROM market"
-					+ " WHERE marketnum = ?";
+			sql = "SELECT a.marketnum,sellerid,buyerid,subject,content,addr, price, hitCount, reg_date, pay_date, state, imgname"
+					+ " FROM market a"
+					+ " JOIN marketimgfile b on a.marketnum = b.marketnum"
+					+ " WHERE a.marketnum = ?";
 			pstmt = conn.prepareStatement(sql);
 			
 			pstmt.setLong(1, marketnum);
@@ -289,16 +302,19 @@ public class MyPageDAO {
 			rs = pstmt.executeQuery();
 
 			if (rs.next()) {
-				dto = new MyPageDTO();
 				
 				dto.setMarketnum(rs.getLong("marketnum"));
 				dto.setSellerid(rs.getString("sellerid"));
 				dto.setBuyerid(rs.getString("buyerid"));
 				dto.setSubject(rs.getString("subject"));
 				dto.setContent(rs.getString("content"));
+				dto.setAddr(rs.getString("addr"));
+				dto.setPrice(rs.getString("price"));
 				dto.setHitCount(rs.getInt("hitcount"));
 				dto.setReg_date(rs.getString("reg_date"));
 				dto.setPay_date(rs.getString("pay_date"));
+				dto.setState(rs.getInt("state"));
+				dto.setImageFilename(rs.getString("imgname"));
 			}
 			
 		} catch (SQLException e) {
@@ -321,23 +337,72 @@ public class MyPageDAO {
 
 		return dto;
 	}
-
-
-	// 이전글
-	public MyPageDTO preReadBoard(long marketnum) {
-		MyPageDTO dto = null;
+	
+	
+	public List<MyPageDTO> listPhotoFile(long marketnum) {
+		List<MyPageDTO> list = new ArrayList<>();
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		String sql;
 		
 		try {
-			sql = "SELECT marketnum,sellerid,buyerid,subject,hitCount, reg_date, pay_date"
-					+ " FROM market"
-					+ " WHERE marketnum = ?";
-			
+			sql = "SELECT imgnum, marketnum, imgname FROM marketimgfile WHERE marketnum=?";
 			pstmt = conn.prepareStatement(sql);
 			
 			pstmt.setLong(1, marketnum);
+			
+			rs = pstmt.executeQuery();
+			
+			while(rs.next()) {
+				MyPageDTO dto = new MyPageDTO();
+				
+				dto.setFileNum(rs.getLong("imgnum"));
+				dto.setMarketnum(rs.getLong("marketnum"));
+				dto.setImageFilename(rs.getString("imgname"));
+				
+				list.add(dto);
+			}
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			if (rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException e) {
+				}
+			}
+
+			if (pstmt != null) {
+				try {
+					pstmt.close();
+				} catch (SQLException e) {
+				}
+			}
+		}
+		
+		
+		return list;
+	}
+
+
+	// 이전글
+	public MyPageDTO preReadBoard(long marketnum, String userId) {
+		MyPageDTO dto = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		StringBuilder sb = new StringBuilder();
+		
+		try {
+			sb.append("SELECT marketnum,subject FROM market ");
+			sb.append(" WHERE marketnum>? AND buyerid =? ");
+			sb.append(" ORDER BY marketnum ASC");
+			sb.append(" FETCH FIRST 1 ROWS ONLY");
+			
+			pstmt = conn.prepareStatement(sb.toString());
+			
+			pstmt.setLong(1, marketnum);
+			pstmt.setString(2, userId);
 			
 			rs = pstmt.executeQuery();
 			
@@ -345,15 +410,10 @@ public class MyPageDAO {
 				dto = new MyPageDTO();
 				
 				dto.setMarketnum(rs.getLong("marketnum"));
-				dto.setSellerid(rs.getString("sellerid"));
-				dto.setBuyerid(rs.getString("buyerid"));
 				dto.setSubject(rs.getString("subject"));
-				dto.setHitCount(rs.getInt("hitcount"));
-				dto.setReg_date(rs.getString("reg_date"));
-				dto.setPay_date(rs.getString("pay_date"));
 			}
 			
-		} catch (Exception e) {
+		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
 			if(rs != null) {
@@ -373,6 +433,56 @@ public class MyPageDAO {
 		
 		return dto;
 	}
+	
+	
+	public MyPageDTO nextReadBoard(long marketnum, String userId) {
+		MyPageDTO dto = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		StringBuilder sb = new StringBuilder();
+		
+		try {
+			sb.append("SELECT marketnum,subject FROM market ");
+			sb.append(" WHERE marketnum<? AND buyerid =? ");
+			sb.append(" ORDER BY marketnum DESC");
+			sb.append(" FETCH FIRST 1 ROWS ONLY");
+			
+			pstmt = conn.prepareStatement(sb.toString());
+			
+			pstmt.setLong(1, marketnum);
+			pstmt.setString(2, userId);
+			
+			rs = pstmt.executeQuery();
+			
+			if(rs.next()) {
+				dto = new MyPageDTO();
+				
+				dto.setMarketnum(rs.getLong("marketnum"));
+				dto.setSubject(rs.getString("subject"));
+			}
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			if(rs != null) {
+				try {
+					rs.close();
+				} catch (Exception e2) {
+				}
+			}
+			
+			if(pstmt != null) {
+				try {
+					pstmt.close();
+				} catch (Exception e2) {
+				}
+			}
+		}
+		
+		return dto;
+	}
+
+
 	
 /*	
 	// 다음글
@@ -448,6 +558,7 @@ public class MyPageDAO {
 	*/
 	
 	
+	/*
 	// 이전글
 	public MyPageDTO preReadBoard(long marketnum, String condition, String keyword) {
 		MyPageDTO dto = null;
@@ -590,4 +701,5 @@ public class MyPageDAO {
 	
 		return dto;
 	}
+	*/
 }

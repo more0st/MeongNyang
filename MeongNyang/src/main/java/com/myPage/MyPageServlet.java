@@ -1,5 +1,6 @@
 package com.myPage;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -21,6 +22,8 @@ import com.util.MyUtil;
 public class MyPageServlet extends MyServlet{
 	private static final long serialVersionUID = 1L;
 
+	private String pathname;
+
 	@Override
 	protected void execute(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		req.setCharacterEncoding("utf-8");
@@ -35,7 +38,10 @@ public class MyPageServlet extends MyServlet{
 			forward(req, resp, "/WEB-INF/views/member/login.jsp");
 			return;
 		}
-		
+
+		String root = session.getServletContext().getRealPath("/");
+		pathname = root + "uploads" + File.separator + "market";
+
 		// uri에 따른 작업 구분
 		if (uri.indexOf("buyList.do") != -1) {		// 나의 구매내역 리스트
 			list(req, resp);
@@ -90,7 +96,7 @@ public class MyPageServlet extends MyServlet{
 			}
 			
 			// 전체 페이지수
-			int size = 5;
+			int size = 9;
 			int total_page = util.pageCount(dataCount, size);
 			if(current_page > total_page) {
 				current_page = total_page;
@@ -158,26 +164,33 @@ public class MyPageServlet extends MyServlet{
 		String page = req.getParameter("page");
 		
 		try {
-			long marketnum = Long.parseLong(req.getParameter("marketnum"));		// num 맞는지 확인
+			long marketnum = Long.parseLong(req.getParameter("marketnum"));		
 
 			MyPageDTO dto = dao.readBoard(marketnum);
-			if (dto == null || !dto.getSellerid().equals(info.getUserId())) {
+			if (dto == null || !dto.getBuyerid().equals(info.getUserId())) {
 				resp.sendRedirect(cp + "/myPage/buyList.do?page=" + page);
 				return;
 			}
 			
 			// 글내용 엔터를 <br>로
-			
+			dto.setContent(dto.getContent().replaceAll("\n", "<br>"));
+
+			// 사진
+			List<MyPageDTO> listFile = dao.listPhotoFile(marketnum);
+
 			/// 조회수 증가
 			dao.updateHitCount(marketnum);
 			
 			// 이전글 다음글
-//			MyPageDTO preReadDto = dao.preReadBoard(dto.getMarketnum());
-//			MyPageDTO nextReadDto = dao.nextReadBoard(dto.getMarketnum());
+			MyPageDTO preReadDto = dao.preReadBoard(marketnum, info.getUserId());
+			MyPageDTO nextReadDto = dao.nextReadBoard(marketnum, info.getUserId());
 
 			// 포워딩할 JSP에 넘겨줄 속성
 			req.setAttribute("dto", dto);
 			req.setAttribute("page", page);
+			req.setAttribute("listFile", listFile);
+			req.setAttribute("preReadDto", preReadDto);
+			req.setAttribute("nextReadDto", nextReadDto);
 			
 			// 포워딩
 			forward(req,resp,"/WEB-INF/views/myPage/buyArticle.jsp");

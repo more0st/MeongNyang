@@ -13,8 +13,30 @@ public class MyPageDTO {
 	private int state;		// 상품상태(0:판매중, 1:온라인거래완료, 2:직거래완료)
 	private String reg_date;	// 글 등록날짜
 	private String pay_date;	// 결제날짜(판매완료 날짜)
+
+	private long fileNum;
+	private String imageFilename;
+	private String[] imageFiles;
 	
 	
+	public long getFileNum() {
+		return fileNum;
+	}
+	public void setFileNum(long fileNum) {
+		this.fileNum = fileNum;
+	}
+	public String getImageFilename() {
+		return imageFilename;
+	}
+	public void setImageFilename(String imageFilename) {
+		this.imageFilename = imageFilename;
+	}
+	public String[] getImageFiles() {
+		return imageFiles;
+	}
+	public void setImageFiles(String[] imageFiles) {
+		this.imageFiles = imageFiles;
+	}
 	public String getAddr() {
 		return addr;
 	}
