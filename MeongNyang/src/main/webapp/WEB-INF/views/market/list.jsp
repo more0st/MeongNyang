@@ -95,6 +95,27 @@ function searchList() {
 			<div class="page-navigation">
 				${dataCount == 0 ? "등록된 게시물이 없습니다." : paging}
 			</div>
+			
+			<table class="table">
+				<tr>
+					<td width="100">
+						<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/market/list.do';" title="새로고침"><i class="fa-solid fa-arrow-rotate-right"></i></button>
+					</td>
+					<td align="center">
+						<form name="searchForm" action="${pageContext.request.contextPath}/market/list.do" method="post">
+							<select name="condition" class="form-select">
+								<option value="all"      ${condition=="all"?"selected='selected'":"" }>제목+내용</option>
+								<option value="userName" ${condition=="sellerId"?"selected='selected'":"" }>작성자</option>
+								<option value="reg_date"  ${condition=="reg_date"?"selected='selected'":"" }>등록일</option>
+								<option value="subject"  ${condition=="subject"?"selected='selected'":"" }>제목</option>
+								<option value="content"  ${condition=="content"?"selected='selected'":"" }>내용</option>
+							</select>
+							<input type="text" name="keyword" value="${keyword}" class="form-control">
+							<button type="button" class="btn" onclick="searchList();">검색</button>
+						</form>
+					</td>
+				</tr>
+			</table>
 
 	    </div>
 	</div>

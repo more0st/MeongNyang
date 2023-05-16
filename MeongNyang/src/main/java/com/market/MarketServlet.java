@@ -2,6 +2,8 @@ package com.market;
 
 import java.io.File;
 import java.io.IOException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.List;
 import java.util.Map;
 
@@ -57,6 +59,8 @@ public class MarketServlet extends MyUploadServlet{
 			updateSubmit(req, resp);
 		} else if (uri.indexOf("delete.do") != -1) {
 			delete(req, resp);
+		}  else if (uri.indexOf("deleteFile.do") != -1) {
+			deleteFile(req, resp);
 		}
 	}
 	
@@ -64,23 +68,38 @@ public class MarketServlet extends MyUploadServlet{
 		
 		MarketDAO dao = new MarketDAO();
 		MyUtil util = new MyUtil();
-		
-		HttpSession session = req.getSession();
-		SessionInfo info = (SessionInfo)session.getAttribute("member");
-		
+
 		String cp = req.getContextPath();
 		
 		try {
 			String page = req.getParameter("page");
 			int current_page = 1;
-			if(page != null) {
+			if (page != null) {
 				current_page = Integer.parseInt(page);
 			}
 			
-			// 전체데이터 개수
-			int dataCount = dao.dataCount();
+			// 검색
+			String condition = req.getParameter("condition");
+			String keyword = req.getParameter("keyword");
+			if (condition == null) {
+				condition = "all";
+				keyword = "";
+			}
 
-			// 전체페이지수
+			// GET 방식인 경우 디코딩
+			if (req.getMethod().equalsIgnoreCase("GET")) {
+				keyword = URLDecoder.decode(keyword, "utf-8");
+			}
+
+			// 전체 데이터 개수
+			int dataCount;
+			if (keyword.length() == 0) {
+				dataCount = dao.dataCount();
+			} else {
+				dataCount = dao.dataCount(condition, keyword);
+			}
+			
+			// 전체 페이지 수
 			int size = 9;
 			int total_page = util.pageCount(dataCount, size);
 			if (current_page > total_page) {
@@ -90,23 +109,45 @@ public class MarketServlet extends MyUploadServlet{
 			// 게시물 가져오기
 			int offset = (current_page - 1) * size;
 			if(offset < 0) offset = 0;
-			List<MarketDTO> list = dao.listMarket(offset, size);
 			
+			List<MarketDTO> list = null;
+			if (keyword.length() == 0) {
+				list = dao.listMarket(offset, size);
+			} else {
+				list = dao.listMarket(offset, size, condition, keyword);
+			}
+
+			String query = "";
+			if (keyword.length() != 0) {
+				query = "condition=" + condition + "&keyword=" + URLEncoder.encode(keyword, "utf-8");
+			}
+
 			// 페이징 처리
 			String listUrl = cp + "/market/list.do";
 			String articleUrl = cp + "/market/article.do?page=" + current_page;
+			if (query.length() != 0) {
+				listUrl += "?" + query;
+				articleUrl += "&" + query;
+			}
+
 			String paging = util.paging(current_page, total_page, listUrl);
 
-			// 포워딩할 list.jsp에 넘길 값
+			// 포워딩할 JSP에 전달할 속성
 			req.setAttribute("list", list);
-			req.setAttribute("dataCount", dataCount);
-			req.setAttribute("articleUrl", articleUrl);
 			req.setAttribute("page", current_page);
 			req.setAttribute("total_page", total_page);
+			req.setAttribute("dataCount", dataCount);
+			req.setAttribute("size", size);
+			req.setAttribute("articleUrl", articleUrl);
 			req.setAttribute("paging", paging);
+			req.setAttribute("condition", condition);
+			req.setAttribute("keyword", keyword);
+			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+
+		// JSP로 포워딩
 		forward(req, resp, "/WEB-INF/views/market/list.jsp");
 	}
 	
@@ -240,9 +281,6 @@ public class MarketServlet extends MyUploadServlet{
 		
 		MarketDAO dao = new MarketDAO();
 		
-		HttpSession session = req.getSession();
-		SessionInfo info = (SessionInfo)session.getAttribute("member");
-		
 		try {
 			String cp = req.getContextPath();
 			
@@ -273,7 +311,7 @@ public class MarketServlet extends MyUploadServlet{
 
 			resp.sendRedirect(cp + "/market/list.do?page=" + page);
 		} catch (Exception e) {
-			// TODO: handle exception
+			e.printStackTrace();
 		}
 		
 		
@@ -314,6 +352,49 @@ public class MarketServlet extends MyUploadServlet{
 
 			// 테이블 데이터 삭제
 			dao.deletePhoto(marketNum);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		resp.sendRedirect(cp + "/market/list.do?page=" + page);
+	}
+	
+	protected void deleteFile(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		// 수정에서 파일만 삭제
+		MarketDAO dao = new MarketDAO();
+		
+		HttpSession session = req.getSession();
+		SessionInfo info = (SessionInfo) session.getAttribute("member");
+
+		String cp = req.getContextPath();
+
+		String page = req.getParameter("page");
+
+		try {
+			long marketNum = Long.parseLong(req.getParameter("marketNum"));
+			long fileNum = Long.parseLong(req.getParameter("fileNum"));
+			
+			MarketDTO dto = dao.readMarket(marketNum);
+
+			if (dto == null) {
+				resp.sendRedirect(cp + "/market/list.do?page=" + page);
+				return;
+			}
+
+			if (!info.getUserId().equals(dto.getSellerId())) {
+				resp.sendRedirect(cp + "/market/list.do?page=" + page);
+				return;
+			}
+			
+			MarketDTO vo = dao.readPhotoFile(fileNum);
+			if(vo != null) {
+				FileManager.doFiledelete(pathname, vo.getImageFilename());
+				
+				dao.deletePhotoFile("one", fileNum);
+			}
+
+			resp.sendRedirect(cp + "/market/update.do?marketNum=" + marketNum + "&page=" + page);
+			return;
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
