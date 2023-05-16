@@ -2,8 +2,10 @@ package com.map;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
@@ -13,6 +15,8 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+
+import org.json.JSONObject;
 
 import com.member.SessionInfo;
 import com.util.FileManager;
@@ -31,17 +35,23 @@ public class MapServlet extends MyUploadServlet{
 		req.setCharacterEncoding("utf-8");
 		
 		String uri = req.getRequestURI();
-		String cp = req.getContextPath();
 
-		
-		// 세션 정보
 		HttpSession session = req.getSession();
 		SessionInfo info = (SessionInfo)session.getAttribute("member");
+
+		String ajax = req.getHeader("AJAX");
 		
-		if (info == null) { // 로그인되지 않은 경우
-			resp.sendRedirect(cp + "/member/login.do");
+		// 세션 정보
+		if (ajax!=null && info == null) {
+			// AJAX로 요청해서 로그인이 안된 경우 403 이라는 에러코드를 던짐 
+			resp.sendError(403);
+			return;
+		} else if(info == null) {
+			// AJAX로 요청하지 않고 로그인되지 않은 상태 
+			forward(req, resp, "/WEB-INF/views/member/login.jsp");
 			return;
 		}
+
 		
 		String root = session.getServletContext().getRealPath("/");
 		pathname = root + "uploads" + File.separator + "map";
@@ -68,8 +78,36 @@ public class MapServlet extends MyUploadServlet{
 		} else if(uri.indexOf("deleteReply.do") != -1) {
 			deleteReply(req, resp);
 		} else if(uri.indexOf("insertLikeBoard.do") != -1) {
-			insertLikeBoard(req, resp);
+			insertBoardLike(req, resp);
+		} else if (uri.indexOf("insertReply.do") != -1) {
+			// 댓글 등록
+			insertReply(req, resp);
+		} else if (uri.indexOf("listReply.do") != -1) {
+			// 댓글 리스트
+			listReply(req, resp);
+		} else if (uri.indexOf("deleteReply.do") != -1) {
+			// 댓글 삭제
+			deleteReply(req, resp);
+		} else if (uri.indexOf("insertReplyLike.do") != -1) {
+			// 댓글 좋아요/싫어요 등록
+			insertReplyLike(req, resp);			
+		} else if (uri.indexOf("countReplyLike.do") != -1) {
+			// 댓글 좋아요/실헝요 개수
+			countReplyLike(req, resp);
+		} else if (uri.indexOf("insertReplyAnswer.do") != -1) {
+			// 댓글의 답글 등록 
+			insertReplyAnswer(req, resp);
+		} else if (uri.indexOf("listReplyAnswer.do") != -1) {
+			// 댓글의 답글 리스트
+			listReplyAnswer(req, resp);
+		} else if (uri.indexOf("deleteReplyAnswer.do") != -1) {
+			// 댓글의 답글 삭제
+			deleteReplyAnswer(req, resp);
+		} else if (uri.indexOf("countReplyAnswer.do") != -1) {
+			// 댓글의 답글 개수 
+			countReplyAnswer(req, resp);
 		}
+		
 	}
 	
 	protected void list(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -241,6 +279,13 @@ public class MapServlet extends MyUploadServlet{
 					}
 					dto.setContent(util.htmlSymbols(dto.getContent()));
 
+					
+					// 로그인 유저의 게시글 공감 여부 
+					HttpSession session = req.getSession();
+					SessionInfo info = (SessionInfo) session.getAttribute("member"); 
+					boolean isUserLike = dao.isUserBoardLike(num, info.getUserId());
+					
+					
 					// 이전글 다음글
 					MapDTO preReadDto = dao.preReadBoard(dto.getMapNum(), condition, keyword);
 					MapDTO nextReadDto = dao.nextReadBoard(dto.getMapNum(), condition, keyword);
@@ -258,6 +303,8 @@ public class MapServlet extends MyUploadServlet{
 					req.setAttribute("listFile", listFile);
 					// req.setAttribute("list", list);
 
+					req.setAttribute("isUserLike", isUserLike);
+					
 					// 포워딩
 					forward(req, resp, "/WEB-INF/views/map/article.jsp");
 					return;
@@ -334,10 +381,14 @@ public class MapServlet extends MyUploadServlet{
 			// num = Long.parseLong(req.getParameter("mapNum"));
 			// dto.setMapNum(num);
 			
+			
+			// 숨겨진 좌표 값을 받아와서 DTO에 설정합니다.
+	        String coordinate = req.getParameter("coordinate");
+	        dto.setAddr(coordinate);
+			
 			dto.setMapNum(Long.parseLong(req.getParameter("mapNum")));
 			dto.setSubject(req.getParameter("subject"));
 			dto.setContent(req.getParameter("content"));
-			dto.setAddr(req.getParameter("addr"));
 			dto.setUserId(info.getUserId());
 			
 			Map<String, String[]> map = doFileUpload(req.getParts(), pathname);
@@ -373,8 +424,11 @@ public class MapServlet extends MyUploadServlet{
 			long num = Long.parseLong(req.getParameter("num"));
 			long fileNum = Long.parseLong(req.getParameter("fileNum"));
 			
+			
+			
 			MapDTO dto = dao.readMap(num);
 
+			
 			if (dto == null) {
 				resp.sendRedirect(cp + "/map/list.do?page=" + page);
 				return;
@@ -416,7 +470,7 @@ public class MapServlet extends MyUploadServlet{
 		String query = "page=" + page;
 
 		try {
-			long num = Long.parseLong(req.getParameter("num"));
+			long num = Long.parseLong(req.getParameter("mapNum"));
 			String condition = req.getParameter("condition");
 			String keyword = req.getParameter("keyword");
 			if (condition == null) {
@@ -448,7 +502,7 @@ public class MapServlet extends MyUploadServlet{
 			}
 			dao.deleteImgFile("all", num);
 
-			dao.deleteMap(num);
+			dao.deleteMap(num, info.getUserId());
 
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -457,15 +511,182 @@ public class MapServlet extends MyUploadServlet{
 		resp.sendRedirect(cp + "/map/list.do?" + query);
 
 	}
+	protected void insertBoardLike(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		// 게시글 공감(좋아요) 저장 : AJAX-JSON 으로.  
+		
+		  
+		MapDAO dao = new MapDAO();
+		
+		HttpSession session = req.getSession();
+		SessionInfo info = (SessionInfo) session.getAttribute("member");
+		
+		String state = "false";
+		int boardLikeCount = 0;
+		
+		try {
+			long num = Long.parseLong(req.getParameter("mapNum"));
+			String isNoLike = req.getParameter("isNoLike");
+			
+			if(isNoLike.equals("true")) {
+				dao.insertBoardLike(num, info.getUserId());	// 공감
+			} else {
+				dao.deleteBoardLike(num, info.getUserId());	// 공감 취소
+			}
+			
+			// 공감 개수 
+			boardLikeCount = dao.countBoardLike(num);
+			
+			state = "true";
+			
+		} catch (SQLException e) {
+			state = "liked";
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		JSONObject job = new JSONObject();
+		job.put("state", state);
+		job.put("boardLikeCount", boardLikeCount);
+		
+		PrintWriter out = resp.getWriter();
+		out.print(job.toString());
+		
+	}
+
 	protected void insertReply(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		// 댓글 추가
+		 // 게시글 댓글/답글 저장 : AJAX-JSON 으로.  
+		  
+		MapDAO dao = new MapDAO();
+		
+		HttpSession session = req.getSession();
+		SessionInfo info = (SessionInfo) session.getAttribute("member");
+		
+		String state = "false";
+		try {
+			MapReplyDTO dto = new MapReplyDTO();
+			
+			long num = Long.parseLong(req.getParameter("mapNum"));
+			dto.setMapNum(num);
+			dto.setUserId(info.getUserId());
+			dto.setContent(req.getParameter("content"));
+			String originalReplyNum = req.getParameter("originalReplyNum");
+			if(originalReplyNum != null) {
+				dto.setOriginalReplyNum(Long.parseLong(originalReplyNum));
+			}
+			
+			dao.insertReply(dto);
+			
+			state = "true";
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		JSONObject job = new JSONObject();
+		job.put("state", state);
+		
+		resp.setContentType("text/html;charset=utf-8");
+		PrintWriter out = resp.getWriter();
+		out.print(job.toString());
+		
 	}
+
+	protected void listReply(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		// 게시글 댓글 리스트 : AJAX-Text  
+		
+		
+		String cp = req.getContextPath();
+		
+		String page = req.getParameter("page");
+		String query = "page=" + page;
+		  
+		MapDAO dao = new MapDAO();
+		MyUtil util = new MyUtil();
+		
+		try {
+			long num = Long.parseLong(req.getParameter("mapNum"));
+			String pageNo = req.getParameter("pageNo");
+			int current_page = 1;
+			if(pageNo != null) {
+				current_page = Integer.parseInt(pageNo);
+			}
+			
+			int size = 5;
+			int total_page = 0;
+			int replyCount = 0;
+			
+			replyCount = dao.dataCountReply(num);
+			total_page = util.pageCount(replyCount, size);
+			if(current_page > total_page) {
+				current_page = total_page;
+			}
+			
+			int offset = (current_page -1) * size;
+			if(offset < 0) offset = 0;
+			
+			List<MapReplyDTO> listReply = dao.listReply(num, offset, size);
+			
+			for(MapReplyDTO dto : listReply) {
+				dto.setContent(dto.getContent().replaceAll("\n", "<br>"));
+			}
+			
+			String paging = util.pagingMethod(current_page, total_page, "listPage");
+			
+			req.setAttribute("listReply", listReply);
+			req.setAttribute("pageNo", pageNo);
+			req.setAttribute("replyCount", replyCount);
+			req.setAttribute("total_page", total_page);
+			req.setAttribute("paging", paging);
+
+			// forward(req, resp, "/WEB-INF/views/map/article.jsp");
+			return;
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		resp.sendError(400);
+		
+		resp.sendRedirect(cp + "/map/list.do?" + query);
+		
+		 
+	}
+	
+
 	protected void deleteReply(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		// 댓글 삭제
+		// 게시글 댓글 삭제 : AJAX-JSON  
+	
 	}
-	protected void insertLikeBoard(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		// 게시글 좋아요
+
+	protected void insertReplyLike(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		// 게시글 댓글 좋아요/싫어요 추가 : AJAX-JSON  
+	
 	}
+	
+	protected void countReplyLike(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		// 게시글 댓글 좋아요/싫어요 개수 : AJAX-JSON  
+	
+	}
+
+	protected void insertReplyAnswer(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		// 게시글 댓글에 답글 추가 : AJAX-JSON  
+	
+	}
+
+	protected void listReplyAnswer(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		// 게시글 댓글에 답글 리스트 : AJAX-Text  
+	
+	}
+	
+	protected void deleteReplyAnswer(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		// 게시글 댓글에 답글 삭제 : AJAX-JSON  
+	
+	}
+
+	protected void countReplyAnswer(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		// 게시글 댓글에 답글 개수 : AJAX-JSON  
+	
+	}	
 	
 
 	

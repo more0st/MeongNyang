@@ -173,7 +173,7 @@ public class MapDAO {
 
 	
 
-	
+	// 게시물 리스트
 	public List<MapDTO> listMap(int offset, int size) {
 		List<MapDTO> list = new ArrayList<MapDTO>();
 		PreparedStatement pstmt = null;
@@ -182,6 +182,7 @@ public class MapDAO {
 		try {
 			sb.append(" SELECT p.mapNum, userName, subject, hitCount, imageFilename, ");
 			sb.append("       TO_CHAR(reg_date, 'YYYY-MM-DD') reg_date ") ;
+			// sb.append("        NVL(replyCount, 0) replyCount ");
 			sb.append(" FROM map p");
 			sb.append(" JOIN member m ON p.userId = m.userId ");
 			sb.append(" LEFT OUTER JOIN ( ");
@@ -311,18 +312,24 @@ public class MapDAO {
 		return list;
 	}
 		
-		
+	// 공감추가	
 	public MapDTO readMap(long num) {
 		MapDTO dto = null;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		String sql;
 
+		
 		try {
-			sql = "SELECT mapNum, p.userId, userName, subject, content, reg_date, hitCount, p.addr"
+			sql = "SELECT p.mapNum, p.userId, userName, subject, content, reg_date, hitCount, p.addr,"
+					+ "    NVL(boardLikeCount, 0) boardLikeCount "
 					+ " FROM map p "
-					+ " JOIN member m ON p.userId=m.userId  "
-					+ " WHERE mapNum = ? ";
+					+ " JOIN member m ON p.userId = m.userId  "
+					+ " LEFT OUTER JOIN ("
+					+ "      SELECT mapNum, COUNT(*) boardLikeCount FROM mapLike"
+					+ "      GROUP BY mapNum"
+					+ " ) mc ON p.mapNum = mc.mapNum"
+					+ " WHERE p.mapNum = ? ";
 
 			pstmt = conn.prepareStatement(sql);
 			
@@ -341,6 +348,9 @@ public class MapDAO {
 				dto.setReg_date(rs.getString("reg_date"));
 				dto.setAddr(rs.getString("addr"));
 				dto.setHitCount(rs.getInt("hitCount"));
+				
+				dto.setBoardLikeCount(rs.getInt("boardLikeCount"));
+				
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -362,6 +372,48 @@ public class MapDAO {
 
 		return dto;
 	}
+	
+		// 로그인 유저의 게시글 공감 유무
+		public boolean isUserBoardLike(long num, String userId) {
+			boolean result = false;
+			PreparedStatement pstmt = null;
+			ResultSet rs = null;
+			String sql;
+			
+			try {
+				sql = "SELECT mapNum, userId FROM mapLike WHERE mapNum = ? AND userId = ?";
+				pstmt = conn.prepareStatement(sql);
+				
+				pstmt.setLong(1, num);
+				pstmt.setString(2, userId);
+				
+				rs = pstmt.executeQuery();
+				
+				if(rs.next()) {
+					result = true;
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			} finally {
+				if(rs != null) {
+					try {
+						rs.close();
+					} catch (Exception e2) {
+					}
+				}
+				
+				if(pstmt != null) {
+					try {
+						pstmt.close();
+					} catch (Exception e2) {
+					}
+				}
+				
+			}
+			
+			return result;
+		}
+	
 	
 	public void updateHitCount(long num) throws SQLException {
 		PreparedStatement pstmt = null;
@@ -578,17 +630,28 @@ public class MapDAO {
 
 		}
 		
-		public void deleteMap(long num) throws SQLException {
+		public void deleteMap(long num, String userId) throws SQLException {
 			PreparedStatement pstmt = null;
 			String sql;
 
 			try {
-				sql = "DELETE FROM map WHERE mapNum=?";
-				pstmt = conn.prepareStatement(sql);
-				
-				pstmt.setLong(1, num);
-				
-				pstmt.executeUpdate();
+				if (userId.equals("admin")) {
+					sql = "DELETE FROM map WHERE mapNum=?";
+					pstmt = conn.prepareStatement(sql);
+					
+					pstmt.setLong(1, num);
+					
+					pstmt.executeUpdate();
+				} else {
+					sql = "DELETE FROM map WHERE mapNum=? AND userId=?";
+					
+					pstmt = conn.prepareStatement(sql);
+					
+					pstmt.setLong(1, num);
+					pstmt.setString(2, userId);
+					
+					pstmt.executeUpdate();
+				}
 			} catch (SQLException e) {
 				e.printStackTrace();
 				throw e;
@@ -601,6 +664,106 @@ public class MapDAO {
 				}
 			}
 		}
+		
+		// 게시물의 공감 추가
+		public void insertBoardLike(long num, String userId) throws SQLException {
+			PreparedStatement pstmt = null;
+			String sql;
+			
+			try {
+				sql = "INSERT INTO mapLike(mapNum, userId) VALUES (?, ?)";
+				pstmt = conn.prepareStatement(sql);
+				
+				pstmt.setLong(1, num);
+				pstmt.setString(2, userId);
+				
+				pstmt.executeUpdate();
+				
+			} catch (SQLException e) {
+				e.printStackTrace();
+				throw e;
+			} finally {
+				if(pstmt != null) {
+					try {
+						pstmt.close();
+					} catch (SQLException e) {
+					}
+				}
+			}
+			
+		}
+		
+		// 게시글 공감 삭제
+		public void deleteBoardLike(long num, String userId) throws SQLException {
+			PreparedStatement pstmt = null;
+			String sql;
+			
+			try {
+				sql = "DELETE FROM mapLike WHERE mapNum = ? AND userId = ?";
+				pstmt = conn.prepareStatement(sql);
+				
+				pstmt.setLong(1, num);
+				pstmt.setString(2, userId);
+				
+				pstmt.executeUpdate();
+			} catch (SQLException e) {
+				e.printStackTrace();
+				throw e;
+			} finally {
+				if(pstmt != null) {
+					try {
+						pstmt.close();
+					} catch (Exception e2) {
+					}
+				}
+			}
+			
+		}
+		
+		
+		// 게시물의 공감 개수
+		public int countBoardLike(long num) {
+			int result = 0;
+			PreparedStatement pstmt = null;
+			ResultSet rs = null;
+			String sql;
+			
+			try {
+				sql = "SELECT NVL(COUNT(*), 0) FROM mapLike WHERE mapNum=?";
+				pstmt = conn.prepareStatement(sql);
+				
+				pstmt.setLong(1, num);
+				
+				rs = pstmt.executeQuery();
+				
+				if(rs.next()) {
+					result = rs.getInt(1);
+				}
+			} catch (SQLException e) {
+				e.printStackTrace();
+			} finally {
+				if(rs != null) {
+					try {
+						rs.close();
+					} catch (SQLException e) {
+					}
+				}
+					
+				if(pstmt != null) {
+					try {
+						pstmt.close();
+					} catch (SQLException e) {
+					}
+				}
+			}
+			
+			return result;
+		}
+
+		
+		
+		
+		
 		public List<MapDTO> listImgFile(long num) {
 			List<MapDTO> list = new ArrayList<>();
 			PreparedStatement pstmt = null;
@@ -716,4 +879,141 @@ public class MapDAO {
 				}
 			}
 		}
+		
+		// 게시물의 댓글 및 답글 추가
+		public void insertReply(MapReplyDTO dto) throws SQLException {
+			PreparedStatement pstmt = null;
+			String sql;
+			
+			try {
+				sql = "INSERT INTO mapReply(replyNum, num, userId, content, originalReplyNum, reg_date) "
+						+ " VALUES (mapReply_seq.NEXTVAL, ?, ?, ?, ?, SYSDATE)";
+				pstmt = conn.prepareStatement(sql);
+				
+				pstmt.setLong(1, dto.getMapNum());
+				pstmt.setString(2, dto.getUserId());
+				pstmt.setString(3, dto.getContent());
+				pstmt.setLong(4, dto.getOriginalReplyNum());
+				
+				pstmt.executeUpdate();
+				
+			} catch (SQLException e) {
+				e.printStackTrace();
+				throw e;
+			} finally {
+				if(pstmt != null)
+					try {
+						pstmt.close();
+					} catch (SQLException e) {
+					}
+			}
+			
+		}
+
+		// 게시물의 댓글 개수
+		public int dataCountReply(long num) {
+			int result = 0;
+			PreparedStatement pstmt = null;
+			ResultSet rs = null;
+			String sql;
+			
+			try {
+				sql = "SELECT NVL(COUNT(*), 0) FROM mapReply WHERE num=? AND originalReplyNum = 0";
+				pstmt = conn.prepareStatement(sql);
+				
+				pstmt.setLong(1, num);
+				
+				rs = pstmt.executeQuery();
+				
+				if(rs.next()) {
+					result = rs.getInt(1);
+				}
+			} catch (SQLException e) {
+				e.printStackTrace();
+			} finally {
+				if(rs != null) {
+					try {
+						rs.close();
+					} catch (SQLException e) {
+					}
+				}
+					
+				if(pstmt != null) {
+					try {
+						pstmt.close();
+					} catch (SQLException e) {
+					}
+				}
+			}
+			
+			return result;
+		}
+		// 게시물 댓글 리스트
+		public List<MapReplyDTO> listReply(long num, int offset, int size) {
+			List<MapReplyDTO> list = new ArrayList<>();
+			PreparedStatement pstmt = null;
+			ResultSet rs = null;
+			StringBuilder sb = new StringBuilder();
+			
+			try {
+				sb.append(" SELECT r.replyNum, r.userId, userName, num, content, r.reg_date, ");
+				sb.append("     NVL(originalReplyNumCount, 0) originalReplyNumCount ");
+				sb.append(" FROM mapReply r ");
+				sb.append(" JOIN member m ON r.userId = m.userId ");
+				sb.append(" LEFT OUTER  JOIN (");
+				sb.append("	    SELECT originalReplyNum, COUNT(*) originalReplyNumCount ");
+				sb.append("     FROM mapReply ");
+				sb.append("     WHERE originalReplyNum != 0 ");
+				sb.append("     GROUP BY originalReplyNum ");
+				sb.append(" ) a ON r.replyNum = a.originalReplyNum ");
+				
+				sb.append(" WHERE num = ? AND r.originalReplyNum=0 ");
+				sb.append(" ORDER BY r.replyNum DESC ");
+				sb.append(" OFFSET ? ROWS FETCH FIRST ? ROWS ONLY ");
+				
+				pstmt = conn.prepareStatement(sb.toString());
+				
+				pstmt.setLong(1, num);
+				pstmt.setInt(2, offset);
+				pstmt.setInt(3, size);
+
+				rs = pstmt.executeQuery();
+				
+				while(rs.next()) {
+					MapReplyDTO dto = new MapReplyDTO();
+					
+					dto.setReplyNum(rs.getLong("replyNum"));
+					dto.setMapNum(rs.getLong("num"));
+					dto.setUserId(rs.getString("userId"));
+					dto.setUserName(rs.getString("userName"));
+					dto.setContent(rs.getString("content"));
+					dto.setReg_date(rs.getString("reg_date"));
+					dto.setOriginalReplyNum(rs.getInt("originalReplyNumCount"));
+					// dto.setLikeCount(rs.getInt("likeCount"));
+					// dto.setDisLikeCount(rs.getInt("disLikeCount"));
+					
+					list.add(dto);
+				}
+				
+			} catch (SQLException e) {
+				e.printStackTrace();
+			} finally {
+				if(rs != null) {
+					try {
+						rs.close();
+					} catch (SQLException e) {
+					}
+				}
+				if(pstmt != null) {
+					try {
+						pstmt.close();
+					} catch (SQLException e) {
+					}
+				}
+			}
+			
+			return list;
+		}
+	
+		
 }

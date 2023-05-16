@@ -7,15 +7,16 @@ public class MapDTO {
 	private int hitCount;
 	private String reg_date;
 	private String userId;
+	private String userName;
 	private String addr;
 
 	private Long fileNum;
 	private String imageFilename;
 	private String[] imageFiles;
-	
-	
-	private String userName;
-	
+
+	private int replyCount;
+	private int boardLikeCount;
+
 	public long getMapNum() {
 		return mapNum;
 	}
@@ -104,6 +105,20 @@ public class MapDTO {
 		this.userName = userName;
 	}
 
-	
-	
+	public int getReplyCount() {
+		return replyCount;
+	}
+
+	public void setReplyCount(int replyCount) {
+		this.replyCount = replyCount;
+	}
+
+	public int getBoardLikeCount() {
+		return boardLikeCount;
+	}
+
+	public void setBoardLikeCount(int mapLikeCount) {
+		this.boardLikeCount = mapLikeCount;
+	}
+
 }

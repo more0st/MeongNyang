@@ -54,11 +54,139 @@
 
 
 </style>
+
+<script type="text/javascript">
+// 댓글 좋아요
+function login() {
+	location.href = "${pageContext.request.contextPath}/member/login.do";
+}
+
+function ajaxFun(url, method, query, dataType, fn) {
+	$.ajax({
+		type:method,	// 메소드(get, post, put, delete)
+		url:url,		// 요청받을 서버주소 
+		data:query,		// 서버에 전송할 파라미터 
+		dataType:dataType,	// 서버에서 응답할 형식(json, xml, text)
+		success:function(data){
+			fn(data);
+		},
+		beforeSend:function(jqXHR){
+			jqXHR.setRequestHeader("AJAX", true);	// 사용자 정의 헤더
+		},
+		error:function(jqXHR){
+			if(jqXHR.status === 403) {
+				login();
+				return false;
+			} else if(jqXHR.status === 400) {
+				alert("요청 처리가 실패했습니다.");
+				return false;
+			}
+			console.log(jqXHR.responseText);
+		}
+	});
+}
+
+// 게시글 공감 여부 
+$(function() {
+	$(".btnSendBoardLike").click(function() {
+		const $i = $(this).find("i");
+		let isNoLike = $i.css("color") == "rgb(0, 0, 0)";
+		let msg = isNoLike ? "게시글에 공감하십니까 ?" : "게시글 공감을 취소하시겠습니까 ?"; 
+		
+		if(! confirm(msg)) {
+			return false; 
+		}
+		
+		let url = "${pageContext.request.contextPath}/map/insertBoardLike.do";
+		let num = "${dto.mapNum}"; 
+		let qs = "num=" + num + "&isNoLike=" + isNoLike;
+		
+		const fn = function(data) {
+			let state = data.state;
+			if(state === "true") {
+				let color = "black";
+				if( isNoLike) {
+					color = "blue";
+				}
+				$i.css("color", color);
+				
+				let count = data.boardLikeCount;
+				$("#boardLikeCount").text(count);
+				
+			} else if (state === "liked") {
+				alert("좋아요는 한번만 가능합니다.");
+			}
+		};
+		
+		ajaxFun(url, "post", qs, "json", fn);
+		
+	});
+});
+
+// 댓글 리스트 및 페이징
+$(function() {
+	listPage(1);
+});
+
+function listPage(page) {
+	let url = "${pageContext.request.contextPath}/map/listReply.do";
+	let qs = "mapNum=${dto.mapNum}&pageNo="+page;
+	let selector = "#listReply";
+	
+	const fn = function(data) {
+		$(selector).html(data);	
+	}
+	
+	ajaxFun(url, "get", qs, "text", fn);
+	//ajaxFun(url, "get", qs, "html", fn);	// 가능
+
+}
+
+
+// 댓글 등록 
+$(function() {
+	$(".btnSendReply").click(function() {
+		let mapNum = "${dto.mapNum}";
+		const $tb = $(this).closest("table");
+		let content = $tb.find("textarea").val().trim();
+		
+		if(! content) {
+			$tb.find("textarea").focus(); 
+			return false;
+		}
+		content = encodeURIComponent(content);
+		
+		let url = "${pageContext.request.contextPath}/map/insertReply.do";
+		let qs = "mapNum="+mapNum+"&content="+content+"&answer=0";
+		
+		const fn = function(data) {
+			$tb.find("textarea").val("");
+			
+			let state = data.state;
+			if(state === "true"){
+				listPage(1);
+			} else {
+				alert("댓글을 추가하지 못했습니다.");
+			}
+		}
+		
+		ajaxFun(url,"post",qs,"json",fn);
+		
+	});
+});
+
+
+
+
+
+</script>
+
+
 <script type="text/javascript">
 <c:if test="${sessionScope.member.userId==dto.userId || sessionScope.member.userId=='admin'}">
 	function deleteBoard() {
 	    if(confirm("게시글을 삭제 하시 겠습니까 ? ")) {
-		    let query = "num=${dto.mapNum}&${query}";
+		    let query = "mapNum=${dto.mapNum}&${query}";
 		    let url = "${pageContext.request.contextPath}/map/delete.do?" + query;
 	    	location.href = url;
 	    }
@@ -229,6 +357,8 @@ function imageViewer(img) {
 						</td>	
 					</tr>
 					
+					
+					
 					<tr >
 						<td style="text-align: center;">
 							<div id="map" style="width:100%;height:350px;"></div>
@@ -251,6 +381,12 @@ function imageViewer(img) {
 							</c:if>
 						</td>
 					</tr>
+					<tr>
+						<td colspan="2" align="center" style="border-bottom: 20px;">
+							<button type="button" class="btn btnSendBoardLike" title="좋아요"><i class="fas fa-thumbs-up" style="color:${isUserLike?'blue':'black'}"></i>&nbsp;&nbsp;<span id="boardLikeCount">10</span></button>
+						</td>
+					</tr>
+					
 				</tbody>
 			</table>
 			
@@ -275,6 +411,8 @@ function imageViewer(img) {
 				    		</c:otherwise>
 				    	</c:choose>
 					</td>
+					
+					
 					<td align="right">
 						<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/map/list.do?${query}';">리스트</button>
 					</td>
@@ -312,38 +450,38 @@ function imageViewer(img) {
 		<div id="listReply">
 		
 			<div class='reply-info'>
-				<span class='reply-count'>댓글 15개</span>
-				<span>[목록, 1/3 페이지]</span>
+				<span class='reply-count'>${replyCount}개</span>
+				<span>[목록, ${pageNo}/${total_page} 페이지]</span>
 			</div>
 			
 			<table class='table reply-list'>
-			
+				<c:forEach var="vo" items="${listReply}">
 					<tr class='list-header'>
 						<td width='50%'>
-							<span class='bold'>홍길동</span>
+							<span class='bold'>${vo.userName}</span>
 						</td>
 						<td width='50%' align='right'>
-							<span>2021-11-01</span> |
+							<span>${vo.reg_date}</span> |
 							<span class='deleteReply' data-replyNum='10' data-pageNo='1'>삭제</span>
 						</td>
 					</tr>
 					<tr>
-						<td colspan='2' valign='top'>내용입니다.</td>
+						<td colspan='2' valign='top'>${vo.content}</td>
 					</tr>
 			
 					<tr>
 						<td>
-							<button type='button' class='btn btnReplyAnswerLayout' data-replyNum='10'>답글 <span id="answerCount10">3</span></button>
+							<button type='button' class='btn btnReplyAnswerLayout' data-replyNum='${vo.replyNum}'>답글 <span id="answerCount10">3</span></button>
 						</td>
 						<td align='right'>
-							<button type='button' class='btn btnSendReplyLike' data-replyNum='10' data-replyLike='1' title="좋아요">좋아요 <span>3</span></button>
-							<button type='button' class='btn btnSendReplyLike' data-replyNum='10' data-replyLike='0' title="싫어요">싫어요 <span>1</span></button>	        
+							<button type='button' class='btn btnSendReplyLike' data-replyNum='${vo.replyNum}' data-replyLike='1' title="좋아요">좋아요 <span>10</span></button>
+							<button type='button' class='btn btnSendReplyLike' data-replyNum='${vo.replyNum}' data-replyLike='0' title="싫어요">싫어요 <span>10</span></button>	        
 						</td>
 					</tr>
 				
 				    <tr class='reply-answer'>
 				        <td colspan='2'>
-				            <div id='Answer10' class='answer-list'>
+				            <div id='listReplyAnswer${vo.replyNum}' class='answer-list'>
 				            
 								<div class='answer-article'>
 									<div class='answer-article-header'>
@@ -352,7 +490,7 @@ function imageViewer(img) {
 											<div style='float: left;'><span class='bold'>스프링</span></div>
 											<div style='float: right;'>
 												<span>2021-11-01</span> |
-												<span class='deleteReplyAnswer' data-replyNum='10' data-answer='15'>삭제</span>
+												<span class='deleteReplyAnswer' data-replyNum='10' data-answer='${vo.replyNum}'>삭제</span>
 											</div>
 										</div>
 									</div>
@@ -371,8 +509,13 @@ function imageViewer(img) {
 				            </div>
 						</td>
 				    </tr>
+				</c:forEach>
 			</table>
-		
+		<div>
+			<div class="page-navigation">
+			${paging}
+			</div>		
+		</div>
 		</div>
 	</div>
 
