@@ -11,7 +11,7 @@
 <jsp:include page="/WEB-INF/views/layout/staticHeader.jsp"/>
 <style type="text/css">
 .body-main {
-	max-width: 700px;
+	max-width: 90%;
 	padding-top: 15px;
 }
 
@@ -109,95 +109,183 @@ $(function() {
 });
 
 
-//댓글 등록
-window.addEventListener('load',()=>{
-	const btnEL = document.querySelector('.btnSendReply');
+
+
+
+
+//댓글 리스트 및 페이징
+$(function(){
+	listPage(1);
+});
+
+function listPage(page) {
+	let url = "${pageContext.request.contextPath}/gallery/listReply.do";
+	let qs = "num=${dto.photoNum}&pageNo="+page;
+	let selector = "#listReply";
 	
-	btnEL.addEventListener('click', e =>{
-		const El = e.target.closest('table');
-		let content = El.querySelector('textarea').value.trim();
-		if(!content) {
-			alert('내용을입력하세요');
-			El.querySelector('textarea').focus();
-			return;
+	const fn = function(data) {
+		$(selector).html(data);	
+	}
+	
+	ajaxFun(url, "get", qs, "text", fn);
+	// ajaxFun(url, "get", qs, "html", fn); // 가능
+}
+
+//댓글 등록
+$(function(){
+	$(".btnSendReply").click(function(){
+		let num = "${dto.photoNum}";
+		const $tb = $(this).closest("table");
+		let content = $tb.find("textarea").val().trim();
+		
+		if(! content) {
+			$tb.find("textarea").focus();
+			return false;
+		}
+		content = encodeURIComponent(content);
+		
+		let url = "${pageContext.request.contextPath}/gallery/insertReply.do";
+		let qs = "num="+num+"&content="+content+"&answer=0";
+		
+		const fn = function(data) {
+			$tb.find("textarea").val("");
+			
+			let state = data.state;
+			if(state === "true") {
+				listPage(1);
+			} else {
+				alert("댓글을 추가하지 못했습니다.");
+			}
 		}
 		
-		content = encodeURIComponent(content);
-		alert('등록할 댓글 :' + content);
-	});
-	
-});
-
-//댓글 삭제
-window.addEventListener('load',() => {
-	const listReplyEL = document.querySelector('#listReply');	
-
-	listReplyEL.addEventListener('click',e =>{
-		if(e.target.matches('.deleteReply')){
-			
-			if(! confirm('게시글을 삭제하시겠습니까 ? ')){
-				return;
-			}
-			let pageNo = e.target.getAttribute('data-pageNo');
-			let replyNum = e.target.getAttribute('data-replyNum');
-			
-			alert('삭제할 댓글번호 :'+replyNum+",페이지번호:"+pageNo);
-		}
-	
+		ajaxFun(url, "post", qs, "json", fn);
+		
 	});
 });
 
-
-
-
-/*
-//답글 버튼 : 댓글별 답글 등록폼 및 답글 리스트 표시/숨김
-window.addEventListener('load',() => {
-	const listReplyEL = document.querySelector('#listReply');	
+//댓글의 답글 리스트
+function listReplyAnswer(answer) {
+	let url = "${pageContext.request.contextPath}/gallery/listReplyAnswer.do";
+	let qs = "answer="+answer;
+	let selector = "#listReplyAnswer"+answer;
 	
-	listReplyEL.addEventListener('click',e =>{
-		if(e.target.matches('.btnReplyAnswerLayout')||e.target.parentElement.matches('.btnReplyAnswerLayout')){
-			let $El = e.target.closest('tr').nextElementSibling;//다음형제
+	const fn = function(data) {
+		$(selector).html(data);
+	};
+	
+	ajaxFun(url, "get", qs, "text", fn);
+}
+
+//댓글별 답글 개수
+function countReplyAnswer(answer) {
+	let url = "${pageContext.request.contextPath}/gallery/countReplyAnswer.do";
+	let qs = "answer="+answer;
+	
+	const fn = function(data) {
+		let count = data.count;
+		let selector = "#answerCount"+answer;
+		$(selector).html(count);
+	};
+	ajaxFun(url, "post", qs, "json", fn);
+}
+
+//답글 버튼(댓글별 답글 등록 폼 및 답글 리스트)
+$(function(){
+	$("#listReply").on("click", ".btnReplyAnswerLayout", function() {
+		const $trAnswer = $(this).closest("tr").next();
+		
+		let isVisible = $trAnswer.is(":visible");
+		let replyNum = $(this).attr("data-replyNum");
+		
+		if(isVisible) {
+			$trAnswer.hide();
+		} else {
+			$trAnswer.show();
 			
-			//$El.classList.toggle('reply-answer'); //tr태그라 화면이 이상하게나옴
-			//$El.style.display = 'block'; //tr태그엔 block속성 사용안됨, 화면이 이상하게 나옴
+			// 답글 리스트
+			listReplyAnswer(replyNum);
 			
-			if(isHidden($El)){//숨겨져있으면 table-row, 아니면 none
-				$El.style.display = 'table-row'; //tr태그에 보이게할수있는 속성은 table-row!!!
-			}else{
-				$El.style.display = 'none';
-			}
+			// 답글 개수
+			countReplyAnswer(replyNum);
 		}
 	});
 });
 
 //답글 등록 버튼
-
-window.addEventListener('load',() => {
-	const listReplyEL = document.querySelector('#listReply');	
-	
-	listReplyEL.addEventListener('click',e =>{
-		if(e.target.matches('.btnSendReplyAnswer')){
-			let replyNum = e.target.getAttribute('data-replyNum');
-			
-			let El = e.target.closest('td');
-			let content = El.querySelector('textarea').value.trim();
-			if( ! content){
-				alert('내용을 입력해주세요');
-				El.querySelector('textarea').focus();
-				return;
-			}
-			
-			content = encodeURIComponent(content);//서버로 데이터 보내는것
-			
-			alert('댓글번호 : '+ replyNum+', 등록할 답글 : '+content);
-			
-			
-		}
+$(function(){
+	$("#listReply").on("click", ".btnSendReplyAnswer", function(){
+		let num = "${dto.photoNum}";
+		let replyNum = $(this).attr("data-replyNum");
+		const $td = $(this).closest("td");
 		
+		let content = $td.find("textarea").val().trim();
+		if(! content) {
+			$td.find("textarea").focus();
+			return false;
+		}
+		content = encodeURIComponent(content);
+		
+		let url = "${pageContext.request.contextPath}/gallery/insertReply.do";
+		let qs = "num="+num+"&content="+content+"&answer="+replyNum;
+		
+		const fn = function(data) {
+			let state = data.state;
+			
+			$td.find("textarea").val("");
+			
+			if(state === "true") {
+				listReplyAnswer(replyNum);
+				countReplyAnswer(replyNum);
+			}
+		};
+		
+		ajaxFun(url, "post", qs, "json", fn);
 	});
 });
-*/
+
+//댓글 삭제
+$(function(){
+	$("#listReply").on("click", ".deleteReply", function(){
+		if(! confirm("게시글을 삭제하시겠습니까 ? ")) {
+			return false;
+		}
+		
+		let replyNum = $(this).attr("data-replyNum");
+		let page = $(this).attr("data-pageNo");
+		
+		let url = "${pageContext.request.contextPath}/gallery/deleteReply.do";
+		let qs = "replyNum="+replyNum;
+		
+		const fn = function(data) {
+			listPage(page);
+		};
+		
+		ajaxFun(url, "post", qs, "json", fn);
+	});
+});
+
+//댓글의 답글 삭제
+$(function(){
+	$("#listReply").on("click", ".deleteReplyAnswer", function(){
+		if(! confirm("게시글을 삭제하시겠습니까 ? ")) {
+			return false;
+		}
+		
+		let replyNum = $(this).attr("data-replyNum");
+		let answer = $(this).attr("data-answer");
+		
+		let url = "${pageContext.request.contextPath}/gallery/deleteReply.do";
+		let qs = "replyNum="+replyNum;
+		
+		const fn = function(data) {
+			listReplyAnswer(answer);
+			countReplyAnswer(answer);
+		};
+		
+		ajaxFun(url, "post", qs, "json", fn);
+	});
+});
+
 
 </script>
 
@@ -213,7 +301,7 @@ window.addEventListener('load',() => {
 	    <div class="body-title">
 			<h2> 멍냥갤러리 </h2>
 	    </div>
-	    <div style="box-shadow: 0 0 15px 0 rgb(2 59 109 / 10%);border-radius: 30px; margin: 0 auto ; width: 70%; margin-bottom: 50px;">
+	    <div style="box-shadow: 0 0 15px 0 rgb(2 59 109 / 10%);border-radius: 30px; margin: 0 auto ; width: 90%; margin-bottom: 50px;">
 	    <div class="body-main mx-auto">
 			<table class="table table-border table-article">
 				<thead>
@@ -304,107 +392,32 @@ window.addEventListener('load',() => {
 				</tr>
 			</table>
 
-	    </div>
+					<div class="reply">
+						<form name="replyForm" method="post">
+							<div class='form-header'>
+								<span class="bold">댓글쓰기</span><span> - 타인을 비방하거나 개인정보를
+									유출하는 글의 게시를 삼가해 주세요.</span>
+							</div>
+
+							<table class="table reply-form">
+								<tr>
+									<td><textarea class='form-control' name="content"></textarea>
+									</td>
+								</tr>
+								<tr>
+									<td align='right'>
+										<button type='button' class='btn btnSendReply'>댓글 등록</button>
+									</td>
+								</tr>
+							</table>
+						</form>
+
+						<div id="listReply"></div>
+					</div>
+
+				</div>
 	    </div>
 	</div>
-	
-	
-	<!-- 댓글 폼 -->
-	<div class="body-container" >
-
-	<div class="reply" >
-		<form name="replyForm" method="post">
-			<div class='form-header'>
-				<span class="bold">댓글쓰기</span><span> - 타인을 비방하거나 개인정보를 유출하는 글의 게시를 삼가해 주세요.</span>
-			</div>
-			
-			<table class="table reply-form">
-				<tr>
-					<td>
-						<textarea class='form-control' name="content" style="height: 120px;"></textarea>
-					</td>
-				</tr>
-				<tr>
-				   <td align='right'>
-				        <button type='button' class='btn btnSendReply'>댓글 등록</button>
-				    </td>
-				 </tr>
-			</table>
-		</form>
-		
-		<div id="listReply">
-		
-			<div class='reply-info'>
-				<span class='reply-count'>댓글 15개</span>
-				<span>[목록, 1/3 페이지]</span>
-			</div>
-			
-			<table class='table reply-list'>
-			
-					<tr class='list-header'>
-						<td width='50%'>
-							<span class='bold'>홍길동</span>
-						</td>
-						<td width='50%' align='right'>
-							<span>2021-11-01</span> |
-							<span class='deleteReply' data-replyNum='10' data-pageNo='1'>삭제</span>
-						</td>
-					</tr>
-					<tr>
-						<td colspan='2' valign='top'>내용입니다.</td>
-					</tr>
-			
-					<tr>
-						<td>
-							<button type='button' class='btn btnReplyAnswerLayout' data-replyNum='10'>답글 <span id="answerCount10">3</span></button>
-						</td>
-						<td align='right'>
-							<button type='button' class='btn btnSendReplyLike' data-replyNum='10' data-replyLike='1' title="좋아요">좋아요 <span>3</span></button>
-							<button type='button' class='btn btnSendReplyLike' data-replyNum='10' data-replyLike='0' title="싫어요">싫어요 <span>1</span></button>	        
-						</td>
-					</tr>
-				
-				    <tr class='reply-answer'>
-				        <td colspan='2'>
-				            <div id='Answer10' class='answer-list'>
-				            
-								<div class='answer-article'>
-									<div class='answer-article-header'>
-										<div class='answer-left'>└</div>
-										<div class='answer-right'>
-											<div style='float: left;'><span class='bold'>스프링</span></div>
-											<div style='float: right;'>
-												<span>2021-11-01</span> |
-												<span class='deleteReplyAnswer' data-replyNum='10' data-answer='15'>삭제</span>
-											</div>
-										</div>
-									</div>
-									<div class='answer-article-body'>
-										답글입니다.
-									</div>
-								</div>
-												            
-				            </div>
-				            <div class="answer-form">
-				                <div class='answer-left'>└</div>
-				                <div class='answer-right'><textarea class='form-control' ></textarea></div>
-				            </div>
-				             <div class='answer-footer'>
-				                <button type='button' class='btn btnSendReplyAnswer' data-replyNum='10'>답글 등록</button>
-				            </div>
-						</td>
-				    </tr>
-				
-
-					
-				
-			</table>
-		
-		</div>
-	</div>
-
-</div>
-	
 	
 </main>
 
