@@ -65,6 +65,8 @@ public class MarketServlet extends MyUploadServlet{
 			delete(req, resp);
 		} else if (uri.indexOf("deleteFile.do") != -1) {
 			deleteFile(req, resp);
+		} else if (uri.indexOf("buy_ok.do") != -1) {
+			buy(req, resp);
 		} else if(uri.indexOf("insertBoardLike.do") != -1) {
 			insertBoardLike(req, resp);
 		} else if(uri.indexOf("insertReply.do") != -1) {
@@ -231,8 +233,8 @@ public class MarketServlet extends MyUploadServlet{
 			
 			boolean isUserLike = dao.isUserBoardLike(marketNum, info.getUserId());
 			
-			MarketDTO preReadDto = dao.preReadPhoto(marketNum, info.getUserId());
-			MarketDTO nextReadDto = dao.nextReadPhoto(marketNum, info.getUserId());
+			MarketDTO preReadDto = dao.preReadPhoto(marketNum);
+			MarketDTO nextReadDto = dao.nextReadPhoto(marketNum);
 
 			req.setAttribute("dto", dto);
 			req.setAttribute("listFile", listFile);
@@ -539,6 +541,26 @@ public class MarketServlet extends MyUploadServlet{
 		}
 		
 		resp.sendError(400);
+	}
+	
+	protected void buy(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		MarketDAO dao = new MarketDAO();
+		
+		String cp = req.getContextPath();
+		
+		try {
+			
+			String buyerId = req.getParameter("buyerId");
+			long marketNum = Long.parseLong(req.getParameter("marketNum"));
+			
+			System.out.println(marketNum);
+			System.out.println(buyerId);
+			dao.buy(marketNum, buyerId);
+			
+			resp.sendRedirect(cp + "/market/list.do");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	}
 
 }

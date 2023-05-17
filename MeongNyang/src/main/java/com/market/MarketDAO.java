@@ -122,6 +122,33 @@ public class MarketDAO {
 		}
 	}
 	
+	public void buy(Long marketNum, String buyerId) throws SQLException {
+		PreparedStatement pstmt = null;
+		String sql;
+		
+		try {
+			sql = "UPDATE market SET STATE = 0, BUYERID = ?, PAY_DATE = SYSDATE "
+					+ "WHERE MarketNum = ?";
+			pstmt = conn.prepareStatement(sql);
+			
+			pstmt.setString(1, buyerId);
+			pstmt.setLong(2, marketNum);
+			
+			pstmt.executeUpdate();
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw e;
+		} finally {
+			if(pstmt != null) {
+				try {
+					pstmt.close();
+				} catch (Exception e2) {
+				}
+			}
+		}
+	}
+	
 	public void deleteMarket(long marketNum) throws SQLException {
 		PreparedStatement pstmt = null;
 		String sql;
@@ -454,7 +481,7 @@ public class MarketDAO {
 		return list;
 	}
 	
-	public MarketDTO preReadPhoto(long MARKETNUM, String userId) {
+	public MarketDTO preReadPhoto(long MARKETNUM) {
 		MarketDTO dto = null;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
@@ -462,14 +489,13 @@ public class MarketDAO {
 
 		try {
 			sb.append(" SELECT MARKETNUM, subject FROM market ");
-			sb.append(" WHERE MARKETNUM > ? AND SELLERID = ? ");
+			sb.append(" WHERE MARKETNUM > ? ");
 			sb.append(" ORDER BY MARKETNUM ASC ");
 			sb.append(" FETCH FIRST 1 ROWS ONLY ");
 			
 			pstmt = conn.prepareStatement(sb.toString());
 			
 			pstmt.setLong(1, MARKETNUM);
-			pstmt.setString(2, userId);
 
 			rs = pstmt.executeQuery();
 
@@ -500,7 +526,7 @@ public class MarketDAO {
 		return dto;
 	}
 
-	public MarketDTO nextReadPhoto(long MARKETNUM, String userId) {
+	public MarketDTO nextReadPhoto(long MARKETNUM) {
 		MarketDTO dto = null;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
@@ -508,14 +534,13 @@ public class MarketDAO {
 
 		try {
 			sb.append(" SELECT MARKETNUM, subject FROM market ");
-			sb.append(" WHERE MARKETNUM < ? AND SELLERID = ? ");
+			sb.append(" WHERE MARKETNUM < ? ");
 			sb.append(" ORDER BY MARKETNUM DESC ");
 			sb.append(" FETCH FIRST 1 ROWS ONLY ");
 			
 			pstmt = conn.prepareStatement(sb.toString());
 			
 			pstmt.setLong(1, MARKETNUM);
-			pstmt.setString(2, userId);
 
 			rs = pstmt.executeQuery();
 

@@ -68,7 +68,11 @@
 
 .photo-layout img { width: 570px; height: 450px; }
 </style>
+<script type="text/javascript" src="https://code.jquery.com/jquery-1.12.4.min.js" ></script>
+    <!-- iamport.payment.js -->
+<script type="text/javascript" src="https://cdn.iamport.kr/js/iamport.payment-1.2.0.js"></script>
 <script type="text/javascript">
+
 function login() {
 	loaction.href = "${pageContext.request.contextPath}/member/login.do";
 }
@@ -149,9 +153,25 @@ function modal() {
 	let sessionId = "${sessionScope.member.userId}";
 	let s;
 	if(userId === sessionId){
-		s="<button class='btn'>판매확정</button> <button class='btn'>취소</button>";
+		s ="<form name='buyForm' metod='post'>"
+		s += "<table class='table table-border table-form'>"
+		s += "<tr>"
+		s += "<td>"
+		s += "구매자 : "
+		s += "</td>"
+		s += "<td>"
+		s += "<input type='text' name='buyerId'><br>"
+		s += "</td>"
+		s += "</tr>"
+		s += "<tr>"
+		s += "<td>"
+		s +="<button type='button' class='btn' onclick='buy_ok();'>판매확정</button>"
+		s += "</td>"
+		s += "<td>"
+		s += "</table>"
+		s +="<form>"
 	}else{
-		s="<button>결재하기</button>";
+		s="<button type='button' class='btn' onclick='requestPay();'>결재하기</button>";
 	}
 	viewer.html(s);
 	
@@ -220,6 +240,34 @@ $(function () {
 		ajaxFun(url, "post", qs, "json", fn);
 	});
 });
+
+function buy_ok() {
+	const f = document.buyForm;
+	buyerId = f.buyerId.value.trim();
+	marketNum = ${dto.marketNum};
+	location.href = "${pageContext.request.contextPath}/market/buy_ok.do?buyerId="+buyerId+"&marketNum="+marketNum;
+}
+
+var IMP = window.IMP; 
+IMP.init("imp85702804"); 
+
+function requestPay() {
+    IMP.request_pay({
+        pg : 'html5_inicis.INIBillTst',
+        pay_method : 'card',
+        merchant_uid: '${sessionScope.member.userName}', 
+        name : '${dto.subject}',
+        amount : '${dto.price}',
+        buyer_addr : '${dto.addr}',
+    }, function (rsp) { // callback
+        if(rsp.success){
+      	  console.log(rsp);
+        }else{
+      	  console.log(rsp);
+        }
+    });
+}
+
 </script>
 
 </head>
@@ -328,6 +376,9 @@ $(function () {
 					<c:choose>
 						<c:when test="${sessionScope.member.userId==dto.sellerId}">
 							<button type="button" class="btn" onclick="modal();">판매시작</button>
+						</c:when>
+						<c:when test="${dto.state == 0}">
+							<button type="button" class="btn" disabled="disabled">판매완료</button>
 						</c:when>
 						<c:otherwise>
 							<button type="button" class="btn" onclick="modal();">카드결재</button>
