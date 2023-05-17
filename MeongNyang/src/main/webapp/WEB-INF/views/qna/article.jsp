@@ -89,7 +89,7 @@
 			<table class="table">
 				<tr>
 					<td width="50%">
-						<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/qna/reply.do?qesNum=${dto.qesNum}&page=${page}';">답변</button>
+						<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/qna/writeReply.do?qesNum=${dto.qesNum}&page=${page}';">답변</button>
 						<c:choose>
 							<c:when test="${sessionScope.member.userId==dto.userId}">
 								<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/qna/update.do?qesNum=${dto.qesNum}&page=${page}';">수정</button>
@@ -114,6 +114,45 @@
 				</tr>
 			</table>
 	    </div>
+	    
+	    
+	    <%-- 답변 --%>
+			
+			
+		<c:if test="${not empty dto.replyContent}">
+	    <div class="body-main mx-auto">
+			<table class="table table-border table-article" style="border-bottom: 1px solid; ">
+				<thead>
+					<tr>
+						<td colspan="2" align="center">
+							'${dto.subject}'에 대한 답변입니다!
+						</td>
+					</tr>
+				</thead>
+				
+				<tbody>
+					<tr>
+						<td width="50%">
+							이름 : 관리자
+						</td>
+						<td align="right">
+							${dto.replyReg_date}
+						</td>
+					</tr>
+					
+					<tr>
+						<td colspan="2" valign="top" height="200">
+							${dto.replyContent}
+						</td>
+					</tr>
+					
+				</tbody>
+			</table>
+			
+			
+	    </div>
+		</c:if>
+	    
 	</div>
 </main>
 

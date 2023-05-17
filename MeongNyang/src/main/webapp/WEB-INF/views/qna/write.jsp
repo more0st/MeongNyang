@@ -36,14 +36,16 @@ function sendBoard() {
         f.subject.focus();
         return;
     }
-
-    str = f.content.value.trim();
+/*
+ 
+   str = f.content.value.trim();
     if(!str) {
         alert("내용을 입력하세요. ");
         f.content.focus();
         return;
     }
 
+ */
     f.action = "${pageContext.request.contextPath}/qna/${mode}_ok.do";
     f.submit();
 }
@@ -59,7 +61,7 @@ function sendBoard() {
 	<div class="container body-container">
 	    <div class="body-title">
 			<h2><i class="fas fa-chalkboard-teacher"></i> 질문과 답변 </h2>
-	    </div>ㄴ
+	    </div>
 	    
 	    <div class="body-main mx-auto">
 			<form name="boardForm" method="post">
@@ -81,7 +83,7 @@ function sendBoard() {
 					<tr> 
 						<td valign="top">내&nbsp;&nbsp;&nbsp;&nbsp;용</td>
 						<td> 
-							<textarea name="content" class="form-control">${dto.content}</textarea>
+							<textarea name="${mode=='update'?'replyContent':'content'}" class="form-control" >${mode=='update'?dto.replyContent:dto.content}</textarea>
 						</td>
 					</tr>
 				</table>
@@ -89,18 +91,15 @@ function sendBoard() {
 				<table class="table">
 					<tr> 
 						<td align="center">
-							<button type="button" class="btn" onclick="sendBoard();">${mode=='update'?'수정완료':(mode=='reply'? '답변완료':'등록하기')}</button>
+							<button type="button" class="btn" onclick="sendBoard();">${mode=='update'?'답변완료':'등록하기'}</button>
 							<button type="reset" class="btn">다시입력</button>
-							<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/qna/list.do';">${mode=='update'?'수정취소':(mode=='reply'? '답변취소':'등록취소')}</button>
-							<c:if test="${mode=='update'}">
-								<input type="hidden" name="boardNum" value="${dto.boardNum}">
+							<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/qna/list.do';">${mode=='update'?'답변취소':'등록취소'}</button>
+							<c:if test="${mode=='write'}">
+								<input type="hidden" name="qesNum" value="${dto.qesNum}">
 								<input type="hidden" name="page" value="${page}">
 							</c:if>
-							<c:if test="${mode=='reply'}">
-								<input type="hidden" name="groupNum" value="${dto.groupNum}">
-								<input type="hidden" name="orderNo" value="${dto.orderNo}">
-								<input type="hidden" name="depth" value="${dto.depth}">
-								<input type="hidden" name="parent" value="${dto.boardNum}">
+							<c:if test="${mode=='update'}">
+								<input type="hidden" name="qesNum" value="${dto.qesNum}">
 								<input type="hidden" name="page" value="${page}">
 							</c:if>
 						</td>

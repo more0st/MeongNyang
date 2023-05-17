@@ -10,8 +10,10 @@ public class MapReplyDTO {
 	private String reg_date;
 	private long originalReplyNum;
 
-	private int answerCount;
-	
+	private int originalReplyNumCount;
+	private int likeCount;
+	private int disLikeCount;
+
 	public long getReplyNum() {
 		return replyNum;
 	}
@@ -68,12 +70,28 @@ public class MapReplyDTO {
 		this.originalReplyNum = originalReplyNum;
 	}
 
-	public int getAnswerCount() {
-		return answerCount;
+	public int getOriginalReplyNumCount() {
+		return originalReplyNumCount;
 	}
 
-	public void setAnswerCount(int answerCount) {
-		this.answerCount = answerCount;
+	public void setOriginalReplyNumCount(int originalReplyNumCount) {
+		this.originalReplyNumCount = originalReplyNumCount;
+	}
+
+	public int getLikeCount() {
+		return likeCount;
+	}
+
+	public void setLikeCount(int likeCount) {
+		this.likeCount = likeCount;
+	}
+
+	public int getDisLikeCount() {
+		return disLikeCount;
+	}
+
+	public void setDisLikeCount(int disLikeCount) {
+		this.disLikeCount = disLikeCount;
 	}
 
 }

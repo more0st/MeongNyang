@@ -565,7 +565,7 @@ public class MapServlet extends MyUploadServlet{
 		try {
 			MapReplyDTO dto = new MapReplyDTO();
 			
-			long num = Long.parseLong(req.getParameter("mapNum"));
+			long num = Long.parseLong(req.getParameter("num"));
 			dto.setMapNum(num);
 			dto.setUserId(info.getUserId());
 			dto.setContent(req.getParameter("content"));
@@ -597,8 +597,7 @@ public class MapServlet extends MyUploadServlet{
 		
 		String cp = req.getContextPath();
 		
-		String page = req.getParameter("page");
-		String query = "page=" + page;
+		
 		  
 		MapDAO dao = new MapDAO();
 		MyUtil util = new MyUtil();
@@ -638,7 +637,7 @@ public class MapServlet extends MyUploadServlet{
 			req.setAttribute("total_page", total_page);
 			req.setAttribute("paging", paging);
 
-			// forward(req, resp, "/WEB-INF/views/map/article.jsp");
+			forward(req, resp, "/WEB-INF/views/map/listReply.jsp");
 			return;
 			
 		} catch (Exception e) {
@@ -647,9 +646,6 @@ public class MapServlet extends MyUploadServlet{
 		
 		resp.sendError(400);
 		
-		resp.sendRedirect(cp + "/map/list.do?" + query);
-		
-		 
 	}
 	
 

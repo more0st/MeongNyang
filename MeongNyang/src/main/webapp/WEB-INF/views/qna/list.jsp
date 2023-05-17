@@ -64,11 +64,14 @@ function searchList() {
 					</tr>
 				</thead>
 				
-				<tbody>
+				<c:if test="${empty dto.replyContent}" >
+				<tbody style="font-weight: bold;">
+				</c:if>
 					<c:forEach var="dto" items="${list}" varStatus="status">
 						<tr>
 							<td>${dataCount - (page-1) * size - status.index}</td>
 							<td class="left">
+							
 								<a href="${articleUrl}&qesNum=${dto.qesNum}">${dto.subject}</a>
 							</td>
 							<td>${dto.userName}</td>

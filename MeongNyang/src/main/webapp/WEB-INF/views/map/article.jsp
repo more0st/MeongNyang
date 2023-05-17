@@ -1,5 +1,5 @@
-﻿<%@ page contentType="text/html; charset=UTF-8" %>
-<%@ page trimDirectiveWhitespaces="true" %>
+﻿<%@ page contentType="text/html; charset=UTF-8"%>
+<%@ page trimDirectiveWhitespaces="true"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
 <!DOCTYPE html>
@@ -8,7 +8,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>spring</title>
-<jsp:include page="/WEB-INF/views/layout/staticHeader.jsp"/>
+<jsp:include page="/WEB-INF/views/layout/staticHeader.jsp" />
 <style type="text/css">
 .body-main {
 	max-width: 700px;
@@ -20,8 +20,10 @@
 	padding: 5px;
 	overflow-x: auto;
 }
+
 .img-box img {
-	width: 350px; height: 300px;
+	width: 350px;
+	height: 300px;
 	margin-right: 5px;
 	flex: 0 0 auto;
 	cursor: pointer;
@@ -34,25 +36,61 @@
 	border-bottom: 1px solid #ccc;
 	border-radius: 0;
 }
+
 .ui-dialog .ui-dialog-title {
-	padding-top: 5px; padding-bottom: 5px;
+	padding-top: 5px;
+	padding-bottom: 5px;
 }
+
 .ui-widget-content { /* 내용 */
-   /* border: none; */
-   border-color: #ccc; 
+	/* border: none; */
+	border-color: #ccc;
 }
 
-.photo-layout img { width: 570px; height: 450px; }
+.photo-layout img {
+	width: 570px;
+	height: 450px;
+}
 
-.table-article tr>td { padding-left: 5px; padding-right: 5px; }
+.table-article tr>td {
+	padding-left: 5px;
+	padding-right: 5px;
+}
 
-.map_wrap {position:relative;width:100%;height:350px;}
-    .kkotitle {font-weight:bold;display:block;}
-    .hAddr {position:absolute;left:10px;top:10px;border-radius: 2px;background:#fff;background:rgba(255,255,255,0.8);z-index:1;padding:5px;}
-    #centerAddr {display:block;margin-top:2px;font-weight: normal;}
-    .bAddr {padding:5px;text-overflow: ellipsis;overflow: hidden;white-space: nowrap;}
+.map_wrap {
+	position: relative;
+	width: 100%;
+	height: 350px;
+}
 
+.kkotitle {
+	font-weight: bold;
+	display: block;
+}
 
+.hAddr {
+	position: absolute;
+	left: 10px;
+	top: 10px;
+	border-radius: 2px;
+	background: #fff;
+	background: rgba(255, 255, 255, 0.8);
+	z-index: 1;
+	padding: 5px;
+}
+
+#centerAddr {
+	display: block;
+	margin-top: 2px;
+	font-weight: normal;
+}
+
+.bAddr {
+	padding: 5px;
+	text-overflow: ellipsis;
+	overflow: hidden;
+	white-space: nowrap;
+}
 </style>
 
 <script type="text/javascript">
@@ -157,7 +195,7 @@ $(function() {
 		content = encodeURIComponent(content);
 		
 		let url = "${pageContext.request.contextPath}/map/insertReply.do";
-		let qs = "mapNum="+mapNum+"&content="+content+"&answer=0";
+		let qs = "num="+mapNum+"&content="+content+"&originalReplyNum=0";
 		
 		const fn = function(data) {
 			$tb.find("textarea").val("");
@@ -200,92 +238,9 @@ const isHidden = ele => {
 	
 };
 
-//댓글 등록
-window.addEventListener('load',()=>{
-	const btnEL = document.querySelector('.btnSendReply');
-	
-	btnEL.addEventListener('click', e =>{
-		const El = e.target.closest('table');
-		let content = El.querySelector('textarea').value.trim();
-		if(!content) {
-			alert('내용을입력하세요');
-			El.querySelector('textarea').focus();
-			return;
-		}
-		
-		content = encodeURIComponent(content);
-		alert('등록할 댓글 :' + content);
-	});
-	
-});
 
-//댓글 삭제
-window.addEventListener('load',() => {
-	const listReplyEL = document.querySelector('#listReply');	
-
-	listReplyEL.addEventListener('click',e =>{
-		if(e.target.matches('.deleteReply')){
-			
-			if(! confirm('게시글을 삭제하시겠습니까 ? ')){
-				return;
-			}
-			let pageNo = e.target.getAttribute('data-pageNo');
-			let replyNum = e.target.getAttribute('data-replyNum');
-			
-			alert('삭제할 댓글번호 :'+replyNum+",페이지번호:"+pageNo);
-		}
-	
-	});
-});
-
-
-
-//답글 버튼 : 댓글별 답글 등록폼 및 답글 리스트 표시/숨김
-window.addEventListener('load',() => {
-	const listReplyEL = document.querySelector('#listReply');	
-	
-	listReplyEL.addEventListener('click',e =>{
-		if(e.target.matches('.btnReplyAnswerLayout')||e.target.parentElement.matches('.btnReplyAnswerLayout')){
-			let $El = e.target.closest('tr').nextElementSibling;//다음형제
-			
-			//$El.classList.toggle('reply-answer'); //tr태그라 화면이 이상하게나옴
-			//$El.style.display = 'block'; //tr태그엔 block속성 사용안됨, 화면이 이상하게 나옴
-			
-			if(isHidden($El)){//숨겨져있으면 table-row, 아니면 none
-				$El.style.display = 'table-row'; //tr태그에 보이게할수있는 속성은 table-row!!!
-			}else{
-				$El.style.display = 'none';
-			}
-		}
-	});
-});
 
 //답글 등록 버튼
-
-window.addEventListener('load',() => {
-	const listReplyEL = document.querySelector('#listReply');	
-	
-	listReplyEL.addEventListener('click',e =>{
-		if(e.target.matches('.btnSendReplyAnswer')){
-			let replyNum = e.target.getAttribute('data-replyNum');
-			
-			let El = e.target.closest('td');
-			let content = El.querySelector('textarea').value.trim();
-			if( ! content){
-				alert('내용을 입력해주세요');
-				El.querySelector('textarea').focus();
-				return;
-			}
-			
-			content = encodeURIComponent(content);//서버로 데이터 보내는것
-			
-			alert('댓글번호 : '+ replyNum+', 등록할 답글 : '+content);
-			
-			
-		}
-		
-	});
-});
 
 function imageViewer(img) {
 	const viewer = $(".photo-layout");
@@ -310,233 +265,164 @@ function imageViewer(img) {
 </head>
 <body>
 
-<header>
-	<jsp:include page="/WEB-INF/views/layout/header.jsp"></jsp:include>
-</header>
-	
-<main>
-	<div class="container body-container">
-	    <div class="body-title" style="text-align: center;">
-			<img src="${pageContext.request.contextPath}/resource/images/mappage.png" style="width: 250px;">
-	    </div>
-	    <div style="box-shadow: 0 0 15px 0 rgb(2 59 109 / 10%);border-radius: 30px; margin: 0 auto ; width: 70%; margin-bottom: 50px;">
-	    <div class="body-main mx-auto">
-			<table class="table table-border table-article">
-				<thead>
-					<tr>
-						<td colspan="2" align="center">
-							${dto.subject}
-						</td>
-					</tr>
-				</thead>
-				
-				<tbody>
-					<tr>
-						<td width="50%">
-							이름 : ${dto.userName}
-						</td>
-						<td align="right">
-							${dto.reg_date} | 조회 ${dto.hitCount}
-						</td>
-					</tr>
-					
-					<tr>
-						<td colspan="2" valign="top" height="200">
-							${dto.content}
-						</td>
-					</tr>
-					
-					<tr style="border-bottom: none; text-align: center;" >
-						<td colspan="2" height="110">
-							<div class="img-box"  >
-								<c:forEach var="vo" items="${listFile}">
-									<img src="${pageContext.request.contextPath}/uploads/map/${vo.imageFilename}"
-										onclick="imageViewer('${pageContext.request.contextPath}/uploads/map/${vo.imageFilename}');">
-								</c:forEach>
-							</div>
-						</td>	
-					</tr>
-					
-					
-					
-					<tr >
-						<td style="text-align: center;">
-							<div id="map" style="width:100%;height:350px;"></div>
-						</td>
-					</tr>
-					
-					<tr>
-						<td colspan="2">
-							이전글 :
-							<c:if test="${not empty preReadDto}">
-								<a href="${pageContext.request.contextPath}/map/article.do?${query}&num=${preReadDto.mapNum}">${preReadDto.subject}</a>
-							</c:if>
-						</td>
-					</tr>
-					<tr>
-						<td colspan="2">
-							다음글 :
-							<c:if test="${not empty nextReadDto}">
-								<a href="${pageContext.request.contextPath}/map/article.do?${query}&num=${nextReadDto.mapNum}">${nextReadDto.subject}</a>
-							</c:if>
-						</td>
-					</tr>
-					<tr>
-						<td colspan="2" align="center" style="border-bottom: 20px;">
-							<button type="button" class="btn btnSendBoardLike" title="좋아요"><i class="fas fa-thumbs-up" style="color:${isUserLike?'blue':'black'}"></i>&nbsp;&nbsp;<span id="boardLikeCount">10</span></button>
-						</td>
-					</tr>
-					
-				</tbody>
-			</table>
-			
-			<table class="table">
-				<tr>
-					<td width="50%">
-						<c:choose>
-							<c:when test="${sessionScope.member.userId==dto.userId}">
-								<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/map/update.do?num=${dto.mapNum}&page=${page}';">수정</button>
-							</c:when>
-							<c:otherwise>
-								<button type="button" class="btn" disabled="disabled">수정</button>
-							</c:otherwise>
-						</c:choose>
-				    	
-						<c:choose>
-				    		<c:when test="${sessionScope.member.userId==dto.userId || sessionScope.member.userId=='admin'}">
-				    			<button type="button" class="btn" onclick="deleteBoard();">삭제</button>
-				    		</c:when>
-				    		<c:otherwise>
-				    			<button type="button" class="btn" disabled="disabled">삭제</button>
-				    		</c:otherwise>
-				    	</c:choose>
-					</td>
-					
-					
-					<td align="right">
-						<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/map/list.do?${query}';">리스트</button>
-					</td>
-				</tr>
-			</table>
+	<header>
+		<jsp:include page="/WEB-INF/views/layout/header.jsp"></jsp:include>
+	</header>
 
-	    </div>
-	    </div>
-	</div>
-	
-	
-	<!-- 댓글 폼 -->
-	<div class="body-container">
+	<main>
+		<div class="container body-container">
+			<div class="body-title" style="text-align: center;">
+				<img
+					src="${pageContext.request.contextPath}/resource/images/mappage.png"
+					style="width: 250px;">
+			</div>
+			<div
+				style="box-shadow: 0 0 15px 0 rgb(2 59 109/ 10%); border-radius: 30px; margin: 0 auto; width: 70%; margin-bottom: 50px;">
+				<div class="body-main mx-auto">
+					<table class="table table-border table-article">
+						<thead>
+							<tr>
+								<td colspan="2" align="center">${dto.subject}</td>
+							</tr>
+						</thead>
 
-	<div class="reply">
-		<form name="replyForm" method="post">
-			<div class='form-header'>
-				<span class="bold">댓글쓰기</span><span> - 타인을 비방하거나 개인정보를 유출하는 글의 게시를 삼가해 주세요.</span>
-			</div>
-			
-			<table class="table reply-form">
-				<tr>
-					<td>
-						<textarea class='form-control' name="content" style="height: 120px;"></textarea>
-					</td>
-				</tr>
-				<tr>
-				   <td align='right'>
-				        <button type='button' class='btn btnSendReply'>댓글 등록</button>
-				    </td>
-				 </tr>
-			</table>
-		</form>
-		
-		<div id="listReply">
-		
-			<div class='reply-info'>
-				<span class='reply-count'>${replyCount}개</span>
-				<span>[목록, ${pageNo}/${total_page} 페이지]</span>
-			</div>
-			
-			<table class='table reply-list'>
-				<c:forEach var="vo" items="${listReply}">
-					<tr class='list-header'>
-						<td width='50%'>
-							<span class='bold'>${vo.userName}</span>
-						</td>
-						<td width='50%' align='right'>
-							<span>${vo.reg_date}</span> |
-							<span class='deleteReply' data-replyNum='10' data-pageNo='1'>삭제</span>
-						</td>
-					</tr>
-					<tr>
-						<td colspan='2' valign='top'>${vo.content}</td>
-					</tr>
-			
-					<tr>
-						<td>
-							<button type='button' class='btn btnReplyAnswerLayout' data-replyNum='${vo.replyNum}'>답글 <span id="answerCount10">3</span></button>
-						</td>
-						<td align='right'>
-							<button type='button' class='btn btnSendReplyLike' data-replyNum='${vo.replyNum}' data-replyLike='1' title="좋아요">좋아요 <span>10</span></button>
-							<button type='button' class='btn btnSendReplyLike' data-replyNum='${vo.replyNum}' data-replyLike='0' title="싫어요">싫어요 <span>10</span></button>	        
-						</td>
-					</tr>
-				
-				    <tr class='reply-answer'>
-				        <td colspan='2'>
-				            <div id='listReplyAnswer${vo.replyNum}' class='answer-list'>
-				            
-								<div class='answer-article'>
-									<div class='answer-article-header'>
-										<div class='answer-left'>└</div>
-										<div class='answer-right'>
-											<div style='float: left;'><span class='bold'>스프링</span></div>
-											<div style='float: right;'>
-												<span>2021-11-01</span> |
-												<span class='deleteReplyAnswer' data-replyNum='10' data-answer='${vo.replyNum}'>삭제</span>
-											</div>
-										</div>
+						<tbody>
+							<tr>
+								<td width="50%">이름 : ${dto.userName}</td>
+								<td align="right">${dto.reg_date} | 조회 ${dto.hitCount}</td>
+							</tr>
+
+							<tr>
+								<td colspan="2" valign="top" height="200">${dto.content}</td>
+							</tr>
+
+							<tr style="border-bottom: none; text-align: center;">
+								<td colspan="2" height="110">
+									<div class="img-box">
+										<c:forEach var="vo" items="${listFile}">
+											<img
+												src="${pageContext.request.contextPath}/uploads/map/${vo.imageFilename}"
+												onclick="imageViewer('${pageContext.request.contextPath}/uploads/map/${vo.imageFilename}');">
+										</c:forEach>
 									</div>
-									<div class='answer-article-body'>
-										답글입니다.
-									</div>
-								</div>
-												            
-				            </div>
-				            <div class="answer-form">
-				                <div class='answer-left'>└</div>
-				                <div class='answer-right'><textarea class='form-control' ></textarea></div>
-				            </div>
-				             <div class='answer-footer'>
-				                <button type='button' class='btn btnSendReplyAnswer' data-replyNum='10'>답글 등록</button>
-				            </div>
-						</td>
-				    </tr>
-				</c:forEach>
-			</table>
-		<div>
-			<div class="page-navigation">
-			${paging}
-			</div>		
+								</td>
+							</tr>
+
+
+
+							<tr>
+								<td style="text-align: center;">
+									<div id="map" style="width: 100%; height: 350px;"></div>
+								</td>
+							</tr>
+
+							<tr>
+								<td colspan="2">이전글 : <c:if test="${not empty preReadDto}">
+										<a
+											href="${pageContext.request.contextPath}/map/article.do?${query}&num=${preReadDto.mapNum}">${preReadDto.subject}</a>
+									</c:if>
+								</td>
+							</tr>
+							<tr>
+								<td colspan="2">다음글 : <c:if test="${not empty nextReadDto}">
+										<a
+											href="${pageContext.request.contextPath}/map/article.do?${query}&num=${nextReadDto.mapNum}">${nextReadDto.subject}</a>
+									</c:if>
+								</td>
+							</tr>
+							<tr>
+								<td colspan="2" align="center" style="border-bottom: 20px;">
+									<button type="button" class="btn btnSendBoardLike" title="좋아요">
+										<i class="fas fa-thumbs-up"
+											style="color:${isUserLike?'blue':'black'}"></i>&nbsp;&nbsp;<span
+											id="boardLikeCount">${dto.boardLikeCount}</span>
+									</button>
+								</td>
+							</tr>
+
+						</tbody>
+					</table>
+
+					<table class="table">
+						<tr>
+							<td width="50%"><c:choose>
+									<c:when test="${sessionScope.member.userId==dto.userId}">
+										<button type="button" class="btn"
+											onclick="location.href='${pageContext.request.contextPath}/map/update.do?num=${dto.mapNum}&page=${page}';">수정</button>
+									</c:when>
+									<c:otherwise>
+										<button type="button" class="btn" disabled="disabled">수정</button>
+									</c:otherwise>
+								</c:choose> <c:choose>
+									<c:when
+										test="${sessionScope.member.userId==dto.userId || sessionScope.member.userId=='admin'}">
+										<button type="button" class="btn" onclick="deleteBoard();">삭제</button>
+									</c:when>
+									<c:otherwise>
+										<button type="button" class="btn" disabled="disabled">삭제</button>
+									</c:otherwise>
+								</c:choose></td>
+
+
+							<td align="right">
+								<button type="button" class="btn"
+									onclick="location.href='${pageContext.request.contextPath}/map/list.do?${query}';">리스트</button>
+							</td>
+						</tr>
+					</table>
+
+				</div>
+			</div>
 		</div>
+
+
+		<!-- 댓글 폼 -->
+		<div class="body-container">
+
+			<div class="reply">
+				<form name="replyForm" method="post">
+					<div class='form-header'>
+						<span class="bold">댓글쓰기</span><span> - 타인을 비방하거나 개인정보를 유출하는
+							글의 게시를 삼가해 주세요.</span>
+					</div>
+
+					<table class="table reply-form">
+						<tr>
+							<td><textarea class='form-control' name="content"
+									style="height: 120px;"></textarea></td>
+						</tr>
+						<tr>
+							<td align='right'>
+								<button type='button' class='btn btnSendReply'>댓글 등록</button>
+							</td>
+						</tr>
+					</table>
+				</form>
+
+				<div>
+					<div class="page-navigation">${paging}</div>
+				</div>
+			</div>
 		</div>
+
+
+
+	</main>
+
+	<footer>
+		<jsp:include page="/WEB-INF/views/layout/footer.jsp"></jsp:include>
+	</footer>
+
+	<div class="dialog-photo">
+		<div class="photo-layout"></div>
 	</div>
 
-</div>
-	
-	
-</main>
+	<jsp:include page="/WEB-INF/views/layout/staticFooter.jsp" />
 
-<footer>
-    <jsp:include page="/WEB-INF/views/layout/footer.jsp"></jsp:include>
-</footer>
+	<script type="text/javascript"
+		src="//dapi.kakao.com/v2/maps/sdk.js?appkey=01680d6fa50eecc6cbcc23d4888731c2&libraries=services,clusterer,drawing"></script>
 
-<div class="dialog-photo">
-      <div class="photo-layout"></div>
-</div>
-
-<jsp:include page="/WEB-INF/views/layout/staticFooter.jsp"/>
-
-<script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=01680d6fa50eecc6cbcc23d4888731c2&libraries=services,clusterer,drawing"></script>
-
-<script>
+	<script>
 	var mapContainer = document.getElementById('map'), // 지도를 표시할 div 
 	mapOption = { 
 	    center: new kakao.maps.LatLng(${dto.addr}), // 지도의 중심좌표

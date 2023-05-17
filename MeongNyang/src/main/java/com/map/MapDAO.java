@@ -958,6 +958,10 @@ public class MapDAO {
 			try {
 				sb.append(" SELECT r.replyNum, r.userId, userName, num, content, r.reg_date, ");
 				sb.append("     NVL(originalReplyNumCount, 0) originalReplyNumCount ");
+				
+				//sb.append("     NVL(likeCount, 0) likeCount, ");
+				//sb.append("     NVL(disLikeCount, 0) disLikeCount ");
+				
 				sb.append(" FROM mapReply r ");
 				sb.append(" JOIN member m ON r.userId = m.userId ");
 				sb.append(" LEFT OUTER  JOIN (");
@@ -989,8 +993,8 @@ public class MapDAO {
 					dto.setContent(rs.getString("content"));
 					dto.setReg_date(rs.getString("reg_date"));
 					dto.setOriginalReplyNum(rs.getInt("originalReplyNumCount"));
-					// dto.setLikeCount(rs.getInt("likeCount"));
-					// dto.setDisLikeCount(rs.getInt("disLikeCount"));
+					//dto.setLikeCount(rs.getInt("likeCount"));
+					//dto.setDisLikeCount(rs.getInt("disLikeCount"));
 					
 					list.add(dto);
 				}
