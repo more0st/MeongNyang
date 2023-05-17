@@ -100,7 +100,9 @@ public class ClubDAO {
 			String sql;
 			
 			try {
-				sql = "SELECT NVL(COUNT(*), 0) FROM club WHERE userId = ?";
+				sql = "SELECT NVL(COUNT(*), 0) FROM club c "
+						+ " JOIN clubMember m  ON c.clubNum = m.clubNum "
+						+ " WHERE m.userId = ?";
 				pstmt = conn.prepareStatement(sql);
 				
 				pstmt.setString(1, userId);
@@ -1316,18 +1318,61 @@ public class ClubDAO {
 	}
 			
 			
+	//멤버가 존재하는지 확인
+	public boolean isMemberCheck(long num, String userId) {
+	PreparedStatement pstmt = null;
+	ResultSet rs = null;
+	String sql;
+	boolean result = false;
+	
+	try {
+		sql =  " SELECT clubNum, userId FROM clubMember "
+             + " WHERE clubNum = ? AND userId = ? " ;
+		
+		pstmt = conn.prepareStatement(sql);
+		
+		pstmt.setLong(1, num);
+		pstmt.setString(2, userId);
+		
+		rs = pstmt.executeQuery();
+		
+		if(rs.next()) {
+			result = true;
 
-
+		}
+		
+		
+	} catch (Exception e) {
+		e.printStackTrace();
+	} finally {
+		if (rs != null) {
+			try {
+				rs.close();
+			} catch (SQLException e2) {
+			}
+		}
+		if (pstmt != null) {
+			try {
+				pstmt.close();
+			} catch (SQLException e2) {
+			}
+		}
+	}
+	
+	
+	return result;
+}
+		
 		//멤버가 존재하는지 확인
-		public boolean isMemberCheck(long num, String userId) {
+	public int statusCheck(long num, String userId) {
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		String sql;
-		boolean result = false;
+		int result = 2;
 		
 		try {
-			sql =  " SELECT clubNum, userId FROM clubMember "
-                 + " WHERE clubNum = ? AND userId = ? " ;
+			sql =  " SELECT status FROM clubMember "
+	             + " WHERE clubNum = ? AND userId = ? " ;
 			
 			pstmt = conn.prepareStatement(sql);
 			
@@ -1337,10 +1382,9 @@ public class ClubDAO {
 			rs = pstmt.executeQuery();
 			
 			if(rs.next()) {
-				result = true;
-
+				result = rs.getInt("status");
+	
 			}
-			
 			
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -1362,50 +1406,6 @@ public class ClubDAO {
 		
 		return result;
 	}
-		
-		//멤버가 존재하는지 확인
-				public int statusCheck(long num, String userId) {
-				PreparedStatement pstmt = null;
-				ResultSet rs = null;
-				String sql;
-				int result = 2;
-				
-				try {
-					sql =  " SELECT status FROM clubMember "
-		                 + " WHERE clubNum = ? AND userId = ? " ;
-					
-					pstmt = conn.prepareStatement(sql);
-					
-					pstmt.setLong(1, num);
-					pstmt.setString(2, userId);
-					
-					rs = pstmt.executeQuery();
-					
-					if(rs.next()) {
-						result = rs.getInt("status");
-
-					}
-					
-				} catch (Exception e) {
-					e.printStackTrace();
-				} finally {
-					if (rs != null) {
-						try {
-							rs.close();
-						} catch (SQLException e2) {
-						}
-					}
-					if (pstmt != null) {
-						try {
-							pstmt.close();
-						} catch (SQLException e2) {
-						}
-					}
-				}
-				
-				
-				return result;
-			}
 				
 				
 				
@@ -1509,11 +1509,328 @@ public class ClubDAO {
 				
 				
 				
+	// 게시물의 댓글 및 답글 추가
+	public void insertReply(ReplyDTO dto) throws SQLException {
+		PreparedStatement pstmt = null;
+		String sql;
+		
+		try {
+			sql = "INSERT INTO clubReply(replyNum, clubNum, userId, content, answer, reg_date) "
+					+ " VALUES (clubReply_seq.NEXTVAL, ?, ?, ?, ?, SYSDATE)";
+			pstmt = conn.prepareStatement(sql);
+			
+			pstmt.setLong(1, dto.getClubNum());
+			pstmt.setString(2, dto.getUserId());
+			pstmt.setString(3, dto.getContent());
+			pstmt.setLong(4, dto.getAnswer());
+			
+			pstmt.executeUpdate();
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw e;
+		} finally {
+			if(pstmt != null)
+				try {
+					pstmt.close();
+				} catch (SQLException e) {
+				}
+		}
+		
+	}
 				
 				
+	// 게시물의 댓글 개수
+	public int dataCountReply(long num) {
+		int result = 0;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		String sql;
+		
+		try {
+			sql = "SELECT NVL(COUNT(*), 0) FROM clubReply WHERE clubNum=? AND answer=0";
+			pstmt = conn.prepareStatement(sql);
+			
+			pstmt.setLong(1, num);
+			
+			rs = pstmt.executeQuery();
+			
+			if(rs.next()) {
+				result = rs.getInt(1);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			if(rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException e) {
+				}
+			}
 				
+			if(pstmt != null) {
+				try {
+					pstmt.close();
+				} catch (SQLException e) {
+				}
+			}
+		}
+		
+		return result;
+	}				
 				
+	
+	// 게시물 댓글 리스트
+	public List<ReplyDTO> listReply(long num, int offset, int size) {
+		List<ReplyDTO> list = new ArrayList<>();
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		StringBuilder sb = new StringBuilder();
+		
+		try {
+			sb.append(" SELECT r.replyNum, r.userId, userName, clubNum, content, r.reg_date, ");
+			sb.append("     NVL(answerCount, 0) answerCount ");
+			sb.append(" FROM clubReply r ");
+			sb.append(" JOIN member m ON r.userId = m.userId ");
+			sb.append(" LEFT OUTER  JOIN (");
+			sb.append("	    SELECT answer, COUNT(*) answerCount ");
+			sb.append("     FROM clubReply ");
+			sb.append("     WHERE answer != 0 ");
+			sb.append("     GROUP BY answer ");
+			sb.append(" ) a ON r.replyNum = a.answer ");
+			sb.append(" WHERE clubNum = ? AND r.answer = 0 ");
+			sb.append(" ORDER BY r.replyNum DESC ");
+			sb.append(" OFFSET ? ROWS FETCH FIRST ? ROWS ONLY ");
+			
+			pstmt = conn.prepareStatement(sb.toString());
+			
+			pstmt.setLong(1, num);
+			pstmt.setInt(2, offset);
+			pstmt.setInt(3, size);
+
+			rs = pstmt.executeQuery();
+			
+			while(rs.next()) {
+				ReplyDTO dto = new ReplyDTO();
 				
+				dto.setReplyNum(rs.getLong("replyNum"));
+				dto.setClubNum(rs.getLong("clubNum"));
+				dto.setUserId(rs.getString("userId"));
+				dto.setUserName(rs.getString("userName"));
+				dto.setContent(rs.getString("content"));
+				dto.setReg_date(rs.getString("reg_date"));
+				dto.setAnswerCount(rs.getInt("answerCount"));
+				
+				list.add(dto);
+			}
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			if(rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException e) {
+				}
+			}
+			if(pstmt != null) {
+				try {
+					pstmt.close();
+				} catch (SQLException e) {
+				}
+			}
+		}
+		
+		return list;
+	}
+	
+	
+	// 댓글의 답글 리스트
+	public List<ReplyDTO> listReplyAnswer(long answer) {
+		List<ReplyDTO> list = new ArrayList<>();
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		StringBuilder sb=new StringBuilder();
+		
+		try {
+			sb.append(" SELECT replyNum, clubNum, r.userId, userName, content, reg_date, answer ");
+			sb.append(" FROM clubReply r ");
+			sb.append(" JOIN member m ON r.userId=m.userId ");
+			sb.append(" WHERE answer=? ");
+			sb.append(" ORDER BY replyNum DESC ");
+			pstmt = conn.prepareStatement(sb.toString());
+			
+			pstmt.setLong(1, answer);
+
+			rs = pstmt.executeQuery();
+			
+			while(rs.next()) {
+				ReplyDTO dto=new ReplyDTO();
+				
+				dto.setReplyNum(rs.getLong("replyNum"));
+				dto.setClubNum(rs.getLong("clubNum"));
+				dto.setUserId(rs.getString("userId"));
+				dto.setUserName(rs.getString("userName"));
+				dto.setContent(rs.getString("content"));
+				dto.setReg_date(rs.getString("reg_date"));
+				dto.setAnswer(rs.getLong("answer"));
+				
+				list.add(dto);
+			}
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			if(rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException e) {
+				}
+			}
+				
+			if(pstmt != null) {
+				try {
+					pstmt.close();
+				} catch (SQLException e) {
+				}
+			}
+		}
+		return list;
+	}	
+
+	
+	// 댓글의 답글 개수
+	public int dataCountReplyAnswer(long answer) {
+		int result = 0;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		String sql;
+		
+		try {
+			sql = "SELECT NVL(COUNT(*), 0) FROM clubReply WHERE answer=?";
+			pstmt = conn.prepareStatement(sql);
+			
+			pstmt.setLong(1, answer);
+			
+			rs = pstmt.executeQuery();
+			
+			if(rs.next()) {
+				result=rs.getInt(1);
+			}
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			if(rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException e) {
+				}
+			}
+			if(pstmt != null) {
+				try {
+					pstmt.close();
+				} catch (SQLException e) {
+				}
+			}
+		}
+		
+		return result;
+	}
+
+	
+	public ReplyDTO readReply(long replyNum) {
+		ReplyDTO dto = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		String sql;
+		
+		try {
+			sql = "SELECT replyNum, clubNum, r.userId, userName, content ,r.reg_date "
+					+ " FROM clubReply r JOIN member m ON r.userId=m.userId  "
+					+ " WHERE replyNum = ? ";
+			pstmt = conn.prepareStatement(sql);
+			
+			pstmt.setLong(1, replyNum);
+
+			rs=pstmt.executeQuery();
+			
+			if(rs.next()) {
+				dto=new ReplyDTO();
+				
+				dto.setReplyNum(rs.getLong("replyNum"));
+				dto.setClubNum(rs.getLong("clubNum"));
+				dto.setUserId(rs.getString("userId"));
+				dto.setUserName(rs.getString("userName"));
+				dto.setContent(rs.getString("content"));
+				dto.setReg_date(rs.getString("reg_date"));
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			if(rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException e) {
+				}
+			}
+				
+			if(pstmt != null) {
+				try {
+					pstmt.close();
+				} catch (SQLException e) {
+				}
+			}
+		}
+		
+		return dto;
+	}
+	
+	
+	
+	
+	// 게시물의 댓글 삭제
+	public void deleteReply(long replyNum, String userId) throws SQLException {
+		PreparedStatement pstmt = null;
+		String sql;
+		
+		if(! userId.equals("admin")) {
+			ReplyDTO dto = readReply(replyNum);
+			if(dto == null || (! userId.equals(dto.getUserId()))) {
+				return;
+			}
+		}
+		
+		try {
+			sql = "DELETE FROM clubReply "
+					+ " WHERE replyNum IN  "
+					+ " (SELECT replyNum FROM clubReply START WITH replyNum = ?"
+					+ "     CONNECT BY PRIOR replyNum = answer)";
+			pstmt = conn.prepareStatement(sql);
+			
+			pstmt.setLong(1, replyNum);
+			
+			pstmt.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw e;
+		} finally {
+			if(pstmt != null) {
+				try {
+					pstmt.close();
+				} catch (SQLException e) {
+				}
+			}
+		}		
+		
+	}
+
+	
+	
+	
+	
+	
+	
 	
 }
 		

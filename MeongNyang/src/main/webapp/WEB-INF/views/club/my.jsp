@@ -40,7 +40,9 @@ function searchList() {
 <main>
 	<div class="container body-container">
 	   <div class="body-title" style="text-align: center;">
-			<img src="${pageContext.request.contextPath}/resource/images/clubpage.png" style="width: 250px;">
+			<a href="${pageContext.request.contextPath}/club/list.do';">
+				<img src="${pageContext.request.contextPath}/resource/images/clubpage.png" style="width: 250px;">
+			</a>
 	    </div>
 	   <div style="box-shadow: 0 0 15px 0 rgb(2 59 109 / 10%);border-radius: 30px; margin: 0 auto ; width: 70%;">
 	    <div class="body-main mx-auto">
@@ -56,7 +58,7 @@ function searchList() {
 			<table class="table table-border table-list">
 				<thead>
 					<tr>
-						<th class="num">번호!!!</th>
+						<th class="num">번호</th>
 						<th class="subject">제목</th>
 						<th class="name">모임장</th>
 						<th class="date">작성일</th>
@@ -69,7 +71,7 @@ function searchList() {
 				<tbody>
 					<c:forEach var="dto" items="${list}" varStatus="status">
 						<tr>
-							<td>${dataCount - (page-1) * size - status.index}</td>
+							<td>${dataCount - (page-1) * size - status.index }</td>
 							<td style="text-align: center;">
 								<a href="${articleUrl}&num=${dto.clubNum}&val=${val}">${dto.subject}</a>
 							</td>
@@ -84,7 +86,7 @@ function searchList() {
 			</table>
 			
 			<div class="page-navigation">
-				${dataCount == 0 ? "등록된 모임이 없습니다." : paging}
+				${dataCount == 0 ? "가입된 모임이 없습니다." : paging}
 			</div>
 			
 			<table class="table">

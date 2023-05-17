@@ -67,14 +67,20 @@ function sendOk() {
         f.maxMember.focus();
         return;
     }
+    
+    if( !/^\d+$/.test(str) ) {
+        alert("숫자만 가능합니다. ");
+        f.maxMember.focus();
+        return;
+    }
 
     
     let mode = "${mode}";
     let cnt = "${dto.nowMember}";
-    if(cnt == "") cnt = 0;
+    if(cnt == "") cnt = "0";
 
     
-    if(mode=="update" && str < cnt ){
+    if(mode=="update" && parseInt(str) < parseInt(cnt) ){
     	alert("현재 정원수 보다 적습니다. ");
         f.maxMember.focus();
         return;

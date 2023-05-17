@@ -26,7 +26,7 @@
 	border-radius: 0;
 }
 .ui-dialog .ui-dialog-title {
-	padding-top: 5px; padding-bottom: 5px;
+	padding-top: 5px; padding-bottom: 5px; 
 }
 .ui-widget-content { /* 내용 */
    /* border: none; */
@@ -76,7 +76,7 @@ function join(){
 
 function bye(){
 	if(confirm("탈퇴 하시겠습니까 ? ")){
-		location.href='${pageContext.request.contextPath}/club/byebye.do?num=${dto.clubNum}';
+		location.href='${pageContext.request.contextPath}/club/byebye.do?num=${dto.clubNum}&val=${val}';
 	}
 }
 
@@ -253,6 +253,145 @@ $(function(){
 });
 
 
+//댓글의 답글 리스트
+function listReplyAnswer(answer){
+	let url = "${pageContext.request.contextPath}/club/listReplyAnswer.do";
+	let qs = "answer="+answer;
+	let selector = "#listReplyAnswer"+answer;
+	
+	const fn =  function(data){
+		$(selector).html(data);
+	};
+	
+	ajaxFun(url,"get",qs,"text",fn);
+	
+}
+
+//댓글별 답글 개수
+function countReplyAnswer(answer){
+	let url = "${pageContext.request.contextPath}/club/countReplyAnswer.do";
+	let qs = "answer="+answer;
+	
+	const fn = function(data){
+		let count = data.count;
+		let selector = "#answerCount"+answer;
+		$(selector).html(count);
+	};
+		
+	ajaxFun(url,"post",qs,"json",fn);
+}
+
+
+
+//답글 버튼(댓글별 답글 등록 폼 및 답글 리스트)
+$(function(){
+	$("#listReply").on("click",".btnReplyAnswerLayout",function(){
+		
+		const $trAnswer = $(this).closest("tr").next();
+		
+		let isVisible = $trAnswer.is(":visible");
+		let replyNum = $(this).attr("data-replyNum");
+		
+		if(isVisible){
+			$trAnswer.hide();
+		}else{
+			$trAnswer.show();//답글 창이 열릴때
+			
+			//답글 리스트
+			listReplyAnswer(replyNum);
+			
+			//답글 개수
+			countReplyAnswer(replyNum);
+			
+		}
+		
+		
+	});
+});
+
+
+//답글 등록 버튼
+$(function(){
+	$("#listReply").on("click",".btnSendReplyAnswer",function(){
+		
+		let num = "${dto.clubNum}";
+		let replyNum = $(this).attr("data-replyNum");
+		const $td = $(this).closest("td");
+		
+		let content = $td.find("textarea").val().trim();
+		if(! content){
+			$td.find("textarea").focus();
+			return false;
+		}
+		
+		content = encodeURIComponent(content);
+		
+		let url = "${pageContext.request.contextPath}/club/insertReply.do";
+		let qs = "num="+num+"&content="+content+"&answer="+replyNum;
+		
+
+		const fn =  function(data){
+			let state = data.state;
+			
+			$td.find("textarea").val("");
+			
+			if(state === "true"){
+				listReplyAnswer(replyNum);
+				countReplyAnswer(replyNum);
+				
+			}
+		};
+		
+		ajaxFun(url,"post",qs,"json",fn);
+		
+	});
+});
+
+//댓글 삭제
+$(function(){
+	$("#listReply").on("click",".deleteReply",function(){
+		if(! confirm("게시글을 삭제 하시겠습니까?")){
+			return false;
+		}
+		
+		let replyNum = $(this).attr("data-replyNum");
+		let page = $(this).attr("data-pageNo");
+		
+		let url = "${pageContext.request.contextPath}/club/deleteReply.do";
+		let qs = "replyNum="+replyNum;
+		
+		const fn = function(data){
+			listPage(page);
+		};
+		
+		ajaxFun(url,"post",qs,"json",fn);
+		
+	});
+});
+
+
+//댓글의 답글 삭제
+$(function(){
+	$("#listReply").on("click",".deleteReplyAnswer",function(){
+		if(! confirm("게시글을 삭제 하시겠습니까?")){
+			return false;
+		}
+		
+		let replyNum = $(this).attr("data-replyNum");
+		let answer = $(this).attr("data-answer");
+		
+		let url = "${pageContext.request.contextPath}/club/deleteReply.do";
+		let qs = "replyNum="+replyNum;
+		
+		const fn = function(data){
+			listReplyAnswer(answer);
+			countReplyAnswer(answer);
+		};
+		
+		ajaxFun(url,"post",qs,"json",fn);
+		
+	});
+});
 
 
 </script>
@@ -267,7 +406,9 @@ $(function(){
 <main>
 	<div class="container body-container" >
 	    <div class="body-title" style="text-align: center;">
-			<img src="${pageContext.request.contextPath}/resource/images/clubpage.png" style="width: 250px;">
+			<a href="${pageContext.request.contextPath}/club/list.do';">
+				<img src="${pageContext.request.contextPath}/resource/images/clubpage.png" style="width: 250px;">
+			</a>
 	    </div>
 	    <div style="box-shadow: 0 0 15px 0 rgb(2 59 109 / 10%);border-radius: 30px; margin: 0 auto ; width: 70%; margin-bottom: 50px;">
 	    <div class="body-main mx-auto">
@@ -328,6 +469,9 @@ $(function(){
 							<c:if test="${not empty preReadDto}">
 								<a href="${pageContext.request.contextPath}/club/article.do?${query}&num=${preReadDto.clubNum}">${preReadDto.subject}</a>
 							</c:if>
+							<c:if test="${empty preReadDto}">
+								<span>이전글이 없습니다.</span>
+							</c:if>
 						</td>
 					</tr>
 					<tr>
@@ -335,6 +479,9 @@ $(function(){
 							<span class="bold">다음글 : </span>
 							<c:if test="${not empty nextReadDto}">
 								<a href="${pageContext.request.contextPath}/club/article.do?${query}&num=${nextReadDto.clubNum}">${nextReadDto.subject}</a>
+							</c:if>
+							<c:if test="${empty nextReadDto}">
+								<span>다음글이 없습니다.</span>
 							</c:if>
 						</td>
 					</tr>
@@ -403,11 +550,22 @@ $(function(){
 			</table>
 			
 				<input type="hidden" name="num" value="${dto.clubNum }">
+				<input type="hidden" name="val" value="${val}">
+				
 					
 					<!-- 멤버리스트 -->
 					<div class=" popup-dialog" style="display: none;">
 							<c:forEach var="list" items="${list }">
-									<p><i class="fa-solid fa-user" style="color: #fd855d;"></i>${list.userName }</p>
+								<c:choose>
+									<c:when test="${list.status!='1' }">
+										<p style="font-size: 15px;"><i class="fa-solid fa-user" style="color: #fd855d;"></i>${list.userName }</p>
+									</c:when>
+									<c:otherwise>
+										<p style="font-size: 15px;"><i class="fa-solid fa-crown" style="color: #f2eb1c;"></i>${list.userName }</p>
+									</c:otherwise>
+								</c:choose>
+							
+							
 							</c:forEach>
 					</div>
 
@@ -417,33 +575,60 @@ $(function(){
 	
 	
 	<!-- 댓글 쓰기폼 -->
-	<div class="body-container">
-			<div class="reply">
-				<form name="replyForm" method="post">
-					<div class='form-header'>
-						<span class="bold">댓글쓰기</span><span> - 타인을 비방하거나 개인정보를 유출하는 글의 게시를 삼가해 주세요.</span>
-					</div>
+	<c:choose>
+		<c:when test="${ result }">
+			<div class="body-container">
+				<div class="reply">
+					<form name="replyForm" method="post">
+						<div class='form-header'>
+							<span class="bold">댓글쓰기</span><span> - 타인을 비방하거나 개인정보를 유출하는 글의 게시를 삼가해 주세요.</span>
+						</div>
+						
+						<table class="table reply-form">
+							<tr>
+								<td>
+									<textarea class='form-control' name="content" style="height: 130px;"></textarea>
+								</td>
+							</tr>
+							<tr>
+							   <td align='right'>
+									<button type='button' class='btn btnSendReply'>댓글 등록</button>
+								</td>
+							 </tr>
+						</table>
+					</form>
 					
-					<table class="table reply-form">
-						<tr>
-							<td>
-								<textarea class='form-control' name="content" style="height: 130px;"></textarea>
-							</td>
-						</tr>
-						<tr>
-						   <td align='right'>
-								<button type='button' class='btn btnSendReply'>댓글 등록</button>
-							</td>
-						 </tr>
-					</table>
-				</form>
-				
-				<div id="listReply"></div>
+					<div id="listReply"></div>
+				</div>
 			</div>
-	
+		</c:when>
+		<c:otherwise>
+			<div class="body-container">
+				<div class="reply">
+					<form name="replyForm" method="post">
+						<div class='form-header'>
+							<span class="bold">댓글쓰기</span><span> - 타인을 비방하거나 개인정보를 유출하는 글의 게시를 삼가해 주세요.</span>
+						</div>
+						
+						<table class="table reply-form">
+							<tr>
+								<td>
+									<textarea class='form-control' name="content" style="height: 130px;" disabled="disabled">댓글쓰기 기능은 모임멤버만 참여 할 수 있습니다.</textarea>
+								</td>
+							</tr>
+							<tr>
+							   <td align='right'>
+									<button type='button' class='btn btnSendReply' disabled="disabled">댓글 등록</button>
+								</td>
+							 </tr>
+						</table>
+					</form>
+					
+				</div>
+			</div>
+		</c:otherwise>
+	</c:choose>
 
-	</div>
-	
 	
 </main>
 
