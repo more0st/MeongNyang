@@ -16,7 +16,7 @@
 			</td>
 			<td width='50%' align='right'>
 				<span>${dto.reg_date }</span> |
-				<span class='deleteReply' data-replyNum='10' data-pageNo='1'>삭제</span>
+				<span class='deleteReply' data-replyNum='${vo.replyNum}' data-pageNo='${pageNo}'>삭제</span>
 			</td>
 		</tr>
 		<tr>
@@ -27,10 +27,10 @@
 			<td>
 				<button type='button' class='btn btnReplyAnswerLayout' data-replyNum='${vo.replyNum}'>답글 <span id="answerCount${vo.replyNum}">${vo.answerCount}</span></button>
 			</td>
-			<td align='right'>
+			<%-- <td align='right'>
 				<button type='button' class='btn btnSendReplyLike' data-replyNum='${vo.replyNum}' data-replyLike='1' title="좋아요"><i class="fas fa-thumbs-up"></i> <span>${vo.likeCount}</span></button>
 				<button type='button' class='btn btnSendReplyLike' data-replyNum='${vo.replyNum}' data-replyLike='0' title="싫어요"><i class="fas fa-thumbs-down"></i> <span>${vo.disLikeCount}</span></button>	        
-			</td>
+			</td> --%>
 		</tr>
 	
 	    <tr class='reply-answer'>

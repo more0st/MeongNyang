@@ -68,7 +68,7 @@
 
 .photo-layout img { width: 570px; height: 450px; }
 </style>
-<script type="text/javascript" src="https://code.jquery.com/jquery-1.12.4.min.js" ></script>
+<!-- <script type="text/javascript" src="https://code.jquery.com/jquery-1.12.4.min.js" ></script> -->
     <!-- iamport.payment.js -->
 <script type="text/javascript" src="https://cdn.iamport.kr/js/iamport.payment-1.2.0.js"></script>
 <script type="text/javascript">
@@ -268,6 +268,124 @@ function requestPay() {
     });
 }
 
+$(function () {
+	$("#listReply").on("click", ".btnReplyAnswerLayout", function () {
+		const $trAnswer = $(this).closest("tr").next();
+		
+		let isVisible = $trAnswer.is(":visible");
+		let replyNum = $(this).attr("data-replyNum");
+		
+		if(isVisible){
+			$trAnswer.hide();
+		}else{
+			$trAnswer.show();
+			
+			//답글 리스트
+			listReplyAnswer(replyNum);
+			
+			// 답글 개수
+			countReplyAnswer(replyNum);
+		}
+	});
+});
+
+function listReplyAnswer(answer) {
+	let url = "${pageContext.request.contextPath}/market/listReplyAnswer.do";
+	let qs = "answer="+answer;
+	let selector = "#listReplyAnswer"+answer;
+	
+	const fn = function(data) {
+		$(selector).html(data);
+	};
+	
+	ajaxFun(url, "get", qs, "text" ,fn);
+}
+
+function countReplyAnswer(answer) {
+	let url = "${pageContext.request.contextPath}/market/countReplyAnswer.do";
+	let qs = "answer="+answer;
+	
+	const fn = function (data) {
+		let count = data.count;
+		let selector = "#answerCount"+answer;
+		$(selector).html(count);
+	};
+	
+	ajaxFun(url, "post", qs, "json", fn);
+}
+
+//답글 등록 버튼
+$(function () {
+	$("#listReply").on("click", ".btnSendReplyAnswer",function(){
+		let marketNum = "${dto.marketNum}";
+		let replyNum = $(this).attr("data-replyNum");
+		const $td = $(this).closest("td");
+		
+		let content = $td.find("textarea").val().trim();
+		if(! content){
+			$td.find("textarea").focus();
+			return false;
+		}
+		content = encodeURIComponent(content);
+		
+		let url = "${pageContext.request.contextPath}/market/insertReply.do";
+		let qs = "marketNum="+marketNum+"&content="+content+"&rereplynum="+replyNum;
+		
+		const fn = function (data) {
+			let state = data.state;
+			
+			$td.find("textarea").val("");
+			
+			if(state === "true"){
+				listReplyAnswer(replyNum);
+				countReplyAnswer(replyNum);
+			}
+		};
+		
+		ajaxFun(url, "post", qs, "json", fn);
+	});
+});
+
+$(function() {
+	$("#listReply").on("click",".deleteReply", function() {
+		if(! confirm("게시글을 삭제하시겠습니까?")){
+			return false;
+		}
+		
+		let replyNum = $(this).attr("data-replyNum");
+		let page = $(this).attr("data-pageNo");
+		
+		let url = "${pageContext.request.contextPath}/market/deleteReply.do";
+		let qs = "replyNum="+replyNum;
+		
+		const fn = function(data) {
+			listPage(page);
+		};
+		
+		ajaxFun(url, "post", qs, "json", fn);
+	});	
+});
+
+$(function() {
+	$("#listReply").on("click",".deleteReplyAnswer", function() {
+		if(! confirm("댓글을 삭제하시겠습니까?")){
+			return false;
+		}
+		
+		let replyNum = $(this).attr("data-replyNum");
+		let answer = $(this).attr("data-answer");
+		
+		let url = "${pageContext.request.contextPath}/market/deleteReply.do";
+		let qs = "replyNum="+replyNum;
+		
+		const fn = function(data) {
+			listReplyAnswer(answer);
+			countReplyAnswer(answer);
+		};
+		
+		ajaxFun(url, "post", qs, "json", fn);
+	});	
+});
 </script>
 
 </head>
@@ -374,7 +492,7 @@ function requestPay() {
 					</td>
 					<td align="right">
 					<c:choose>
-						<c:when test="${sessionScope.member.userId==dto.sellerId}">
+						<c:when test="${sessionScope.member.userId==dto.sellerId && dto.state == 1}">
 							<button type="button" class="btn" onclick="modal();">판매시작</button>
 						</c:when>
 						<c:when test="${dto.state == 0}">

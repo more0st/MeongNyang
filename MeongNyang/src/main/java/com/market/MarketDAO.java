@@ -946,5 +946,175 @@ public class MarketDAO {
 		
 		return list;
 	}
+	
+	public List<ReplyDTO> listReplyAnswer(long answer) {
+		List<ReplyDTO> list = new ArrayList<>();
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		StringBuilder sb=new StringBuilder();
+		
+		try {
+			sb.append(" SELECT replyNum, marketnum, r.userId, content, reg_date, REREPLYNUM ");
+			sb.append(" FROM marketReply r ");
+			sb.append(" JOIN member m ON r.userId=m.userId ");
+			sb.append(" WHERE REREPLYNUM = ? ");
+			sb.append(" ORDER BY replyNum DESC ");
+			pstmt = conn.prepareStatement(sb.toString());
+			
+			pstmt.setLong(1, answer);
+
+			rs = pstmt.executeQuery();
+			
+			while(rs.next()) {
+				ReplyDTO dto=new ReplyDTO();
+				
+				dto.setReplyNum(rs.getLong("replyNum"));
+				dto.setMarketNum(rs.getLong("marketnum"));
+				dto.setUserId(rs.getString("userId"));
+				dto.setContent(rs.getString("content"));
+				dto.setReg_date(rs.getString("reg_date"));
+				dto.setAnswer(rs.getLong("REREPLYNUM"));
+				
+				list.add(dto);
+			}
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			if(rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException e) {
+				}
+			}
+				
+			if(pstmt != null) {
+				try {
+					pstmt.close();
+				} catch (SQLException e) {
+				}
+			}
+		}
+		return list;
+	}
+	
+	public int dataCountReplyAnswer(long answer) {
+		int result = 0;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		String sql;
+		
+		try {
+			sql = "SELECT NVL(COUNT(*), 0) FROM marketReply WHERE REREPLYNUM=?";
+			pstmt = conn.prepareStatement(sql);
+			
+			pstmt.setLong(1, answer);
+			
+			rs = pstmt.executeQuery();
+			
+			if(rs.next()) {
+				result=rs.getInt(1);
+			}
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			if(rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException e) {
+				}
+			}
+			if(pstmt != null) {
+				try {
+					pstmt.close();
+				} catch (SQLException e) {
+				}
+			}
+		}
+		
+		return result;
+	}
+	
+	public ReplyDTO readReply(long replyNum) {
+		ReplyDTO dto = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		String sql;
+		
+		try {
+			sql = "SELECT replyNum, marketnum, r.userId, content ,r.reg_date "
+					+ " FROM marketReply r JOIN member m ON r.userId=m.userId  "
+					+ " WHERE replyNum = ? ";
+			pstmt = conn.prepareStatement(sql);
+			
+			pstmt.setLong(1, replyNum);
+
+			rs=pstmt.executeQuery();
+			
+			if(rs.next()) {
+				dto=new ReplyDTO();
+				
+				dto.setReplyNum(rs.getLong("replyNum"));
+				dto.setMarketNum(rs.getLong("marketnum"));
+				dto.setUserId(rs.getString("userId"));
+				dto.setContent(rs.getString("content"));
+				dto.setReg_date(rs.getString("reg_date"));
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			if(rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException e) {
+				}
+			}
+				
+			if(pstmt != null) {
+				try {
+					pstmt.close();
+				} catch (SQLException e) {
+				}
+			}
+		}
+		
+		return dto;
+	}
+	
+	public void deleteReply(long replyNum, String userId) throws SQLException {
+		PreparedStatement pstmt = null;
+		String sql;
+		
+		if(! userId.equals("admin")) {
+			ReplyDTO dto = readReply(replyNum);
+			if(dto == null || (! userId.equals(dto.getUserId()))) {
+				return;
+			}
+		}
+		
+		try {
+			sql = "DELETE FROM marketReply "
+					+ " WHERE replyNum IN  "
+					+ " (SELECT replyNum FROM marketReply START WITH replyNum = ?"
+					+ "     CONNECT BY PRIOR replyNum = REREPLYNUM)";
+			pstmt = conn.prepareStatement(sql);
+			
+			pstmt.setLong(1, replyNum);
+			
+			pstmt.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw e;
+		} finally {
+			if(pstmt != null) {
+				try {
+					pstmt.close();
+				} catch (SQLException e) {
+				}
+			}
+		}		
+		
+	}
 
 }
