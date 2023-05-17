@@ -135,7 +135,6 @@ public class EventServlet extends MyUploadServlet{
 			req.setAttribute("articleUrl", articleUrl);
 			req.setAttribute("paging", paging);
 			req.setAttribute("eventStatus", eventStatus);
-			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -200,59 +199,59 @@ public class EventServlet extends MyUploadServlet{
 	}
 	
 	protected void article(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		//이벤트 글보기
-		
-		String cp=req.getContextPath();
-		
-		String page=req.getParameter("page");
-		String size=req.getParameter("size");
-		String query="page="+page+"&size="+size;
-		
-		EventDAO dao=new EventDAO();
-		try {
-			long eNum=Long.parseLong(req.getParameter("eNum"));
-			
-			String condition=req.getParameter("condition");
-			int eventStatus=2;
-			String status=req.getParameter("eventStatus");
-			
-			if(status!=null) {
-				eventStatus=Integer.parseInt(status);
-			}
+	      //이벤트 글보기
+	      
+	      String cp=req.getContextPath();
+	      
+	      String page=req.getParameter("page");
+	      int size=6;
+	      String query="page="+page;
+	      
+	      EventDAO dao=new EventDAO();
+	      try {
+	         long eNum=Long.parseLong(req.getParameter("eNum"));
+	         
+	         int eventStatus=2;
+	         String status=req.getParameter("eventStatus");
+	         
+	         if(status!=null) {
+	            eventStatus=Integer.parseInt(status);
+	         }
 
-			if(condition==null) {
-				condition="all";
-			}
 
-			if(eventStatus!=2) {
-				//query+="&condition="+condition+"&eventStatus="+eventStatus;
-				query+="&condition="+condition;
-			}
-			
-			EventDTO dto=dao.readEvent(eNum);
-			if(dto==null) {
-				resp.sendRedirect(cp+"/event/list.do?"+query);
-				return;
-			}
-			
-			dto.setContent(dto.getContent().replaceAll("\n", "<br>"));
-			
-			//이전글다음글
-			
-			req.setAttribute("dto", dto);
-			req.setAttribute("query", query);
-			req.setAttribute("page", page);
-			req.setAttribute("size", size);
-			
-			forward(req, resp, "/WEB-INF/views/event/article.jsp");
-			return;
-			
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
-		resp.sendRedirect(cp+"/event/list.do?"+query);
-		
+	         query+="&eventStatus="+eventStatus;
+	         
+	         EventDTO dto=dao.readEvent(eNum);
+	         if(dto==null) {
+	            resp.sendRedirect(cp+"/event/list.do?"+query);
+	            return;
+	         }
+	         
+	         dto.setContent(dto.getContent().replaceAll("\n", "<br>"));
+	         
+	         //이전글다음글
+	         EventDTO preReadDTO=dao.preReadEvent(dto.geteNum(), eventStatus);
+	         EventDTO nextReadDTO=dao.nextReadEvent(dto.geteNum(), eventStatus);
+	         
+	         
+	         req.setAttribute("dto", dto);
+	         req.setAttribute("query", query);
+	         req.setAttribute("page", page);
+	         req.setAttribute("size", size);
+	         req.setAttribute("eventStatus",eventStatus );
+	         req.setAttribute("eNum",eNum);
+			 req.setAttribute("preReadDTO", preReadDTO);
+			 req.setAttribute("nextReadDTO", nextReadDTO);
+	         
+	         forward(req, resp, "/WEB-INF/views/event/article.jsp");
+	         return;
+	         
+	      } catch (Exception e) {
+	         e.printStackTrace();
+	      }
+	      
+	      resp.sendRedirect(cp+"/event/list.do?"+query);
+
 	}
 	protected void updateForm(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		//이벤트 수정

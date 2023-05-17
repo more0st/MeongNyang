@@ -18,7 +18,7 @@ public class EventDAO {
 		PreparedStatement pstmt=null;
 		String sql;
 		try {
-			sql="insert into event(eNum, subject, content, start_date, end_date, enabled) values(event_seq.nextval,?,?,TO_DATE(?,'YYYY-MM-DD'),TO_DATE(?,'YYYY-MM-DD'),?)";
+			sql="insert into event(eNum, subject, content, start_date, end_date, enabled) values(event_seq.nextval,?,?,TO_DATE(?,'YYYY-MM-DD'),TO_DATE(?,'YYYY-MM-DD'),1)";
 			
 			pstmt=conn.prepareStatement(sql);
 			
@@ -26,7 +26,7 @@ public class EventDAO {
 			pstmt.setString(2, dto.getContent());
 			pstmt.setString(3, dto.getStart_date());
 			pstmt.setString(4, dto.getEnd_date());
-			pstmt.setInt(5, dto.getEnabled());
+			//pstmt.setInt(5, dto.getEnabled());
 			
 			pstmt.executeUpdate();
 		} catch (SQLException e) {
@@ -169,37 +169,319 @@ public class EventDAO {
 	public List<EventDTO> listEvent(int offset, int size, int eventStatus){
 		//진행여부에 따른 이벤트 리스트
 		List<EventDTO> list=new ArrayList<EventDTO>();
+		PreparedStatement pstmt=null;
+		ResultSet rs=null;
+		StringBuilder sb=new StringBuilder();
+		
+		try {
+			sb.append("select eNum, subject, content, to_char(start_date, 'YYYY-MM-DD') start_date, to_char(end_date, 'YYYY-MM-DD') end_date, enabled ");
+			sb.append(" from event ");
+			sb.append(" where enabled=? ");
+			sb.append(" order by eNum DESC ");
+			sb.append(" offset ? rows fetch first ? rows only ");
+			
+			pstmt=conn.prepareStatement(sb.toString());
+			
+			pstmt.setInt(1, eventStatus);
+			pstmt.setInt(2, offset);
+			pstmt.setInt(3, size);
+			rs=pstmt.executeQuery();
+			
+			while(rs.next()) {
+				EventDTO dto=new EventDTO();
+				
+				dto.seteNum(rs.getLong("eNum"));
+				dto.setSubject(rs.getString("subject"));
+				dto.setContent(rs.getString("content"));
+				dto.setStart_date(rs.getString("start_date"));
+				dto.setEnd_date(rs.getString("end_date"));
+				dto.setEnabled(rs.getInt("enabled"));
+				
+				list.add(dto);
+			}
+			
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			if (rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException e) {
+				}
+			}
+
+			if (pstmt != null) {
+				try {
+					pstmt.close();
+				} catch (SQLException e) {
+				}
+			}
+		}
 		return list;
 	}
 	
 	public EventDTO readEvent(long eNum) {
 		//이벤트 가져오기
 		EventDTO dto=null;
+		
+		PreparedStatement pstmt=null;
+		ResultSet rs=null;
+		String sql;
+		
+		try {
+			sql="select eNum, subject, content, to_char(start_date, 'YYYY-MM-DD') start_date, to_char(end_date, 'YYYY-MM-DD') end_date, enabled "
+					+ "from event "
+					+ "where eNum=?";
+			
+			pstmt=conn.prepareStatement(sql);
+			pstmt.setLong(1, eNum);
+			rs=pstmt.executeQuery();
+			
+			if(rs.next()) {
+				dto=new EventDTO();
+				
+				dto.seteNum(rs.getLong("eNum"));
+				dto.setSubject(rs.getString("subject"));
+				dto.setContent(rs.getString("content"));
+				dto.setStart_date(rs.getString("start_date"));
+				dto.setEnd_date(rs.getString("end_date"));
+				dto.setEnabled(rs.getInt("enabled"));
+			}
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			if (rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException e) {
+				}
+			}
+
+			if (pstmt != null) {
+				try {
+					pstmt.close();
+				} catch (SQLException e) {
+				}
+			}
+		}
+		
+		
 		return dto;
 	}
 	
-	public EventDTO preReadEvent(long eNum, int enabled) {
+	public EventDTO preReadEvent(long eNum, int eventStatus) {
 		//이전글
 		EventDTO dto=null;
+		PreparedStatement pstmt=null;
+		ResultSet rs=null;
+		StringBuilder sb=new StringBuilder();
+		
+		try {
+			if(eventStatus!=2) {
+				sb.append("select eNum, subject ");
+				sb.append(" from event ");
+				sb.append(" where (eNum>?) and (enabled=?) ");
+				sb.append(" order by eNum asc ");
+				sb.append(" fetch first 1 rows only ");
+				
+				pstmt=conn.prepareStatement(sb.toString());
+				
+				pstmt.setLong(1, eNum);
+				pstmt.setInt(2, eventStatus);
+			} else {
+				sb.append("select eNum, subject ");
+				sb.append(" from event ");
+				sb.append(" where eNum>? ");
+				sb.append(" order by eNum asc ");
+				sb.append(" fetch first 1 rows only ");
+
+				pstmt=conn.prepareStatement(sb.toString());
+				
+				pstmt.setLong(1, eNum);
+				
+			}
+			
+			rs=pstmt.executeQuery();
+			
+			if(rs.next()) {
+				dto=new EventDTO();
+				
+				dto.seteNum(rs.getLong("eNum"));
+				dto.setSubject(rs.getString("subject"));
+			}
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			if (rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException e) {
+				}
+			}
+
+			if (pstmt != null) {
+				try {
+					pstmt.close();
+				} catch (SQLException e) {
+				}
+			}
+		}
 		return dto;
 	}
 
-	public EventDTO nextReadEvent(long eNum, int enabled) {
+	public EventDTO nextReadEvent(long eNum, int eventStatus) {
 		//다음글
 		EventDTO dto=null;
+		PreparedStatement pstmt=null;
+		ResultSet rs=null;
+		StringBuilder sb=new StringBuilder();
+		
+		try {
+			if(eventStatus!=2) {
+				sb.append("select eNum, subject ");
+				sb.append(" from event ");
+				sb.append(" where (eNum<?) and (enabled=?) ");
+				sb.append(" order by eNum desc ");
+				sb.append(" fetch first 1 rows only ");
+				
+				pstmt=conn.prepareStatement(sb.toString());
+				
+				pstmt.setLong(1, eNum);
+				pstmt.setInt(2, eventStatus);
+			} else {
+				sb.append("select eNum, subject ");
+				sb.append(" from event ");
+				sb.append(" where eNum<? ");
+				sb.append(" order by eNum desc ");
+				sb.append(" fetch first 1 rows only ");
+
+				pstmt=conn.prepareStatement(sb.toString());
+				
+				pstmt.setLong(1, eNum);
+				
+			}
+			
+			rs=pstmt.executeQuery();
+			
+			if(rs.next()) {
+				dto=new EventDTO();
+				
+				dto.seteNum(rs.getLong("eNum"));
+				dto.setSubject(rs.getString("subject"));
+			}
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			if (rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException e) {
+				}
+			}
+
+			if (pstmt != null) {
+				try {
+					pstmt.close();
+				} catch (SQLException e) {
+				}
+			}
+		}
 		return dto;
 	}
 	
 	public void updateEvent(EventDTO dto) throws SQLException{
 		//이벤트 수정
+		PreparedStatement pstmt=null;
+		String sql;
+		
+		try {
+			sql="update event set subject=?, content=?, "
+					+ "start_date=to_date(?,'YYYY-MM-DD'), end_date=to_date(?,'YYYY-MM-DD') "
+					+ "where eNum=? ";
+			
+			pstmt=conn.prepareStatement(sql);
+			
+			pstmt.setString(1, dto.getSubject());
+			pstmt.setString(2, dto.getContent());
+			pstmt.setString(3, dto.getStart_date());
+			pstmt.setString(4, dto.getEnd_date());
+			pstmt.setLong(5, dto.geteNum());
+			
+			pstmt.executeUpdate();
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw e;
+		} finally {
+			if (pstmt != null) {
+				try {
+					pstmt.close();
+				} catch (SQLException e) {
+				}
+			}
+		}
 	}
 	
-	public void updateEnabled(long eNum) throws SQLException{
+	public void updateEnabled(long eNum, int eventStatus) throws SQLException{
 		//진행여부 수정
+		PreparedStatement pstmt=null;
+		String sql;
+		
+		try {
+			sql="update event set enabled=? "
+					+ "where eNum=? ";
+			
+			pstmt=conn.prepareStatement(sql);
+			
+			if(eventStatus==1) {
+				pstmt.setInt(1, 0);
+			} else {
+				pstmt.setInt(1, 1);
+			}
+			
+			pstmt.setLong(2, eNum);
+			
+			pstmt.executeUpdate();
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw e;
+		} finally {
+			if (pstmt != null) {
+				try {
+					pstmt.close();
+				} catch (SQLException e) {
+				}
+			}
+		}
 	}
 	
 	public void deleteEvent(long eNum) throws SQLException{
 		//이벤트 삭제
+		PreparedStatement pstmt=null;
+		String sql;
+		
+		try {
+			sql="delete from event where eNum=?";
+			pstmt=conn.prepareStatement(sql);
+			pstmt.setLong(1, eNum);
+			pstmt.executeUpdate();
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw e;
+		} finally {
+			if (pstmt != null) {
+				try {
+					pstmt.close();
+				} catch (SQLException e) {
+				}
+			}
+		}
 	}
 
 //참여자

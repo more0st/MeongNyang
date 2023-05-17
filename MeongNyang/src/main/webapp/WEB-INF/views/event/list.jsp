@@ -120,12 +120,10 @@ function searchList() {
 			   			<span>
 					   		<a href="#">
 					   			<span class="card-body" style="display: inline-block; justify-content: center;">
-									<span class="card-region" > <br>no.${dataCount - (page-1) * size - status.index} </span>	
+									<span class="card-region" > <br>No.${dataCount - (page-1) * size - status.index} </span>	
 					   				<span class="card-title"> ${dto.subject} </span>
 									<span style="display: flex; justify-content: center; padding-bottom: 10px;">
-										<!-- 자세히 : 글보기 -->
-										<button type="button" class="btn more" style="display: inline-block;" onclick="location.href='${pageContext.request.contextPath}/event/article.do';">자세히</button>
-										<!-- 가입 : 바로 가입할 수 있게 ?  -->
+										<button type="button" class="btn more" style="display: inline-block;" onclick="location.href='${articleUrl}&eNum=${dto.eNum}';">자세히</button>
 										<button type="button" class="btn join" style="display: inline-block;" >참여</button>
 									</span>
 									<span class="card-date"> ${dto.start_date} ~ ${dto.end_date} </span>
@@ -156,6 +154,9 @@ function searchList() {
 								<option value="0" ${eventStatus=="0"?"selected='selected'":"" }>종료</option>
 							</select>
 							<button type="button" class="btn" onclick="searchList();">검색</button>
+							<input type="hidden" name="page" value="${page}">
+							<input type="hidden" name="size" value="${size}">
+							<input type="hidden" name="eNum" value="${dto.eNum}">
 						</form>
 					</td>
 					<td align="right" width="100">
