@@ -30,6 +30,9 @@ function sendOk() {
     const f = document.boardForm;
 	let str;
 	
+	let start_date;
+	let end_date;
+	
     str = f.subject.value.trim();
     if(!str) {
         alert("제목을 입력하세요. ");
@@ -43,7 +46,19 @@ function sendOk() {
         f.content.focus();
         return;
     }
+    
+    //종료일 시작일 비교 하기
+    /*
+    start_date=f.start_date.value;
+    end_date=f.start_date.value;
 
+    if(start_date>=end_date){
+    	alert("종료일은 시작일보다 작을 수 없습니다.");
+    	f.end_date.focus();
+    	return;
+    }
+    */
+    
     f.action = "${pageContext.request.contextPath}/event/${mode}_ok.do";
     f.submit();
 }
@@ -59,11 +74,11 @@ function sendOk() {
 
 	<div class="container body-container">
 	    <div class="body-title">
-			<h2> 멍냥지도 </h2>
+			<h2> 이벤트 등록 </h2>
 	    </div>
 	    <div style="box-shadow: 0 0 15px 0 rgb(2 59 109 / 10%);border-radius: 30px; margin: 0 auto ; width: 70%;">
 	    <div class="body-main mx-auto">
-			<form name="boardForm" method="post">
+			<form name="boardForm" method="post" enctype="multipart/form-data">
 				<table class="table table-border table-form">
 					<tr> 
 						<td>제&nbsp;&nbsp;&nbsp;&nbsp;목</td>
@@ -85,6 +100,30 @@ function sendOk() {
 							<textarea name="content" class="form-control">${dto.content}</textarea>
 						</td>
 					</tr>
+					<tr>
+						<td>이벤트기간</td>
+						<td>
+							<p>
+							 	<input type="date" name="start_date"> ~ 
+								<input type="date" name="end_date">
+							</p>
+						</td>
+					</tr>
+					<tr>
+						<td>추첨인원</td>
+						<td>
+							<p>
+							 	<input type="number" name="passNum" min="1" max="10"> 
+							</p>
+						</td>
+					</tr>
+					<tr> 
+						<td>이미지</td>
+						<td> 
+							<input type="file" name="selectFile" accept="image/*" multiple="multiple" class="form-control">
+						</td>
+					</tr>
+
 				</table>
 					
 				<table class="table">

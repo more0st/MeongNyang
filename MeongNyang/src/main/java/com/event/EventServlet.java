@@ -2,6 +2,8 @@ package com.event;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 
 import javax.servlet.ServletException;
 import javax.servlet.annotation.MultipartConfig;
@@ -24,7 +26,7 @@ public class EventServlet extends MyUploadServlet{
 
 	@Override
 	protected void execute(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		req.getParameter("utf-8");
+		req.setCharacterEncoding("utf-8");
 		
 		String uri=req.getRequestURI();
 		String cp=req.getContextPath();
@@ -80,30 +82,177 @@ public class EventServlet extends MyUploadServlet{
 				current_page=Integer.parseInt(page);
 			}
 			
-			String pageSize=req.getParameter("size");
-			int size=pageSize==null? 10 : Integer.parseInt(pageSize);
+			//검색 (전체:2/진행:1/종료:0)
+			int eventStatus=2;
+			String status=req.getParameter("eventStatus");
+			if(status!=null) {
+				eventStatus=Integer.parseInt(status);
+			}
+	
+			int size=6;
 			
-			int dataCount, total_page;
-			//컨디션에 진행/종료/전체 설정해야할듯
-			int enabled=Integer.parseInt(req.getParameter("enabled"));
-			if(enabled==1) {//진행중인 이벤트
+			//데이터개수
+			int dataCount = 0;
+
+			if(eventStatus==2) {//전체 이벤트
 				dataCount=dao.dataCount();
+			} else {
+				dataCount=dao.dataCount(eventStatus);
 			}
 			
+			int total_page=util.pageCount(dataCount, size);
+			if(current_page>total_page) {
+				current_page=total_page;
+			}
+			
+			int offset=(current_page-1)*size;
+			if(offset<0) offset=0;
+			
+			
+			List<EventDTO> list=null;
+			if(eventStatus==2) {
+				list=dao.listEvent(offset, size);
+			} else {
+				list=dao.listEvent(offset, size, eventStatus);
+			}
+			
+			String query="eventStatus="+eventStatus;
+			String listUrl=cp+"/event/list.do";
+			String articleUrl=cp+"/event/article.do?page="+current_page;
+			
+			if(query.length()!=0) {
+				listUrl+="?"+query;
+				articleUrl+="&"+query;
+			}
+			
+			String paging=util.paging(current_page, total_page, listUrl);
+			
+			req.setAttribute("list", list);
+			req.setAttribute("page", current_page);
+			req.setAttribute("total_page", total_page);
+			req.setAttribute("dataCount", dataCount);
+			req.setAttribute("size", size);
+			req.setAttribute("articleUrl", articleUrl);
+			req.setAttribute("paging", paging);
+			req.setAttribute("eventStatus", eventStatus);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		forward(req, resp, "/WEB-INF/views/event/list.jsp");
+	}
+	protected void writeForm(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		//이벤트 등록 폼
+		HttpSession session=req.getSession();
+		SessionInfo info=(SessionInfo)session.getAttribute("member");
+		
+		String cp=req.getContextPath();
+		String size=req.getParameter("size");
+		
+		if(!info.getUserId().equals("admin")) {
+			resp.sendRedirect(cp+"/event/list.do?size="+size);
+			return;
+		}
+		
+		req.setAttribute("mode", "write");
+		req.setAttribute("size", size);
+		
+		forward(req, resp, "/WEB-INF/views/event/write.jsp");
+		
+	}
+	protected void writeSubmit(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		//이벤트 저장
+		EventDAO dao=new EventDAO();
+		
+		HttpSession session=req.getSession();
+		SessionInfo info=(SessionInfo)session.getAttribute("member");
+		
+		String cp=req.getContextPath();
+		if(req.getMethod().equalsIgnoreCase("GET")) {
+			resp.sendRedirect(cp+"/event/list.do");
+			return;
+		}
+		
+		try {
+			EventDTO dto=new EventDTO();
+			
+			dto.setUserId(info.getUserId());
+			
+			dto.setSubject(req.getParameter("subject"));
+			dto.setContent(req.getParameter("content"));
+			dto.setStart_date(req.getParameter("start_date"));
+			dto.setEnd_date(req.getParameter("end_date"));
+			
+			Map<String, String[]> map = doFileUpload(req.getParts(), pathname);
+			if (map != null) {
+				String[] saveFiles = map.get("saveFilenames");
+				dto.setImageFiles(saveFiles);
+			}
+			
+			dao.insertEvent(dto);
 			
 			
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		resp.sendRedirect(cp+"/event/list.do");
 	}
-	protected void writeForm(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		//이벤트 등록 폼
-	}
-	protected void writeSubmit(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		//이벤트 저장
-	}
+	
 	protected void article(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		//이벤트 글보기
+		
+		String cp=req.getContextPath();
+		
+		String page=req.getParameter("page");
+		String size=req.getParameter("size");
+		String query="page="+page+"&size="+size;
+		
+		EventDAO dao=new EventDAO();
+		try {
+			long eNum=Long.parseLong(req.getParameter("eNum"));
+			
+			String condition=req.getParameter("condition");
+			int eventStatus=2;
+			String status=req.getParameter("eventStatus");
+			
+			if(status!=null) {
+				eventStatus=Integer.parseInt(status);
+			}
+
+			if(condition==null) {
+				condition="all";
+			}
+
+			if(eventStatus!=2) {
+				//query+="&condition="+condition+"&eventStatus="+eventStatus;
+				query+="&condition="+condition;
+			}
+			
+			EventDTO dto=dao.readEvent(eNum);
+			if(dto==null) {
+				resp.sendRedirect(cp+"/event/list.do?"+query);
+				return;
+			}
+			
+			dto.setContent(dto.getContent().replaceAll("\n", "<br>"));
+			
+			//이전글다음글
+			
+			req.setAttribute("dto", dto);
+			req.setAttribute("query", query);
+			req.setAttribute("page", page);
+			req.setAttribute("size", size);
+			
+			forward(req, resp, "/WEB-INF/views/event/article.jsp");
+			return;
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		resp.sendRedirect(cp+"/event/list.do?"+query);
+		
 	}
 	protected void updateForm(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		//이벤트 수정

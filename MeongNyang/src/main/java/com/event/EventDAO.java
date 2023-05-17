@@ -18,7 +18,7 @@ public class EventDAO {
 		PreparedStatement pstmt=null;
 		String sql;
 		try {
-			sql="insert into event(eNum, subject, contect, start_date, end_date, enabled) values(event_seq.nextval,?,?,TO_DATE(?,'YYYY-MM-DD'),TO_DATE(?,'YYYY-MM-DD'),?)";
+			sql="insert into event(eNum, subject, content, start_date, end_date, enabled) values(event_seq.nextval,?,?,TO_DATE(?,'YYYY-MM-DD'),TO_DATE(?,'YYYY-MM-DD'),?)";
 			
 			pstmt=conn.prepareStatement(sql);
 			
@@ -79,7 +79,7 @@ public class EventDAO {
 		}
 		return result;
 	}
-	public int dataCount(int enabled) {
+	public int dataCount(int eventStatus) {
 		//진행중인 또는 종료된 이벤트 전체 개수
 		int result=0;
 		PreparedStatement pstmt=null;
@@ -90,7 +90,7 @@ public class EventDAO {
 			sql="select count(*) from event where enabled=?";
 			
 			pstmt=conn.prepareStatement(sql);
-			pstmt.setInt(1, enabled);
+			pstmt.setInt(1, eventStatus);
 			rs=pstmt.executeQuery();
 			
 			if(rs.next()) {
@@ -125,7 +125,7 @@ public class EventDAO {
 		StringBuilder sb=new StringBuilder();
 		
 		try {
-			sb.append("select eNum, subject, content, start_date, end_date, enabled ");
+			sb.append("select eNum, subject, content, to_char(start_date, 'YYYY-MM-DD') start_date, to_char(end_date, 'YYYY-MM-DD') end_date, enabled ");
 			sb.append(" from event ");
 			sb.append(" order by eNum DESC ");
 			sb.append(" offset ? rows fetch first ? rows only ");
@@ -166,7 +166,7 @@ public class EventDAO {
 		}
 		return list;
 	}
-	public List<EventDTO> listEvent(int offset, int size, int enabled){
+	public List<EventDTO> listEvent(int offset, int size, int eventStatus){
 		//진행여부에 따른 이벤트 리스트
 		List<EventDTO> list=new ArrayList<EventDTO>();
 		return list;
