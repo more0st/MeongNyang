@@ -93,175 +93,6 @@
 }
 </style>
 
-<script type="text/javascript">
-// 댓글 좋아요
-function login() {
-	location.href = "${pageContext.request.contextPath}/member/login.do";
-}
-
-function ajaxFun(url, method, query, dataType, fn) {
-	$.ajax({
-		type:method,	// 메소드(get, post, put, delete)
-		url:url,		// 요청받을 서버주소 
-		data:query,		// 서버에 전송할 파라미터 
-		dataType:dataType,	// 서버에서 응답할 형식(json, xml, text)
-		success:function(data){
-			fn(data);
-		},
-		beforeSend:function(jqXHR){
-			jqXHR.setRequestHeader("AJAX", true);	// 사용자 정의 헤더
-		},
-		error:function(jqXHR){
-			if(jqXHR.status === 403) {
-				login();
-				return false;
-			} else if(jqXHR.status === 400) {
-				alert("요청 처리가 실패했습니다.");
-				return false;
-			}
-			console.log(jqXHR.responseText);
-		}
-	});
-}
-
-// 게시글 공감 여부 
-$(function() {
-	$(".btnSendBoardLike").click(function() {
-		const $i = $(this).find("i");
-		let isNoLike = $i.css("color") == "rgb(0, 0, 0)";
-		let msg = isNoLike ? "게시글에 공감하십니까 ?" : "게시글 공감을 취소하시겠습니까 ?"; 
-		
-		if(! confirm(msg)) {
-			return false; 
-		}
-		
-		let url = "${pageContext.request.contextPath}/map/insertBoardLike.do";
-		let num = "${dto.mapNum}"; 
-		let qs = "num=" + num + "&isNoLike=" + isNoLike;
-		
-		const fn = function(data) {
-			let state = data.state;
-			if(state === "true") {
-				let color = "black";
-				if( isNoLike) {
-					color = "blue";
-				}
-				$i.css("color", color);
-				
-				let count = data.boardLikeCount;
-				$("#boardLikeCount").text(count);
-				
-			} else if (state === "liked") {
-				alert("좋아요는 한번만 가능합니다.");
-			}
-		};
-		
-		ajaxFun(url, "post", qs, "json", fn);
-		
-	});
-});
-
-// 댓글 리스트 및 페이징
-$(function() {
-	listPage(1);
-});
-
-function listPage(page) {
-	let url = "${pageContext.request.contextPath}/map/listReply.do";
-	let qs = "mapNum=${dto.mapNum}&pageNo="+page;
-	let selector = "#listReply";
-	
-	const fn = function(data) {
-		$(selector).html(data);	
-	}
-	
-	ajaxFun(url, "get", qs, "text", fn);
-	//ajaxFun(url, "get", qs, "html", fn);	// 가능
-
-}
-
-
-// 댓글 등록 
-$(function() {
-	$(".btnSendReply").click(function() {
-		let mapNum = "${dto.mapNum}";
-		const $tb = $(this).closest("table");
-		let content = $tb.find("textarea").val().trim();
-		
-		if(! content) {
-			$tb.find("textarea").focus(); 
-			return false;
-		}
-		content = encodeURIComponent(content);
-		
-		let url = "${pageContext.request.contextPath}/map/insertReply.do";
-		let qs = "num="+mapNum+"&content="+content+"&originalReplyNum=0";
-		
-		const fn = function(data) {
-			$tb.find("textarea").val("");
-			
-			let state = data.state;
-			if(state === "true"){
-				listPage(1);
-			} else {
-				alert("댓글을 추가하지 못했습니다.");
-			}
-		}
-		
-		ajaxFun(url,"post",qs,"json",fn);
-		
-	});
-});
-
-
-
-
-
-</script>
-
-
-<script type="text/javascript">
-<c:if test="${sessionScope.member.userId==dto.userId || sessionScope.member.userId=='admin'}">
-	function deleteBoard() {
-	    if(confirm("게시글을 삭제 하시 겠습니까 ? ")) {
-		    let query = "mapNum=${dto.mapNum}&${query}";
-		    let url = "${pageContext.request.contextPath}/map/delete.do?" + query;
-	    	location.href = url;
-	    }
-	}
-</c:if>
-
-//해당되는 객체가 숨겨져있는지 아닌지 확인하는 함수
-const isHidden = ele => {
-	const styles = window.getComputedStyle(ele); //인자로 넘겨 받은 요소의 모든 css 속성 값을 담은 객체 반환
-	return styles.display === 'none' || styles.visibility === 'hidden'; //숨겨져있는지 아닌지 확인
-	
-};
-
-
-
-//답글 등록 버튼
-
-function imageViewer(img) {
-	const viewer = $(".photo-layout");
-	let s="<img src='"+img+"'>";
-	viewer.html(s);
-	
-	$(".dialog-photo").dialog({
-		title:"이미지",
-		width: 600,
-		height: 530,
-		modal: true
-	});
-}
-
-
-
-
-
-
-</script>
-
 </head>
 <body>
 
@@ -293,7 +124,7 @@ function imageViewer(img) {
 							</tr>
 
 							<tr>
-								<td colspan="2" valign="top" height="200">${dto.content}</td>
+								<td colspan="2" valign="top" height="200"><c:out value="${dto.content}" /></td>
 							</tr>
 
 							<tr style="border-bottom: none; text-align: center;">
@@ -398,7 +229,11 @@ function imageViewer(img) {
 						</tr>
 					</table>
 				</form>
-
+				<div id="listReply">
+					<c:forEach var="vo" items="${listReply}">
+					        <!-- 댓글을 표시하는 HTML 코드 -->
+					</c:forEach>
+				</div>
 				<div>
 					<div class="page-navigation">${paging}</div>
 				</div>
@@ -519,5 +354,197 @@ function imageViewer(img) {
 	// 아래 코드는 지도 위의 마커를 제거하는 코드입니다
 	// marker.setMap(null);    
 	</script>
+	
+	
+<script type="text/javascript">
+// 댓글 좋아요
+function login() {
+	location.href = "${pageContext.request.contextPath}/member/login.do";
+}
+
+function ajaxFun(url, method, query, dataType, fn) {
+	$.ajax({
+		type:method,	// 메소드(get, post, put, delete)
+		url:url,		// 요청받을 서버주소 
+		data:query,		// 서버에 전송할 파라미터 
+		dataType:dataType,	// 서버에서 응답할 형식(json, xml, text)
+		success:function(data){
+			fn(data);
+		},
+		beforeSend:function(jqXHR){
+			jqXHR.setRequestHeader("AJAX", true);	// 사용자 정의 헤더
+		},
+		error:function(jqXHR){
+			if(jqXHR.status === 403) {
+				login();
+				return false;
+			} else if(jqXHR.status === 400) {
+				alert("요청 처리가 실패했습니다.");
+				return false;
+			}
+			console.log(jqXHR.responseText);
+		}
+	});
+}
+
+// 게시글 공감 여부 
+$(function() {
+	$(".btnSendBoardLike").click(function() {
+		const $i = $(this).find("i");
+		let isNoLike = $i.css("color") == "rgb(0, 0, 0)";
+		let msg = isNoLike ? "게시글에 공감하십니까 ?" : "게시글 공감을 취소하시겠습니까 ?"; 
+		
+		if(! confirm(msg)) {
+			return false; 
+		}
+		
+		let url = "${pageContext.request.contextPath}/map/insertBoardLike.do";
+		let num = "${dto.mapNum}"; 
+		let qs = "num=" + num + "&isNoLike=" + isNoLike;
+		
+		const fn = function(data) {
+			let state = data.state;
+			if(state === "true") {
+				let color = "black";
+				if( isNoLike) {
+					color = "blue";
+				}
+				$i.css("color", color);
+				
+				let count = data.boardLikeCount;
+				$("#boardLikeCount").text(count);
+				
+			} else if (state === "liked") {
+				alert("좋아요는 한번만 가능합니다.");
+			}
+		};
+		
+		ajaxFun(url, "post", qs, "json", fn);
+		
+	});
+});
+
+// 댓글 리스트 및 페이징
+$(function() {
+	listPage(1);
+});
+
+function listPage(page) {
+	let url = "${pageContext.request.contextPath}/map/listReply.do";
+	let qs = "mapNum=${dto.mapNum}&pageNo="+page;
+	let selector = "#listReply";
+	
+	const fn = function(data) {
+		$(selector).html(data);	
+	}
+	
+	ajaxFun(url, "get", qs, "text", fn);
+	//ajaxFun(url, "get", qs, "html", fn);	// 가능
+
+}
+
+
+// 댓글 등록 
+$(function() {
+	$(".btnSendReply").click(function() {
+		let mapNum = "${dto.mapNum}";
+		const $td = $(this).closest("table");
+		let content = $td.find("textarea").val().trim();
+		
+		if(! content) {
+			$td.find("textarea").focus(); 
+			return false;
+		}
+		content = encodeURIComponent(content);
+		
+		let url = "${pageContext.request.contextPath}/map/insertReply.do";
+		let qs = "num="+mapNum+"&content="+content+"&originalReplyNum=0";
+		
+		const fn = function(data) {
+			$td.find("textarea").val("");
+			
+			let state = data.state;
+			if(state === "true"){
+				listPage(1);
+			} else {
+				alert("댓글을 추가하지 못했습니다.");
+			}
+		}
+		
+		ajaxFun(url,"post",qs,"json",fn);
+		
+	});
+});
+
+
+//답글 등록 버튼
+$(function () {
+	$("#listReply").on("click", ".btnSendReplyAnswer", function () {
+		let num = "${dto.mapNum}";
+		let replyNum = $(this).attr("data-replyNum");
+		const $td = $(this).closest("td");
+		
+		let content = $td.find("textarea").val().trim();
+		if(! content) {
+			$td.find("textarea").focus();
+			return false;
+		}
+		content = encodeURIComponent(content);
+		
+		let url = "${pageContext.request.contextPath}/bbs/insertReply.do";
+		let qs = "mapNum=" +num+ "&content=" +content+ "&originalReplyNum=" +replyNum;
+		
+		const fn = function (data) {
+			let state = data.state;
+			
+			$td.find("textarea").val("");
+			
+			if(state === "true") {
+				listReplyAnswer(replyNum);
+				countReplyAnswer(replyNum);
+			}
+	
+		};
+		
+		ajaxFun(url, "post", qs, "json", fn);
+		
+	});
+});
+
+
+
+
+
+
+
+
+function imageViewer(img) {
+	const viewer = $(".photo-layout");
+	let s="<img src='"+img+"'>";
+	viewer.html(s);
+	
+	$(".dialog-photo").dialog({
+		title:"이미지",
+		width: 600,
+		height: 530,
+		modal: true
+	});
+}
+
+
+
+
+
+<c:if test="${sessionScope.member.userId==dto.userId || sessionScope.member.userId=='admin'}">
+	function deleteBoard() {
+	    if(confirm("게시글을 삭제 하시 겠습니까 ? ")) {
+		    let query = "mapNum=${dto.mapNum}&${query}";
+		    let url = "${pageContext.request.contextPath}/map/delete.do?" + query;
+	    	location.href = url;
+	    }
+	}
+</c:if>
+
+</script>
 </body>
 </html>

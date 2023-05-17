@@ -26,9 +26,10 @@
 				</c:choose>
 			</td>
 		</tr>
-		<tr>
-			<td colspan='2' valign='top'>${vo.content}</td>
-		</tr>
+			<tr>
+			   <td colspan='2' valign='top'><c:out value='${vo.content}' /></td>
+			</tr>
+
 
 		<tr>
 			<td>

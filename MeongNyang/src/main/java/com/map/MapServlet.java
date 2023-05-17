@@ -548,6 +548,8 @@ public class MapServlet extends MyUploadServlet{
 		job.put("state", state);
 		job.put("boardLikeCount", boardLikeCount);
 		
+		
+		resp.setContentType("text/html;charset=utf-8");
 		PrintWriter out = resp.getWriter();
 		out.print(job.toString());
 		
@@ -594,11 +596,6 @@ public class MapServlet extends MyUploadServlet{
 	protected void listReply(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		// 게시글 댓글 리스트 : AJAX-Text  
 		
-		
-		String cp = req.getContextPath();
-		
-		
-		  
 		MapDAO dao = new MapDAO();
 		MyUtil util = new MyUtil();
 		
@@ -620,15 +617,17 @@ public class MapServlet extends MyUploadServlet{
 				current_page = total_page;
 			}
 			
+			// 리스트에 출력할 데이터
 			int offset = (current_page -1) * size;
 			if(offset < 0) offset = 0;
 			
 			List<MapReplyDTO> listReply = dao.listReply(num, offset, size);
 			
+			// 엔터를 <br>
 			for(MapReplyDTO dto : listReply) {
 				dto.setContent(dto.getContent().replaceAll("\n", "<br>"));
 			}
-			
+			// 페이징 처리 : AJAX 용 - listPage : 자바스크립트 함수명
 			String paging = util.pagingMethod(current_page, total_page, "listPage");
 			
 			req.setAttribute("listReply", listReply);
