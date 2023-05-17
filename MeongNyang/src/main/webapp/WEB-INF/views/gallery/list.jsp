@@ -106,8 +106,8 @@
 						<div class="desc-area">
 							<div class="info">
 								<span>${dto.subject}</span>
-								<span><img src="${pageContext.request.contextPath}/resource/images/like2.png" style="width: 25px;" > 1</span>
-								<span><img src="${pageContext.request.contextPath}/resource/images/hitCount.jpg" style="width: 25px; margin-bottom: 5px;" > 1</span>
+								<span><img src="${pageContext.request.contextPath}/resource/images/like2.png" style="width: 25px;">${dto.boardLikeCount}</span>
+								<span><img src="${pageContext.request.contextPath}/resource/images/hitCount.jpg" style="width: 25px; margin-bottom: 5px;" >${dto.hitCount}</span>
 							</div>
 						</div>
 					</div>

@@ -45,6 +45,70 @@ const isHidden = ele => {
 	
 };
 
+
+function ajaxFun(url, method, query, dataType, fn) {
+	$.ajax({
+		type:method,	// 메소드(get, post, put, delete)
+		url:url,		// 요청받을 서버주소 
+		data:query,		// 서버에 전송할 파라미터 
+		dataType:dataType,	// 서버에서 응답할 형식(json, xml, text)
+		success:function(data){
+			fn(data);
+		},
+		beforeSend:function(jqXHR){
+			jqXHR.setRequestHeader("AJAX", true);	// 사용자 정의 헤더
+		},
+		error:function(jqXHR){
+			if(jqXHR.status === 403) {
+				login();
+				return false;
+			} else if(jqXHR.status === 400) {
+				alert("요청 처리가 실패했습니다.");
+				return false;
+			}
+			console.log(jqXHR.responseText);
+		}
+	});
+}
+
+//게시글 공감 여부 
+$(function() {
+	$(".btnSendBoardLike").click(function() {
+		const $i = $(this).find("i");
+		let isNoLike = $i.css("color") == "rgb(0, 0, 0)";
+		let msg = isNoLike ? "게시글에 공감하십니까 ?" : "게시글 공감을 취소하시겠습니까 ?"; 
+		
+		if(! confirm(msg)) {
+			return false; 
+		}
+		
+		let url = "${pageContext.request.contextPath}/gallery/insertBoardLike.do";
+		let num = "${dto.photoNum}"; 
+		let qs = "num=" + num + "&isNoLike=" + isNoLike;
+		
+		const fn = function(data) {
+			let state = data.state;
+			if(state === "true") {
+				let color = "black";
+				if( isNoLike) {
+					color = "blue";
+				}
+				$i.css("color", color);
+				
+				let count = data.boardLikeCount;
+				$("#boardLikeCount").text(count);
+				
+			} else if (state === "liked") {
+				alert("좋아요는 한번만 가능합니다.");
+			}
+		};
+		
+		ajaxFun(url, "post", qs, "json", fn);
+		
+	});
+});
+
+
 //댓글 등록
 window.addEventListener('load',()=>{
 	const btnEL = document.querySelector('.btnSendReply');
@@ -85,6 +149,8 @@ window.addEventListener('load',() => {
 
 
 
+
+/*
 //답글 버튼 : 댓글별 답글 등록폼 및 답글 리스트 표시/숨김
 window.addEventListener('load',() => {
 	const listReplyEL = document.querySelector('#listReply');	
@@ -131,7 +197,7 @@ window.addEventListener('load',() => {
 		
 	});
 });
-
+*/
 
 </script>
 
@@ -183,6 +249,12 @@ window.addEventListener('load',() => {
 					<tr>
 						<td colspan="2" valign="top" style="margin-bottom:100px;">
 							${dto.content}
+						</td>
+					</tr>
+					
+					<tr>
+						<td colspan="2" align="center" style="border-bottom: 20px;">
+							<button type="button" class="btn btnSendBoardLike" title="좋아요"><i class="fas fa-thumbs-up" style="color:${isUserLike?'blue':'black'}"></i>&nbsp;&nbsp;<span id="boardLikeCount">${dto.boardLikeCount}</span></button>
 						</td>
 					</tr>
 					

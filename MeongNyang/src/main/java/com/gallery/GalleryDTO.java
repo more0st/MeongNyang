@@ -9,11 +9,27 @@ public class GalleryDTO {
 	private String reg_date;
 	private int hitCount;
 	
+	
+	private int replyCount;
+	private int boardLikeCount;
+
 	private long fileNum;
 	private String imageFilename;
 	private String[] imageFiles;
 	
 	
+	public int getReplyCount() {
+		return replyCount;
+	}
+	public void setReplyCount(int replyCount) {
+		this.replyCount = replyCount;
+	}
+	public int getBoardLikeCount() {
+		return boardLikeCount;
+	}
+	public void setBoardLikeCount(int boardLikeCount) {
+		this.boardLikeCount = boardLikeCount;
+	}
 	public long getPhotoNum() {
 		return photoNum;
 	}

@@ -2,6 +2,8 @@ package com.gallery;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.PrintWriter;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
@@ -11,6 +13,8 @@ import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
+
+import org.json.JSONObject;
 
 import com.member.SessionInfo;
 import com.util.FileManager;
@@ -29,11 +33,11 @@ public class GalleryServlet extends MyUploadServlet {
 		req.setCharacterEncoding("utf-8");
 
 		String uri = req.getRequestURI();
-		String cp = req.getContextPath();
+		//String cp = req.getContextPath();
 		
 		
 		HttpSession session = req.getSession();
-		SessionInfo info = (SessionInfo) session.getAttribute("member");
+		//SessionInfo info = (SessionInfo) session.getAttribute("member");
 		
 		/*
 		if (info == null) { // 로그인되지 않은 경우
@@ -60,11 +64,14 @@ public class GalleryServlet extends MyUploadServlet {
 			updateForm(req, resp);
 		} else if (uri.indexOf("update_ok.do") != -1) {
 			updateSubmit(req, resp);
-		} else if (uri.indexOf("deleteFile") != -1) {
+		} else if (uri.indexOf("deleteFile.do") != -1) {
 			deleteFile(req, resp);
 		} else if (uri.indexOf("delete.do") != -1) {
 			delete(req, resp);
-		}
+		} else if (uri.indexOf("insertBoardLike.do") != -1) {
+			// 게시글 공감
+			insertBoardLike(req, resp);
+		};
 	}
 
 	protected void list(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -72,8 +79,8 @@ public class GalleryServlet extends MyUploadServlet {
 		GalleryDAO dao = new GalleryDAO();
 		MyUtil util = new MyUtil();
 		
-		HttpSession session = req.getSession();
-		SessionInfo info = (SessionInfo) session.getAttribute("member");
+		//HttpSession session = req.getSession();
+		//SessionInfo info = (SessionInfo) session.getAttribute("member");
 
 		String cp = req.getContextPath();
 		
@@ -174,6 +181,7 @@ public class GalleryServlet extends MyUploadServlet {
 	protected void article(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		// 게시물 보기
 		GalleryDAO dao = new GalleryDAO();
+		MyUtil util = new MyUtil();
 		
 		HttpSession session = req.getSession();
 		SessionInfo info = (SessionInfo) session.getAttribute("member");
@@ -189,17 +197,21 @@ public class GalleryServlet extends MyUploadServlet {
 		try {
 			long num = Long.parseLong(req.getParameter("num"));
 			
+			// 조회수 증가
+			dao.updateHitCount(num);
+			
 			GalleryDTO dto = dao.readPhoto(num);
-
-			/*
 			if (dto == null || !dto.getUserId().equals(info.getUserId())) {
 				resp.sendRedirect(cp + "/gallery/list.do?page=" + page);
 				return;
 			}
-			*/
+			dto.setContent(util.htmlSymbols(dto.getContent()));
+			
+			// 로그인 유저의 게시글 공감 여부 
+			boolean isUserLike = dao.isUserBoardLike(num, info.getUserId());
 			
 			dto.setContent(dto.getContent().replaceAll("\n", "<br>"));
-
+			
 			GalleryDTO preReadDto = dao.preReadPhoto(num);
 			GalleryDTO nextReadDto = dao.nextReadPhoto(num);
 
@@ -210,6 +222,8 @@ public class GalleryServlet extends MyUploadServlet {
 			req.setAttribute("nextReadDto", nextReadDto);
 			req.setAttribute("listFile", listFile);
 			req.setAttribute("page", page);
+			
+			req.setAttribute("isUserLike", isUserLike);
 
 			forward(req, resp, "/WEB-INF/views/gallery/article.jsp");
 			return;
@@ -379,4 +393,45 @@ public class GalleryServlet extends MyUploadServlet {
 
 		resp.sendRedirect(cp + "/gallery/list.do?page=" + page);
 	}
+	
+	
+	protected void insertBoardLike(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		GalleryDAO dao = new GalleryDAO();
+		
+		HttpSession session = req.getSession();
+		SessionInfo info = (SessionInfo) session.getAttribute("member");
+		
+		String state = "false";
+		int boardLikeCount = 0;
+		
+		try {
+			long num = Long.parseLong(req.getParameter("num"));
+			String isNoLike = req.getParameter("isNoLike");
+			
+			if(isNoLike.equals("true")) {
+				dao.insertBoardLike(num, info.getUserId());	// 공감
+			} else {
+				dao.deleteBoardLike(num, info.getUserId());	// 공감 취소
+			}
+			
+			// 공감 개수 
+			boardLikeCount = dao.countBoardLike(num);
+			
+			state = "true";
+			
+		} catch (SQLException e) {
+			state = "liked";
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		JSONObject job = new JSONObject();
+		job.put("state", state);
+		job.put("boardLikeCount", boardLikeCount);
+		
+		PrintWriter out = resp.getWriter();
+		out.print(job.toString());
+	
+	}
+	
 }

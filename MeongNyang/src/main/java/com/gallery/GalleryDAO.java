@@ -122,7 +122,7 @@ public class GalleryDAO {
 		StringBuilder sb = new StringBuilder();
 
 		try {
-			sb.append(" SELECT g.photoNum, g.userId, userName, subject, imageFilename ");
+			sb.append(" SELECT g.photoNum, g.userId, userName, subject, imageFilename, hitCount ");
 			sb.append(" FROM gallery g ");
 			sb.append(" JOIN member m ON g.userId = m.userId ");
 			sb.append(" LEFT OUTER JOIN ( ");
@@ -152,6 +152,9 @@ public class GalleryDAO {
 				dto.setUserName(rs.getString("userName"));
 				dto.setSubject(rs.getString("subject"));
 				dto.setImageFilename(rs.getString("imageFilename"));
+				dto.setHitCount(rs.getInt("hitCount"));
+				
+				dto.setBoardLikeCount(countBoardLike(rs.getLong("photoNum")));
 				
 				list.add(dto);
 			}
@@ -183,10 +186,15 @@ public class GalleryDAO {
 		String sql;
 
 		try {
-			sql = "SELECT photoNum, g.userId, userName, subject, content, reg_date "
+			sql = "SELECT g.photoNum, g.userId, userName, subject, content, reg_date, hitCount, "
+					+ " NVL(boardLikeCount, 0) boardLikeCount "
 					+ " FROM gallery g "
 					+ " JOIN member m ON g.userId=m.userId  "
-					+ " WHERE photoNum = ? ";
+					+ " LEFT OUTER JOIN ("
+					+ "      SELECT photoNum, COUNT(*) boardLikeCount FROM galleryLike"
+					+ "      GROUP BY photoNum"
+					+ " ) bc ON g.photoNum = bc.photoNum"
+					+ " WHERE g.photoNum = ? ";
 
 			pstmt = conn.prepareStatement(sql);
 			
@@ -203,6 +211,10 @@ public class GalleryDAO {
 				dto.setSubject(rs.getString("subject"));
 				dto.setContent(rs.getString("content"));
 				dto.setReg_date(rs.getString("reg_date"));
+				dto.setHitCount(rs.getInt("hitCount"));
+				
+				dto.setBoardLikeCount(rs.getInt("boardLikeCount"));
+				
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -498,5 +510,170 @@ public class GalleryDAO {
 			}
 		}
 	}
+	
+	public void updateHitCount(long num) throws SQLException {
+		PreparedStatement pstmt = null;
+		String sql;
+
+		try {
+			sql = "UPDATE gallery SET hitCount=hitCount+1 WHERE photoNum=?";
+			pstmt = conn.prepareStatement(sql);
+			
+			pstmt.setLong(1, num);
+			
+			pstmt.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw e;
+		} finally {
+			if (pstmt != null) {
+				try {
+					pstmt.close();
+				} catch (SQLException e) {
+					
+				}
+			}
+		}
+
+	}
+	
+	// 게시물의 공감 추가
+	public void insertBoardLike(long num, String userId) throws SQLException {
+		PreparedStatement pstmt = null;
+		String sql;
+
+		try {
+			sql = "INSERT INTO galleryLike(photoNum, userId) VALUES (?, ?)";
+			pstmt = conn.prepareStatement(sql);
+
+			pstmt.setLong(1, num);
+			pstmt.setString(2, userId);
+
+			pstmt.executeUpdate();
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw e;
+		} finally {
+			if (pstmt != null) {
+				try {
+					pstmt.close();
+				} catch (SQLException e) {
+				}
+			}
+		}
+
+	}
+	
+
+	// 게시글 공감 삭제
+	public void deleteBoardLike(long num, String userId) throws SQLException {
+		PreparedStatement pstmt = null;
+		String sql;
+		
+		try {
+			sql = "DELETE FROM galleryLike WHERE photoNum = ? AND userId = ?";
+			pstmt = conn.prepareStatement(sql);
+			
+			pstmt.setLong(1, num);
+			pstmt.setString(2, userId);
+			
+			pstmt.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw e;
+		} finally {
+			if(pstmt != null) {
+				try {
+					pstmt.close();
+				} catch (Exception e2) {
+				}
+			}
+		}
+		
+	}
+	
+	// 게시물의 공감 개수
+	public int countBoardLike(long num) {
+		int result = 0;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		String sql;
+		
+		try {
+			sql = "SELECT NVL(COUNT(*), 0) FROM galleryLike WHERE photoNum=?";
+			pstmt = conn.prepareStatement(sql);
+			
+			pstmt.setLong(1, num);
+			
+			rs = pstmt.executeQuery();
+			
+			if(rs.next()) {
+				result = rs.getInt(1);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			if(rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException e) {
+				}
+			}
+				
+			if(pstmt != null) {
+				try {
+					pstmt.close();
+				} catch (SQLException e) {
+				}
+			}
+		}
+		
+		return result;
+	}
+	
+
+	// 로그인 유저의 게시글 공감 유무
+	public boolean isUserBoardLike(long num, String userId) {
+		boolean result = false;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		String sql;
+		
+		try {
+			sql = "SELECT photoNum, userId FROM galleryLike WHERE photoNum = ? AND userId = ?";
+			pstmt = conn.prepareStatement(sql);
+			
+			pstmt.setLong(1, num);
+			pstmt.setString(2, userId);
+			
+			rs = pstmt.executeQuery();
+			
+			if(rs.next()) {
+				result = true;
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			if(rs != null) {
+				try {
+					rs.close();
+				} catch (Exception e2) {
+				}
+			}
+			
+			if(pstmt != null) {
+				try {
+					pstmt.close();
+				} catch (Exception e2) {
+				}
+			}
+			
+		}
+		
+		return result;
+	}
+	
+	
 
 }
