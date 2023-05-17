@@ -114,8 +114,6 @@ public class ClubServlet extends MyUploadServlet {
 		ClubDAO dao = new ClubDAO();
 		MyUtil util = new MyUtil();
 		
-		HttpSession session = req.getSession();
-		SessionInfo info = (SessionInfo) session.getAttribute("member");
 		
 		String cp = req.getContextPath();
 		
@@ -158,7 +156,6 @@ public class ClubServlet extends MyUploadServlet {
 			int offset = (current_page - 1) * size;
 			if(offset < 0) offset = 0;
 			
-			String userId = info.getUserId();
 			List<ClubDTO> list = null;
 			if (keyword.length() == 0) {
 				//list = dao.myClubList(offset, size, userId);
@@ -195,7 +192,6 @@ public class ClubServlet extends MyUploadServlet {
 			req.setAttribute("paging", paging);
 			req.setAttribute("condition", condition);
 			req.setAttribute("keyword", keyword);
-			req.setAttribute("userId", userId);
 			
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -280,7 +276,6 @@ public class ClubServlet extends MyUploadServlet {
 			req.setAttribute("condition", condition);
 			req.setAttribute("keyword", keyword);
 			req.setAttribute("paging", paging);
-			req.setAttribute("userId", userId);
 			req.setAttribute("val", "true");
 			
 		} catch (Exception e) {

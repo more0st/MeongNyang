@@ -60,7 +60,7 @@
 <script type="text/javascript">
 <c:if test="${sessionScope.member.userId==dto.userId || sessionScope.member.userId=='admin'}">
 	function deleteBoard() {
-	    if(confirm("게시글을 삭제 하시 겠습니까 ? ")) {
+	    if(confirm("모임을 삭제 하시 겠습니까 ? ")) {
 		    let query = "num=${dto.clubNum}&${query}";
 		    let url = "${pageContext.request.contextPath}/club/delete.do?" + query;
 	    	location.href = url;
