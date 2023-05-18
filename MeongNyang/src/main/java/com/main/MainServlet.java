@@ -34,9 +34,6 @@ public class MainServlet extends MyServlet {
 		MarketDAO dao = new MarketDAO();
 		MyUtil util = new MyUtil();
 		
-		HttpSession session = req.getSession();
-		SessionInfo info = (SessionInfo)session.getAttribute("member");
-		
 		String cp = req.getContextPath();
 		
 		try {
@@ -50,7 +47,7 @@ public class MainServlet extends MyServlet {
 			int dataCount = dao.dataCount();
 
 			// 전체페이지수
-			int size = 9;
+			int size = 6;
 			int total_page = util.pageCount(dataCount, size);
 			if (current_page > total_page) {
 				current_page = total_page;
@@ -60,7 +57,7 @@ public class MainServlet extends MyServlet {
 			int offset = (current_page - 1) * size;
 			if(offset < 0) offset = 0;
 			
-			List<MarketDTO> list = dao.listMarket(offset, size);
+			List<MarketDTO> list = dao.mainlistMarket(offset, size);
 			
 			// 페이징 처리
 			String listUrl = cp + "/market/list.do";

@@ -23,7 +23,7 @@
 	flex-wrap: wrap;
 	gap: 10px;
 }
-.market-box .item { cursor: pointer; max-width: 300px; max-height: 370px; }
+.market-box .item { cursor: pointer; max-width: 300px; max-height: 370px; margin: 30px;}
 .item > img {  width: 300px; height: 300px; object-fit: cover; cursor: pointer; border-radius : 20px; }
 .border{
 	background: #ffedea;
@@ -49,7 +49,7 @@
 	    </div>
 			
 			<div class="market-box">
-				<c:forEach var="dto" items="${list}" begin="1" end="6" step="1"	>
+				<c:forEach var="dto" items="${list}"  varStatus="status">
 					<div class="item" title="${dto.subject}"
 						onclick="location.href='${articleUrl}&marketNum=${dto.marketNum}';">
 						<img src="${pageContext.request.contextPath}/uploads/market/${dto.imageFilename}">

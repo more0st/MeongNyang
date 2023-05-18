@@ -35,7 +35,7 @@ public class MarketDAO {
 			rs = null;
 			pstmt = null;
 			sql = "INSERT INTO market(MARKETNUM, SELLERID, BUYERID, SUBJECT, CONTENT, ADDR, PRICE, REG_DATE, HITCOUNT, STATE, PAY_DATE) "
-					+ "VALUES(?, ?, 'X', ?, ?, ?, ?, SYSDATE, 0, 1, SYSDATE)";
+					+ "VALUES(?, ?, 'X', ?, ?, ?, ?, SYSDATE, 0, 0, SYSDATE)";
 			pstmt = conn.prepareStatement(sql);
 			
 			pstmt.setLong(1, dto.getMarketNum());
@@ -127,7 +127,7 @@ public class MarketDAO {
 		String sql;
 		
 		try {
-			sql = "UPDATE market SET STATE = 0, BUYERID = ?, PAY_DATE = SYSDATE "
+			sql = "UPDATE market SET STATE = 2, BUYERID = ?, PAY_DATE = SYSDATE "
 					+ "WHERE MarketNum = ?";
 			pstmt = conn.prepareStatement(sql);
 			
@@ -186,6 +186,62 @@ public class MarketDAO {
 					+ " JOIN (SELECT MARKETNUM, MIN(IMGNUM) IMGNUM FROM marketimgfile"
 					+ " GROUP BY MARKETNUM)mf2 on mf2.imgnum = mf.imgnum"
 					+ " ORDER BY marketnum DESC OFFSET ? ROWS FETCH FIRST ? ROWS ONLY";
+			pstmt = conn.prepareStatement(sql);
+			
+			pstmt.setInt(1, offset);
+			pstmt.setInt(2, size);
+			
+			rs = pstmt.executeQuery();
+			while(rs.next()) {
+				MarketDTO dto = new MarketDTO();
+				dto.setMarketNum(rs.getLong("MARKETNUM"));
+				dto.setSellerId(rs.getString("SELLERID"));
+				dto.setSubject(rs.getString("SUBJECT"));
+				dto.setContent(rs.getString("CONTENT"));
+				dto.setAddr(rs.getString("ADDR"));
+				dto.setPrice(rs.getInt("PRICE"));
+				dto.setReg_date(rs.getString("REG_DATE"));
+				dto.setHitCount(rs.getInt("HITCOUNT"));
+				dto.setState(rs.getInt("STATE"));
+				dto.setPay_date(rs.getString("PAY_DATE"));
+				dto.setImageFilename(rs.getString("IMGNAME"));
+				dto.setZzimCount(rs.getInt("ZZIMCOUNT"));
+				
+				list.add(dto);
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			if(pstmt != null) {
+				try {
+					pstmt.close();
+				} catch (Exception e2) {
+				}
+			}
+			if(rs != null) {
+				try {
+					rs.close();
+				} catch (Exception e2) {
+				}
+			}
+		}
+		return list;
+	}
+	
+	public List<MarketDTO> mainlistMarket(int offset, int size){
+		List<MarketDTO> list = new ArrayList<>();
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		String sql;
+		
+		try {
+			sql = "SELECT ma.MARKETNUM, SELLERID, BUYERID, SUBJECT, CONTENT, ADDR, PRICE, REG_DATE, HITCOUNT, STATE, PAY_DATE, IMGNAME, ZZIMCOUNT"
+					+ " FROM market ma"
+					+ " JOIN marketimgfile mf on ma.marketnum = mf.marketnum"
+					+ " JOIN (SELECT MARKETNUM, MIN(IMGNUM) IMGNUM FROM marketimgfile"
+					+ " GROUP BY MARKETNUM)mf2 on mf2.imgnum = mf.imgnum"
+					+ " WHERE STATE = 0 ORDER BY hitcount desc OFFSET ? ROWS FETCH FIRST ? ROWS ONLY";
 			pstmt = conn.prepareStatement(sql);
 			
 			pstmt.setInt(1, offset);
@@ -392,9 +448,10 @@ public class MarketDAO {
 		String sql;
 
 		try {
-			sql = "SELECT ma.MARKETNUM, SELLERID, BUYERID, SUBJECT, CONTENT, ADDR, PRICE, REG_DATE, HITCOUNT, STATE, PAY_DATE, IMGNAME, ZZIMCOUNT "
+			sql = "SELECT ma.MARKETNUM, SELLERID, BUYERID, SUBJECT, CONTENT, ADDR, PRICE, REG_DATE, HITCOUNT, STATE, PAY_DATE, IMGNAME, NVL(boardLikeCount, 0) ZZIMCOUNT"
 					+ " FROM market ma"
 					+ " JOIN marketimgfile mf on ma.marketnum = mf.marketnum"
+					+ " LEFT OUTER JOIN ( SELECT marketnum, COUNT(*) boardLikeCount FROM zzim GROUP BY marketnum ) bc ON ma.marketnum = bc.marketnum"
 					+ " WHERE ma.MARKETNUM = ?";
 
 			pstmt = conn.prepareStatement(sql);

@@ -107,7 +107,7 @@ $(function () {
 	$(".btnSendBoardLike").click(function () {
 		const $i = $(this).find("i");
 		let isNoLike = $i.css("color") == "rgb(0, 0, 0)";
-		let msg = isNoLike ? "게시글에 공감하십니까?" : "게시글 공감을 취소하시겠습니까 ?";
+		let msg = isNoLike ? "게시글에 찜하십니까?" : "게시글 찜을 취소하시겠습니까 ?";
 		
 		if(! confirm(msg)){
 			return false;
@@ -129,7 +129,7 @@ $(function () {
 				let count = data.boardLikeCount;
 				$("#boardLikeCount").text(count);
 			}else if(state === "liked"){
-				alert("좋아요는 한번만 가능합니다.");
+				alert("찜은 한번만 가능합니다.");
 			}
 		};
 		
@@ -170,8 +170,6 @@ function modal() {
 		s += "<td>"
 		s += "</table>"
 		s +="<form>"
-	}else{
-		s="<button type='button' class='btn' onclick='requestPay();'>결재하기</button>";
 	}
 	viewer.html(s);
 	
@@ -255,10 +253,14 @@ function requestPay() {
     IMP.request_pay({
         pg : 'html5_inicis.INIBillTst',
         pay_method : 'card',
-        merchant_uid: '${sessionScope.member.userName}', 
-        name : '${dto.subject}',
-        amount : '${dto.price}',
-        buyer_addr : '${dto.addr}',
+        merchant_uid: '${dto.marketNum}', 
+        name: '${dto.subject}',
+        amount: '${dto.price}',                         // 숫자 타입
+        buyer_email: "xx37820@gmail.com",
+        buyer_name: "${dto.sellerId}",
+        buyer_tel: "010-1234-5678",
+        buyer_addr: "서울특별시 강남구 신사동",
+        buyer_postcode: "01181"
     }, function (rsp) { // callback
         if(rsp.success){
       	  console.log(rsp);
@@ -437,7 +439,7 @@ $(function() {
 					
 					<tr>
 						<td colspan="2" align="center" style="border-bottom: 20px;">
-							<button type="button" class="btn btnSendBoardLike" title="찜"> <i class="fas fa-thumbs-up" style="color:${isUserLike?'blue':'black'}"></i>&nbsp;&nbsp;<span id="boardLikeCount">${dto.zzimCount }</span> </button>
+							<button type="button" class="btn btnSendBoardLike" title="찜"> <i style="color:${isUserLike?'blue':'black'}"><img src="${pageContext.request.contextPath}/resource/images/zzim.png" width="20px;" height="20px;"></img></i>&nbsp;&nbsp;<span id="boardLikeCount">${dto.zzimCount }</span> </button>
 						</td>
 					</tr>
 					
@@ -492,14 +494,14 @@ $(function() {
 					</td>
 					<td align="right">
 					<c:choose>
-						<c:when test="${sessionScope.member.userId==dto.sellerId && dto.state == 1}">
+						<c:when test="${sessionScope.member.userId==dto.sellerId && dto.state == 0}">
 							<button type="button" class="btn" onclick="modal();">판매시작</button>
 						</c:when>
-						<c:when test="${dto.state == 0}">
+						<c:when test="${dto.state == 1 || dto.state == 2}">
 							<button type="button" class="btn" disabled="disabled">판매완료</button>
 						</c:when>
 						<c:otherwise>
-							<button type="button" class="btn" onclick="modal();">카드결재</button>
+							<button type="button" class="btn" onclick="requestPay();">카드결재</button>
 						</c:otherwise>
 					</c:choose>	
 						<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/market/list.do?page=${page}';">리스트</button>

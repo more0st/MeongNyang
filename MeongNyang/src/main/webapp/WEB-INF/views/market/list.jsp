@@ -39,11 +39,11 @@
 	gap: 10px;
 	
 }
-.market-box .item { border: 1px solid #DAD9FF; cursor: pointer; max-width: 220px;  }
+.market-box .item { cursor: pointer; max-width: 220px;  }
 .item > img {  width: 220px; height: 220px; object-fit: cover; cursor: pointer; border-radius : 20px; }
 .border{
-	border: 1px solid;
 	background: #ffedea;
+	border-radius : 10px;
 }
 </style>
 <script type="text/javascript">
@@ -63,7 +63,7 @@ function searchList() {
 <main>
 	<div class="container body-container">
 	    <div class="body-title">
-			<h2><i class="far fa-image"></i> 멍냥 마켓 </h2>
+			<h2><img src="${pageContext.request.contextPath}/resource/images/marketPage.png"></h2>
 	    </div>
 	    
 	    <div class="body-main mx-auto">
@@ -83,17 +83,19 @@ function searchList() {
 					<div class="item" title="${dto.subject}"
 						onclick="location.href='${articleUrl}&marketNum=${dto.marketNum}';">
 					<c:choose>
-						<c:when test="${dto.state == 0}">
+						<c:when test="${dto.state == 2 || dto.state == 1}">
 							<img src="${pageContext.request.contextPath}/resource/images/buy.jpg">
 						</c:when>
 						<c:otherwise>
 							<img src="${pageContext.request.contextPath}/uploads/market/${dto.imageFilename}">
 						</c:otherwise>
 					</c:choose>	
-						<div class="border">
-						<div>제목 : ${dto.subject}</div>
-						<div>거래지 : ${dto.addr}</div>
-						<div>가격 : ${dto.price}원</div>
+						<div>
+							<div class="border">
+								<div>제목 : ${dto.subject}</div>
+								<div>거래지 : ${dto.addr}</div>
+								<div>가격 : ${dto.price}원</div>
+							</div>
 						</div>
 					</div>
 				</c:forEach>
