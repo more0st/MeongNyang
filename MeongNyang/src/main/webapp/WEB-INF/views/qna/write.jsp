@@ -60,7 +60,7 @@ function sendBoard() {
 <main>
 	<div class="container body-container">
 	    <div class="body-title" style="text-align: center;">
-			<img src="${pageContext.request.contextPath}/resource/images/questionpage.png" style="width: 250px;">
+			<img src="${pageContext.request.contextPath}/resource/images/questionPage.png" style="width: 250px;">
 	    </div>
 	    
 	    <div class="body-main mx-auto">
