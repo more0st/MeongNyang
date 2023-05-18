@@ -34,6 +34,12 @@ a:hover{color: black; text-decoration: none;}
  background: white; width: 200px; height: 200px; 
  border-radius: 30px; border: 5px solid tomato;
  }
+.event:hover {
+
+box-shadow: 0 0 15px 0 rgb(2 59 109 / 30%);
+border:5px solid yellow;
+
+ }
  
  .more{
  	background: skyblue;
@@ -54,6 +60,16 @@ a:hover{color: black; text-decoration: none;}
  	color : white;
  }
 
+ .join_ok{
+ 	background: #eee;
+ 	color: black;
+ 	disabled="disabled";
+ }
+ .join_ok:hover{
+ 	background: #eee;
+ 	color: black;
+ 	disabled="disabled";
+ }
 
 .card-img:hover {
     opacity:0.5;
@@ -82,10 +98,13 @@ function searchList() {
 	f.submit();
 }
 
-function join(){
+function join(eNum){
 	if(confirm("이벤트에 참여하시겠습니까 ? ")){
-		location.href='${pageContext.request.contextPath}/event/참여.do?eNum=${dto.eNum}';
+		location.href="${pageContext.request.contextPath}/event/join.do?eNum="+eNum;
 	}
+}
+function join_ok(){
+	alert("이미 참여한 이벤트입니다.");
 }
 
 
@@ -103,7 +122,9 @@ function join(){
 
 	<div class="container body-container" style="width: 60%; margin-bottom: 0;">
 	   <div class="body-title" style="text-align: center;">
-			<h2>이벤트</h2>
+			<a href="${pageContext.request.contextPath}/event/list.do';">
+				<img src="${pageContext.request.contextPath}/resource/images/eventPage.png" style="width: 250px;">
+			</a>
 			 
 	    </div>
 	   <div style="box-shadow: 0 0 15px 0 rgb(2 59 109 / 10%);border-radius: 30px; margin: 0 auto 30px ; width: 100%;">
@@ -130,7 +151,8 @@ function join(){
 					   				<span class="card-title"> ${dto.subject} </span>
 									<span style="display: flex; justify-content: center; padding-bottom: 10px;">
 										<button type="button" class="btn more" style="display: inline-block;" onclick="location.href='${articleUrl}&eNum=${dto.eNum}';">자세히</button>
-										<button type="button" class="btn join" style="display: inline-block;" onclick="join();">참여</button>
+												<button type="button" class="btn join_ok" style="display: inline-block;" onclick="join_ok();">완료</button>
+												<button type="button" class="btn join" style="display: inline-block;" onclick="join(${dto.eNum});">참여</button>
 									</span>
 									<span class="card-date"> ${dto.start_date} ~ ${dto.end_date} </span>
 					   			</span>

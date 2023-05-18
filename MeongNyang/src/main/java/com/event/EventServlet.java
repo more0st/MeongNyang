@@ -64,6 +64,8 @@ public class EventServlet extends MyUploadServlet{
 			eventDisable(req, resp);
 		} else if(uri.indexOf("pass.do")!=-1) {
 			eventPass(req, resp);
+		} else if(uri.indexOf("join.do")!=-1) {
+			join(req, resp);
 		}
 		
 	}
@@ -124,7 +126,6 @@ public class EventServlet extends MyUploadServlet{
 				listUrl+="?"+query;
 				articleUrl+="&"+query;
 			}
-			
 			String paging=util.paging(current_page, total_page, listUrl);
 			
 			req.setAttribute("list", list);
@@ -392,6 +393,27 @@ public class EventServlet extends MyUploadServlet{
 		
 		resp.sendRedirect(cp+"/event/list.do?"+query);
 		
+		
+	}
+	protected void join(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		//이벤트 참여
+		EventDAO dao=new EventDAO();
+		
+		String cp=req.getContextPath();
+		
+		HttpSession session=req.getSession();
+		SessionInfo info=(SessionInfo)session.getAttribute("member");
+		
+		try {
+			long eNum=Long.parseLong(req.getParameter("eNum"));
+			
+			dao.insertParticipant(eNum,info.getUserId());
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		resp.sendRedirect(cp+"/event/list.do");
 		
 	}
 	protected void eventParticipant(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
