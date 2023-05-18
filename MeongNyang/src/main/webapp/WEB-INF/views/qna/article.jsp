@@ -37,8 +37,8 @@
 	
 <main>
 	<div class="container body-container">
-	    <div class="body-title">
-			<h2><i class="fas fa-chalkboard-teacher"></i> 질문과 답변 </h2>
+	    <div class="body-title" style="text-align: center;">
+			<img src="${pageContext.request.contextPath}/resource/images/questionpage.png" style="width: 250px;">
 	    </div>
 	    
 	    <div class="body-main mx-auto">
@@ -89,15 +89,17 @@
 			<table class="table">
 				<tr>
 					<td width="50%">
-						<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/qna/writeReply.do?qesNum=${dto.qesNum}&page=${page}';">답변</button>
 						<c:choose>
-							<c:when test="${sessionScope.member.userId==dto.userId}">
-								<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/qna/update.do?qesNum=${dto.qesNum}&page=${page}';">수정</button>
+							<c:when test="${sessionScope.member.userId=='admin'}">
+						<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/qna/writeReply.do?qesNum=${dto.qesNum}&page=${page}';">답변</button>
 							</c:when>
 							<c:otherwise>
-								<button type="button" class="btn" disabled="disabled">수정</button>
+								<button type="button" class="btn" style="display: none;" >답변</button>
 							</c:otherwise>
 						</c:choose>
+					
+					
+					
 				    	
 						<c:choose>
 				    		<c:when test="${sessionScope.member.userId==dto.userId || sessionScope.member.userId=='admin'}">

@@ -64,9 +64,7 @@ function searchList() {
 					</tr>
 				</thead>
 				
-				<c:if test="${empty dto.replyContent}" >
-				<tbody style="font-weight: bold;">
-				</c:if>
+				<tbody>
 					<c:forEach var="dto" items="${list}" varStatus="status">
 						<tr>
 							<td>${dataCount - (page-1) * size - status.index}</td>

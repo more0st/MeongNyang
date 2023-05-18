@@ -55,8 +55,6 @@ public class QnaServlet extends MyUploadServlet{
 			article(req,resp);
 		} else if(uri.indexOf("delete.do") != -1) {
 			delete(req, resp);
-		} else if(uri.indexOf("insertReply.do") != -1) {
-			insertReply(req, resp);
 		}
 	}
 	
@@ -95,7 +93,7 @@ public class QnaServlet extends MyUploadServlet{
 			if (keyword.length() == 0) {
 				dataCount = dao.dataCount(info.getUserId());
 			} else {
-				dataCount = dao.dataCount(condition, keyword);
+				dataCount = dao.dataCount(condition, keyword, info.getUserId());
 			}
 			
 			
@@ -115,7 +113,7 @@ public class QnaServlet extends MyUploadServlet{
 			if (keyword.length() == 0) {
 				list = dao.listBoard(offset, size, info.getUserId());
 			} else {
-				list = dao.listBoard(offset, size, condition, keyword);
+				list = dao.listBoard(offset, size, condition, keyword, info.getUserId());
 			}
 
 			String query = "";
@@ -301,13 +299,50 @@ public class QnaServlet extends MyUploadServlet{
 		
 	}
 	protected void delete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		QnaDAO dao = new QnaDAO();
 		
-	}
-
-	protected void insertReply(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		HttpSession session = req.getSession();
+		SessionInfo info = (SessionInfo) session.getAttribute("member");
 		
-	}
+		String cp = req.getContextPath();
+		
+		String page = req.getParameter("page");
+		String query = "page=" + page;
+		try {
+			long qesNum = Long.parseLong(req.getParameter("qesNum"));
+			String condition = req.getParameter("condition");
+			String keyword = req.getParameter("keyword");
+			if (condition == null) {
+				condition = "all";
+				keyword = "";
+			}
+			keyword = URLDecoder.decode(keyword, "utf-8");
 
+			if (keyword.length() != 0) {
+				query += "&condition=" + condition + "&keyword=" + URLEncoder.encode(keyword, "UTF-8");
+			}
+
+			
+			QnaDTO dto = dao.readQuestion(qesNum);
+			
+			if(dto == null) {
+				resp.sendRedirect(cp + "/qna/list.do?" + query);
+				return;
+			}
+			
+			// 게시물을 올린 사용자나 admin이 아니면
+			if(! dto.getUserId().equals(info.getUserId()) && ! info.getUserId().equals("admin")) {
+				resp.sendRedirect(cp + "/qna/list.do?" + query);
+				return;
+			}
+			
+			dao.deleteBoard(qesNum);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		resp.sendRedirect(cp + "/qna/list.do?" + query);
+	}
 
 }
 

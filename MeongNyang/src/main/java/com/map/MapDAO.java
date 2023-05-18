@@ -992,7 +992,7 @@ public class MapDAO {
 					dto.setUserName(rs.getString("userName"));
 					dto.setContent(rs.getString("content"));
 					dto.setReg_date(rs.getString("reg_date"));
-					dto.setOriginalReplyNum(rs.getInt("originalReplyNumCount"));
+					dto.setOriginalReplyNumCount(rs.getInt("originalReplyNumCount"));
 					//dto.setLikeCount(rs.getInt("likeCount"));
 					//dto.setDisLikeCount(rs.getInt("disLikeCount"));
 					
@@ -1019,5 +1019,177 @@ public class MapDAO {
 			return list;
 		}
 	
+		public MapReplyDTO readReply(long replyNum) {
+			MapReplyDTO dto = null;
+			PreparedStatement pstmt = null;
+			ResultSet rs = null;
+			String sql;
+			
+			try {
+				sql = "SELECT replyNum, num, r.userId, content ,r.reg_date "
+						+ " FROM mapReply r JOIN member m ON r.userId=m.userId  "
+						+ " WHERE replyNum = ? ";
+				pstmt = conn.prepareStatement(sql);
+				
+				pstmt.setLong(1, replyNum);
+
+				rs=pstmt.executeQuery();
+				
+				if(rs.next()) {
+					dto=new MapReplyDTO();
+					
+					dto.setReplyNum(rs.getLong("replyNum"));
+					dto.setMapNum(rs.getLong("num"));
+					dto.setUserId(rs.getString("userId"));
+					dto.setContent(rs.getString("content"));
+					dto.setReg_date(rs.getString("reg_date"));
+				}
+			} catch (SQLException e) {
+				e.printStackTrace();
+			} finally {
+				if(rs != null) {
+					try {
+						rs.close();
+					} catch (SQLException e) {
+					}
+				}
+					
+				if(pstmt != null) {
+					try {
+						pstmt.close();
+					} catch (SQLException e) {
+					}
+				}
+			}
+			
+			return dto;
+		}
+		// 댓글삭제
+		public void deleteReply(long replyNum, String userId) throws SQLException {
+			PreparedStatement pstmt = null;
+			String sql;
+			
+			if(! userId.equals("admin")) {
+				MapReplyDTO dto = readReply(replyNum);
+				if(dto == null || (! userId.equals(dto.getUserId()))) {
+					return;
+				}
+			}
+			
+			try {
+				sql = "DELETE FROM mapReply "
+						+ " WHERE replyNum IN  "
+						+ " (SELECT replyNum FROM mapReply START WITH replyNum = ?"
+						+ "     CONNECT BY PRIOR replyNum = originalReplyNum)";
+				pstmt = conn.prepareStatement(sql);
+				
+				pstmt.setLong(1, replyNum);
+				
+				pstmt.executeUpdate();
+			} catch (SQLException e) {
+				e.printStackTrace();
+				throw e;
+			} finally {
+				if(pstmt != null) {
+					try {
+						pstmt.close();
+					} catch (SQLException e) {
+					}
+				}
+			}		
+			
+		}
+		
+		
+		// 댓글의 답글 리스트
+		public List<MapReplyDTO> listReplyAnswer(long originalReplyNum) {
+			List<MapReplyDTO> list = new ArrayList<>();
+			PreparedStatement pstmt = null;
+			ResultSet rs = null;
+			StringBuilder sb=new StringBuilder();
+			
+			try {
+				sb.append(" SELECT replyNum, num, r.userId, content, reg_date, originalReplyNum ");
+				sb.append(" FROM mapReply r ");
+				sb.append(" JOIN member m ON r.userId=m.userId ");
+				sb.append(" WHERE originalReplyNum=? ");
+				sb.append(" ORDER BY replyNum DESC ");
+				pstmt = conn.prepareStatement(sb.toString());
+				
+				pstmt.setLong(1, originalReplyNum);
+
+				rs = pstmt.executeQuery();
+				
+				while(rs.next()) {
+					MapReplyDTO dto=new MapReplyDTO();
+					
+					dto.setReplyNum(rs.getLong("replyNum"));
+					dto.setMapNum(rs.getLong("num"));
+					dto.setUserId(rs.getString("userId"));
+					dto.setContent(rs.getString("content"));
+					dto.setReg_date(rs.getString("reg_date"));
+					dto.setOriginalReplyNum(rs.getLong("originalReplyNum"));
+					
+					list.add(dto);
+				}
+				
+			} catch (SQLException e) {
+				e.printStackTrace();
+			} finally {
+				if(rs != null) {
+					try {
+						rs.close();
+					} catch (SQLException e) {
+					}
+				}
+					
+				if(pstmt != null) {
+					try {
+						pstmt.close();
+					} catch (SQLException e) {
+					}
+				}
+			}
+			return list;
+		}
+		// 댓글의 답글 개수
+		public int dataCountReplyAnswer(long originalReplyNum) {
+			int result = 0;
+			PreparedStatement pstmt = null;
+			ResultSet rs = null;
+			String sql;
+			
+			try {
+				sql = "SELECT NVL(COUNT(*), 0) FROM mapReply WHERE originalReplyNum=?";
+				pstmt = conn.prepareStatement(sql);
+				
+				pstmt.setLong(1, originalReplyNum);
+				
+				rs = pstmt.executeQuery();
+				
+				if(rs.next()) {
+					result=rs.getInt(1);
+				}
+				
+			} catch (SQLException e) {
+				e.printStackTrace();
+			} finally {
+				if(rs != null) {
+					try {
+						rs.close();
+					} catch (SQLException e) {
+					}
+				}
+				if(pstmt != null) {
+					try {
+						pstmt.close();
+					} catch (SQLException e) {
+					}
+				}
+			}
+			
+			return result;
+		}
+		
 		
 }

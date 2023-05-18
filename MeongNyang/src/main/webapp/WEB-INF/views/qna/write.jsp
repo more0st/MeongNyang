@@ -59,8 +59,8 @@ function sendBoard() {
 	
 <main>
 	<div class="container body-container">
-	    <div class="body-title">
-			<h2><i class="fas fa-chalkboard-teacher"></i> 질문과 답변 </h2>
+	    <div class="body-title" style="text-align: center;">
+			<img src="${pageContext.request.contextPath}/resource/images/questionpage.png" style="width: 250px;">
 	    </div>
 	    
 	    <div class="body-main mx-auto">

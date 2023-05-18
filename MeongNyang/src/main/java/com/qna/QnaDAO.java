@@ -12,6 +12,7 @@ import com.util.DBConn;
 public class QnaDAO {
 	private Connection conn = DBConn.getConnection();
 
+	// 질문 추가
 	public void insertQna(QnaDTO dto) throws SQLException {
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
@@ -65,6 +66,7 @@ public class QnaDAO {
 		}
 	}
 
+	// 게시물 데이터
 	public int dataCount(String userId) {
 		int result = 0;
 		PreparedStatement pstmt = null;
@@ -72,12 +74,20 @@ public class QnaDAO {
 		String sql;
 
 		try {
-			sql = "SELECT NVL(COUNT(*), 0) FROM questions WHERE userId = ?";
-			pstmt = conn.prepareStatement(sql);
+			if (!userId.equals("admin")) {
 
-			pstmt.setString(1, userId);
-			
-			rs = pstmt.executeQuery();
+				sql = "SELECT NVL(COUNT(*), 0) FROM questions WHERE userId = ?";
+				pstmt = conn.prepareStatement(sql);
+
+				pstmt.setString(1, userId);
+
+				rs = pstmt.executeQuery();
+			} else {
+				sql = "SELECT NVL(COUNT(*), 0) FROM questions";
+				pstmt = conn.prepareStatement(sql);
+
+				rs = pstmt.executeQuery();
+			}
 
 			if (rs.next()) {
 				result = rs.getInt(1);
@@ -104,31 +114,62 @@ public class QnaDAO {
 		return result;
 	}
 
-	public int dataCount(String condition, String keyword) {
+	// 데이터 개수 아이디 조건
+	public int dataCount(String condition, String keyword, String userId) {
 		int result = 0;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		String sql;
 
 		try {
-			sql = "SELECT NVL(COUNT(*), 0) FROM questions q " + " JOIN member m ON q.userId = m.userId ";
-			if (condition.equals("all")) {
-				sql += "  WHERE INSTR(subject, ?) >= 1 OR INSTR(content, ?) >= 1 ";
-			} else if (condition.equals("reg_date")) {
-				keyword = keyword.replaceAll("(\\-|\\/|\\.)", "");
-				sql += "  WHERE TO_CHAR(reg_date, 'YYYYMMDD') = ? ";
+			if (!userId.equals("admin")) {
+
+				sql = "SELECT NVL(COUNT(*), 0) FROM questions q " + " JOIN member m ON q.userId = m.userId ";
+				if (condition.equals("all")) {
+					sql += "  WHERE INSTR(subject, ?) >= 1 OR INSTR(content, ?) >= 1 ";
+				} else if (condition.equals("reg_date")) {
+					keyword = keyword.replaceAll("(\\-|\\/|\\.)", "");
+					sql += "  WHERE TO_CHAR(reg_date, 'YYYYMMDD') = ? ";
+				} else {
+					sql += "  WHERE INSTR(" + condition + ", ?) >= 1 ";
+				}
+				
+				sql += " AND q.userId = ?" ;
+					
+				pstmt = conn.prepareStatement(sql);
+
+				pstmt.setString(1, keyword);
+				if (condition.equals("all")) {
+					pstmt.setString(2, keyword);
+					pstmt.setString(3, userId);
+				}else {
+					pstmt.setString(2, userId);
+					
+				}
+
+				rs = pstmt.executeQuery();
+
 			} else {
-				sql += "  WHERE INSTR(" + condition + ", ?) >= 1 ";
+				sql = "SELECT NVL(COUNT(*), 0) FROM questions q " + " JOIN member m ON q.userId = m.userId ";
+				if (condition.equals("all")) {
+					sql += "  WHERE INSTR(subject, ?) >= 1 OR INSTR(content, ?) >= 1 ";
+				} else if (condition.equals("reg_date")) {
+					keyword = keyword.replaceAll("(\\-|\\/|\\.)", "");
+					sql += "  WHERE TO_CHAR(reg_date, 'YYYYMMDD') = ? ";
+				} else {
+					sql += "  WHERE INSTR(" + condition + ", ?) >= 1 ";
+				}
+
+				pstmt = conn.prepareStatement(sql);
+
+				pstmt.setString(1, keyword);
+				if (condition.equals("all")) {
+					pstmt.setString(2, keyword);
+				}
+
+				rs = pstmt.executeQuery();
+
 			}
-
-			pstmt = conn.prepareStatement(sql);
-
-			pstmt.setString(1, keyword);
-			if (condition.equals("all")) {
-				pstmt.setString(2, keyword);
-			}
-
-			rs = pstmt.executeQuery();
 
 			if (rs.next()) {
 				result = rs.getInt(1);
@@ -155,6 +196,7 @@ public class QnaDAO {
 		return result;
 	}
 
+	// 게시물 리스트
 	public List<QnaDTO> listBoard(int offset, int size, String userId) {
 		List<QnaDTO> list = new ArrayList<QnaDTO>();
 		PreparedStatement pstmt = null;
@@ -162,22 +204,42 @@ public class QnaDAO {
 		StringBuilder sb = new StringBuilder();
 
 		try {
-			sb.append(" SELECT qesNum, q.userId, userName, ");
-			sb.append("       subject, replyContent, replyReg_date, ");
-			sb.append("       TO_CHAR(reg_date, 'YYYY-MM-DD') reg_date ");
-			sb.append(" FROM questions q ");
-			sb.append(" JOIN member m ON q.userId = m.userId ");
-			sb.append(" WHERE q.userId = ? OR q.userId = 'admin'");
-			sb.append(" ORDER BY qesNum DESC ");
-			sb.append(" OFFSET ? ROWS FETCH FIRST ? ROWS ONLY ");
+			if (!userId.equals("admin")) {
 
-			pstmt = conn.prepareStatement(sb.toString());
+				sb.append(" SELECT qesNum, q.userId, userName, ");
+				sb.append("       subject, replyContent, replyReg_date, ");
+				sb.append("       TO_CHAR(reg_date, 'YYYY-MM-DD') reg_date ");
+				sb.append(" FROM questions q ");
+				sb.append(" JOIN member m ON q.userId = m.userId ");
+				sb.append(" WHERE q.userId = ? ");
+				sb.append(" ORDER BY qesNum DESC ");
+				sb.append(" OFFSET ? ROWS FETCH FIRST ? ROWS ONLY ");
 
-			pstmt.setString(1, userId);
-			pstmt.setInt(2, offset);
-			pstmt.setInt(3, size);
+				pstmt = conn.prepareStatement(sb.toString());
 
-			rs = pstmt.executeQuery();
+				pstmt.setString(1, userId);
+				pstmt.setInt(2, offset);
+				pstmt.setInt(3, size);
+
+				rs = pstmt.executeQuery();
+			} else {
+				sb.append(" SELECT qesNum, q.userId, userName, ");
+				sb.append("       subject, replyContent, replyReg_date, ");
+				sb.append("       TO_CHAR(reg_date, 'YYYY-MM-DD') reg_date ");
+				sb.append(" FROM questions q ");
+				sb.append(" JOIN member m ON q.userId = m.userId ");
+				// sb.append(" WHERE q.userId = ? OR q.userId = 'admin'");
+				sb.append(" ORDER BY qesNum DESC ");
+				sb.append(" OFFSET ? ROWS FETCH FIRST ? ROWS ONLY ");
+
+				pstmt = conn.prepareStatement(sb.toString());
+
+				// pstmt.setString(1, userId);
+				pstmt.setInt(1, offset);
+				pstmt.setInt(2, size);
+
+				rs = pstmt.executeQuery();
+			}
 
 			while (rs.next()) {
 				QnaDTO dto = new QnaDTO();
@@ -192,8 +254,6 @@ public class QnaDAO {
 
 				list.add(dto);
 			}
-			
-			
 
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -215,42 +275,82 @@ public class QnaDAO {
 		return list;
 	}
 
-	public List<QnaDTO> listBoard(int offset, int size, String condition, String keyword) {
+	// 검색 아이디 조건
+	public List<QnaDTO> listBoard(int offset, int size, String condition, String keyword, String userId) {
 		List<QnaDTO> list = new ArrayList<QnaDTO>();
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		StringBuilder sb = new StringBuilder();
 
 		try {
-			sb.append(" SELECT qesNum, q.userId, userName, ");
-			sb.append("       subject, replyContent, replyReg_date, ");
-			sb.append("       TO_CHAR(reg_date, 'YYYY-MM-DD') reg_date ");
-			sb.append(" FROM questions q ");
-			sb.append(" JOIN member m ON q.userId = m.userId ");
-			if (condition.equals("all")) {
-				sb.append(" WHERE INSTR(subject, ?) >= 1 OR INSTR(content, ?) >= 1 ");
-			} else if (condition.equals("reg_date")) {
-				keyword = keyword.replaceAll("(\\-|\\/|\\.)", "");
-				sb.append(" WHERE TO_CHAR(reg_date, 'YYYYMMDD') = ?");
-			} else {
-				sb.append(" WHERE INSTR(" + condition + ", ?) >= 1 ");
-			}
-			sb.append(" ORDER BY qesNum DESC ");
-			sb.append(" OFFSET ? ROWS FETCH FIRST ? ROWS ONLY ");
+			if (!userId.equals("admin")) {
 
-			pstmt = conn.prepareStatement(sb.toString());
-			if (condition.equals("all")) {
-				pstmt.setString(1, keyword);
-				pstmt.setString(2, keyword);
-				pstmt.setInt(3, offset);
-				pstmt.setInt(4, size);
-			} else {
-				pstmt.setString(1, keyword);
-				pstmt.setInt(2, offset);
-				pstmt.setInt(3, size);
-			}
+				sb.append(" SELECT qesNum, q.userId, userName, ");
+				sb.append("       subject, replyContent, replyReg_date, ");
+				sb.append("       TO_CHAR(reg_date, 'YYYY-MM-DD') reg_date ");
+				sb.append(" FROM questions q ");
+				sb.append(" JOIN member m ON q.userId = m.userId ");
+				if (condition.equals("all")) {
+					sb.append(" WHERE INSTR(subject, ?) >= 1 OR INSTR(content, ?) >= 1 ");
+				} else if (condition.equals("reg_date")) {
+					keyword = keyword.replaceAll("(\\-|\\/|\\.)", "");
+					sb.append(" WHERE TO_CHAR(reg_date, 'YYYYMMDD') = ?");
+				} else {
+					sb.append(" WHERE INSTR(" + condition + ", ?) >= 1 ");
+				}
+				sb.append(" AND q.userId = ? ");
+				sb.append(" ORDER BY qesNum DESC ");
+				sb.append(" OFFSET ? ROWS FETCH FIRST ? ROWS ONLY ");
 
-			rs = pstmt.executeQuery();
+				pstmt = conn.prepareStatement(sb.toString());
+
+				if (condition.equals("all")) {
+					pstmt.setString(1, keyword);
+					pstmt.setString(2, keyword);
+					pstmt.setString(3, userId);
+					pstmt.setInt(4, offset);
+					pstmt.setInt(5, size);
+				} else {
+					pstmt.setString(1, keyword);
+					pstmt.setString(2, userId);
+					pstmt.setInt(3, offset);
+					pstmt.setInt(4, size);
+				}
+
+				rs = pstmt.executeQuery();
+
+			} else {
+				sb.append(" SELECT qesNum, q.userId, userName, ");
+				sb.append("       subject, replyContent, replyReg_date, ");
+				sb.append("       TO_CHAR(reg_date, 'YYYY-MM-DD') reg_date ");
+				sb.append(" FROM questions q ");
+				sb.append(" JOIN member m ON q.userId = m.userId ");
+				if (condition.equals("all")) {
+					sb.append(" WHERE INSTR(subject, ?) >= 1 OR INSTR(content, ?) >= 1 ");
+				} else if (condition.equals("reg_date")) {
+					keyword = keyword.replaceAll("(\\-|\\/|\\.)", "");
+					sb.append(" WHERE TO_CHAR(reg_date, 'YYYYMMDD') = ?");
+				} else {
+					sb.append(" WHERE INSTR(" + condition + ", ?) >= 1 ");
+				}
+				sb.append(" ORDER BY qesNum DESC ");
+				sb.append(" OFFSET ? ROWS FETCH FIRST ? ROWS ONLY ");
+
+				pstmt = conn.prepareStatement(sb.toString());
+
+				if (condition.equals("all")) {
+					pstmt.setString(1, keyword);
+					pstmt.setString(2, keyword);
+					pstmt.setInt(3, offset);
+					pstmt.setInt(4, size);
+				} else {
+					pstmt.setString(1, keyword);
+					pstmt.setInt(2, offset);
+					pstmt.setInt(3, size);
+				}
+				rs = pstmt.executeQuery();
+
+			}
 
 			while (rs.next()) {
 				QnaDTO dto = new QnaDTO();
@@ -332,21 +432,20 @@ public class QnaDAO {
 
 		return dto;
 	}
-	
+
+	// 답변 등록
 	public void insertQnaReply(QnaDTO dto) throws SQLException {
 		PreparedStatement pstmt = null;
 		String sql;
 
 		try {
-			sql = "UPDATE questions SET replyContent=?, replyReg_date= SYSDATE "
-					+ " WHERE qesNum=?";
+			sql = "UPDATE questions SET replyContent=?, replyReg_date= SYSDATE " + " WHERE qesNum=?";
 			pstmt = conn.prepareStatement(sql);
-			
+
 			pstmt.setString(1, dto.getReplyContent());
 			pstmt.setLong(2, dto.getQesNum());
-			
-			pstmt.executeUpdate();
 
+			pstmt.executeUpdate();
 
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -362,5 +461,31 @@ public class QnaDAO {
 
 	}
 
+	// 게시물 삭제
+	public void deleteBoard(long qesNum) throws SQLException {
+		PreparedStatement pstmt = null;
+		String sql;
+
+		try {
+			sql = "DELETE FROM questions WHERE qesNum = ?";
+
+			pstmt = conn.prepareStatement(sql);
+
+			pstmt.setLong(1, qesNum);
+
+			pstmt.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw e;
+		} finally {
+			if (pstmt != null) {
+				try {
+					pstmt.close();
+				} catch (SQLException e) {
+				}
+			}
+		}
+
+	}
 
 }

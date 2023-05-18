@@ -77,7 +77,7 @@ public class MapServlet extends MyUploadServlet{
 			insertReply(req, resp);
 		} else if(uri.indexOf("deleteReply.do") != -1) {
 			deleteReply(req, resp);
-		} else if(uri.indexOf("insertLikeBoard.do") != -1) {
+		} else if(uri.indexOf("insertBoardLike.do") != -1) {
 			insertBoardLike(req, resp);
 		} else if (uri.indexOf("insertReply.do") != -1) {
 			// 댓글 등록
@@ -650,7 +650,28 @@ public class MapServlet extends MyUploadServlet{
 
 	protected void deleteReply(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		// 게시글 댓글 삭제 : AJAX-JSON  
-	
+		MapDAO dao = new MapDAO();
+
+		HttpSession session = req.getSession();
+		SessionInfo info = (SessionInfo)session.getAttribute("member");
+		String state = "false";
+		
+		try {
+			long replyNum = Long.parseLong(req.getParameter("replyNum"));
+			dao.deleteReply(replyNum, info.getUserId());
+			state = "true";
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		JSONObject job = new JSONObject();
+		job.put("state", state);
+		
+		resp.setContentType("text/html; charset=utf-8");
+		PrintWriter out = resp.getWriter();
+		out.print(job.toString());
+		
+		
 	}
 
 	protected void insertReplyLike(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -670,8 +691,28 @@ public class MapServlet extends MyUploadServlet{
 
 	protected void listReplyAnswer(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		// 게시글 댓글에 답글 리스트 : AJAX-Text  
+			MapDAO dao = new MapDAO();
+		
+				try {
+					long originalReplyNum = Long.parseLong(req.getParameter("originalReplyNum"));
+					
+					List<MapReplyDTO> listReplyAnswer = dao.listReplyAnswer(originalReplyNum);
+					
+					for(MapReplyDTO dto : listReplyAnswer) {
+						dto.setContent(dto.getContent().replaceAll("\n", "<br>"));
+					}
+					
+					req.setAttribute("listReplyAnswer", listReplyAnswer);
+					
+					forward(req, resp,"/WEB-INF/views/map/listReplyAnswer.jsp");
+					return;
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		
+		
 	
-	}
 	
 	protected void deleteReplyAnswer(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		// 게시글 댓글에 답글 삭제 : AJAX-JSON  
@@ -680,7 +721,26 @@ public class MapServlet extends MyUploadServlet{
 
 	protected void countReplyAnswer(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		// 게시글 댓글에 답글 개수 : AJAX-JSON  
+		
+		MapDAO dao = new MapDAO();
+		int count = 0;
+		
+		try {
+			long originalReplyNum = Long.parseLong(req.getParameter("originalReplyNum"));
+			count = dao.dataCountReplyAnswer(originalReplyNum);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 	
+	JSONObject job = new JSONObject();
+	job.put("count", count);
+	
+	resp.setContentType("text/html; charset=utf-8");
+	PrintWriter out = resp.getWriter();
+	out.print(job.toString());
+		
+		
 	}	
 	
 

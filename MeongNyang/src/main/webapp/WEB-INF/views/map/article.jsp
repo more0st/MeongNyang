@@ -104,8 +104,7 @@
 		<div class="container body-container">
 			<div class="body-title" style="text-align: center;">
 				<img
-					src="${pageContext.request.contextPath}/resource/images/mappage.png"
-					style="width: 250px;">
+					src="${pageContext.request.contextPath}/resource/images/mapPage.png"style="width: 250px;">
 			</div>
 			<div
 				style="box-shadow: 0 0 15px 0 rgb(2 59 109/ 10%); border-radius: 30px; margin: 0 auto; width: 70%; margin-bottom: 50px;">
@@ -230,13 +229,9 @@
 					</table>
 				</form>
 				<div id="listReply">
-					<c:forEach var="vo" items="${listReply}">
-					        <!-- 댓글을 표시하는 HTML 코드 -->
-					</c:forEach>
+					
 				</div>
-				<div>
-					<div class="page-navigation">${paging}</div>
-				</div>
+				
 			</div>
 		</div>
 
@@ -400,7 +395,7 @@ $(function() {
 		
 		let url = "${pageContext.request.contextPath}/map/insertBoardLike.do";
 		let num = "${dto.mapNum}"; 
-		let qs = "num=" + num + "&isNoLike=" + isNoLike;
+		let qs = "mapNum=" + num + "&isNoLike=" + isNoLike;
 		
 		const fn = function(data) {
 			let state = data.state;
@@ -476,11 +471,68 @@ $(function() {
 	});
 });
 
+//댓글의 답글 리스트
+function listReplyAnswer(originalReplyNum) {
+	let url = "${pageContext.request.contextPath}/map/listReplyAnswer.do";
+	let qs = "originalReplyNum="+originalReplyNum;
+	let selector = "#listReplyAnswer"+originalReplyNum;
+	
+	const fn = function (data) {
+		$(selector).html(data)	;
+		
+	};
+	ajaxFun(url,"get",qs,"text",fn);
+	
+}
+
+// 댓글별 답글 개수
+function countReplyAnswer(originalReplyNum) {
+	let url = "${pageContext.request.contextPath}/map/countReplyAnswer.do";
+	let qs = "originalReplyNum="+originalReplyNum;
+	
+	const fn = function (data) {
+		let count = data.count;
+		let selector = "#answerCount" + originalReplyNum;
+		$(selector).html(count);
+		
+	};
+	ajaxFun(url,"post",qs,"json",fn);
+
+}
+
+
+
+
+
+//답글 버튼(댓글별 답글 등록 폼 및 답글 리스트)
+$(function () {
+	$("#listReply").on("click",".btnReplyAnswerLayout", function() {
+		const $trAnswer = $(this).closest("tr").next();
+		
+		let isVisible = $trAnswer.is(":visible");
+		let replyNum = $(this).attr("data-replyNum");
+		
+		if(isVisible){
+			$trAnswer.hide();
+		}else{
+			$trAnswer.show();
+			
+			// 답글 리스트
+			listReplyAnswer(replyNum)
+			// 답글 개수
+			countReplyAnswer(replyNum)
+		}
+	});
+});
+
+
+
+
 
 //답글 등록 버튼
 $(function () {
 	$("#listReply").on("click", ".btnSendReplyAnswer", function () {
-		let num = "${dto.mapNum}";
+		let mapNum = "${dto.mapNum}";
 		let replyNum = $(this).attr("data-replyNum");
 		const $td = $(this).closest("td");
 		
@@ -491,8 +543,8 @@ $(function () {
 		}
 		content = encodeURIComponent(content);
 		
-		let url = "${pageContext.request.contextPath}/bbs/insertReply.do";
-		let qs = "mapNum=" +num+ "&content=" +content+ "&originalReplyNum=" +replyNum;
+		let url = "${pageContext.request.contextPath}/map/insertReply.do";
+		let qs = "num=" +mapNum+ "&content=" +content+ "&originalReplyNum=" +replyNum;
 		
 		const fn = function (data) {
 			let state = data.state;
@@ -511,9 +563,50 @@ $(function () {
 	});
 });
 
+// 댓글 삭제
+$(function () {
+	$("#listReply").on("click", ".deleteReply", function () {
+		if(! confirm("게시글을 삭제하시겠습니까 ? ")){
+			return false;
+		}
+		
+		let replyNum = $(this).attr("data-replyNum");
+		let page = $(this).attr("data-pageNo");
+		
+		let url = "${pageContext.request.contextPath}/map/deleteReply.do";
+		let qs = "replyNum="+replyNum;
+		
+		const fn = function(data) {
+			listPage(page);
+		};
+		
+		ajaxFun(url, "post", qs, "json", fn);
 
+	});
+});
 
+// 댓글의 답글 삭제
+$(function () {
+	$("#listReply").on("click", ".deleteReplyAnswer", function () {
+		if(! confirm("게시글을 삭제하시겠습니까 ? ")){
+			return false;
+		}
+		
+		let replyNum = $(this).attr("data-replyNum");
+		let originalReplyNum = $(this).attr("data-originalReplyNum");
+		
+		let url = "${pageContext.request.contextPath}/map/deleteReply.do";
+		let qs = "replyNum="+replyNum;
+		
+		const fn = function(data) {
+			listReplyAnswer(originalReplyNum);
+			countReplyAnswer(originalReplyNum);
+		};
+		
+		ajaxFun(url, "post", qs, "json", fn);
 
+	});
+});
 
 
 
