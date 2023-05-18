@@ -6,7 +6,6 @@ import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.myPage2.myPage2DTO;
 import com.util.DBConn;
 
 public class AdminDAO {

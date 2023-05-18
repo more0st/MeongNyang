@@ -100,7 +100,7 @@ function searchList() {
 					<td align="center">
 						<form name="searchForm" action="${pageContext.request.contextPath}/admin/userList.do" method="post">
 							<select name="condition" class="form-select">
-								<option value="userId"      ${condition=="userId"?"selected='selected'":"" }>회원ID</option>
+								<option value="userId"      ${condition=="userId" ? "selected='selected'" : "" }>회원ID</option>
 								<option value="userName" ${condition=="userName"?"selected='selected'":"" }>회원이름</option>
 							</select>
 							<input type="text" name="keyword" value="${keyword}" class="form-control" style="border-radius: 20px;">

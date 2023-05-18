@@ -29,6 +29,13 @@ function searchList() {
 	const f = document.searchForm;
 	f.submit();
 }
+
+function changeState(userId,enabled) {
+	const f = document.stateForm;
+	f.userId.value = userId;
+	f.enabled.value = enabled;
+	f.submit();
+}
 </script>
 </head>
 <body>
@@ -40,7 +47,7 @@ function searchList() {
 <main>
 	<div class="container body-container">
 	    <div class="body-title">
-			<h2> 전체 사용자 조회 </h2>
+			<h2> 사용자 관리 </h2>
 	    </div>
 	   <div style="box-shadow: 0 0 15px 0 rgb(2 59 109 / 10%);border-radius: 30px; margin: 0 auto ; width: 70%;">
 	    <div class="body-main mx-auto">
@@ -64,6 +71,7 @@ function searchList() {
 						<th class="addr">주소</th>
 						<th class="email">이메일</th>
 						<th class="state">회원상태</th>
+						<th class="statechange">상태변경</th>
 					</tr>
 				</thead>
 				
@@ -77,14 +85,20 @@ function searchList() {
 							<td>${dto.tel}</td>
 							<td>${dto.addr}</td>
 							<td>${dto.email}</td>
-							<td>${dto.enabled}</td>
-							<td align="right" width="100">
-								<button type="button" name="control" value="${control}" onclick="location.href='${pageContext.request.contextPath}/admin/userFix.do';">회원정지</button>
+							<td>${dto.enabled == 1 ? '활동중' : '정지' }</td>
+							<td>
+									<button type="button" name="recovery" value="${recovery}" onclick="changeState('${dto.userId}', 1);"><img src="${pageContext.request.contextPath}/resource/images/able.png" style="width: 50px;"></button>
+									<button type="button" name="pause" value="${pause}" onclick="changeState('${dto.userId}', 0);"><img src="${pageContext.request.contextPath}/resource/images/enable.png" style="width: 50px;"></button>
 							</td>
 						</tr>
 					</c:forEach>
 				</tbody>
 			</table>
+			
+			<form name="stateForm" action="${pageContext.request.contextPath}/admin2/userFix.do" method="post">
+				<input type="hidden" name="userId">
+				<input type="hidden" name="enabled">
+			</form>
 			
 			<div class="page-navigation">
 				${dataCount == 0 ? "등록된 게시물이 없습니다." : paging}
@@ -93,10 +107,10 @@ function searchList() {
 			<table class="table">
 				<tr>
 					<td width="100">
-						<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/admin/userList.do';" title="새로고침"><i class="fa-solid fa-arrow-rotate-right"></i></button>
+						<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/admin2/userFix.do';" title="새로고침"><i class="fa-solid fa-arrow-rotate-right"></i></button>
 					</td>
 					<td align="center">
-						<form name="searchForm" action="${pageContext.request.contextPath}/admin/userList.do" method="post">
+						<form name="searchForm" action="${pageContext.request.contextPath}/admin2/userFix.do" method="post">
 							<select name="condition" class="form-select">
 								<option value="userId"      ${condition=="userId"?"selected='selected'":"" }>회원ID</option>
 								<option value="userName" ${condition=="userName"?"selected='selected'":"" }>회원이름</option>
@@ -104,9 +118,6 @@ function searchList() {
 							<input type="text" name="keyword" value="${keyword}" class="form-control" style="border-radius: 20px;">
 							<button type="button" class="btn" onclick="searchList();">검색</button>
 						</form>
-					</td>
-					<td align="right" width="100">
-						<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/bbs/write.do';">글올리기</button>
 					</td>
 				</tr>
 			</table>
