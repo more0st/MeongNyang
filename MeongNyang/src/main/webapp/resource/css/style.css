@@ -57,7 +57,7 @@ a:active, a:hover { color: #f28011; text-decoration: underline; }
 }
 .form-control[readonly] { background-color:#f8f9fa; }
 
-textarea.form-control { height: 100px; resize : none; }
+textarea.form-control { height: 170px; resize : none; }
 
 .form-select {
 	border: 1px solid #999999; border-radius: 4px; background-color: #ffffff;
