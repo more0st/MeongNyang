@@ -3,6 +3,8 @@ package com.gallery;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
@@ -80,6 +82,18 @@ public class GalleryServlet extends MyUploadServlet {
 		} else if(uri.indexOf("deleteReply.do") != -1) {
 			// 댓글 삭제
 			deleteReply(req, resp);
+		} else if (uri.indexOf("insertReplyAnswer.do") != -1) {
+			// 댓글의 답글 추가
+			insertReplyAnswer(req, resp);
+		} else if (uri.indexOf("listReplyAnswer.do") != -1) {
+			// 댓글의 답글 리스트
+			listReplyAnswer(req, resp);
+		} else if (uri.indexOf("deleteReplyAnswer.do") != -1) {
+			// 댓글의 답글 삭제
+			deleteReplyAnswer(req, resp);
+		} else if (uri.indexOf("countReplyAnswer.do") != -1) {
+			// 댓글의 답글 개수
+			countReplyAnswer(req, resp);
 		};
 	}
 
@@ -99,9 +113,27 @@ public class GalleryServlet extends MyUploadServlet {
 			if (page != null) {
 				current_page = Integer.parseInt(page);
 			}
+			
+			// 검색
+			String condition = req.getParameter("condition");
+			String keyword = req.getParameter("keyword");
+			if (condition == null) {
+				condition = "all";
+				keyword = "";
+			}
+
+			// GET 방식인 경우 디코딩
+			if (req.getMethod().equalsIgnoreCase("GET")) {
+				keyword = URLDecoder.decode(keyword, "utf-8");
+			}
 
 			// 전체데이터 개수
-			int dataCount = dao.dataCount();
+			int dataCount;
+			if (keyword.length() == 0) {
+				dataCount = dao.dataCount();
+			} else {
+				dataCount = dao.dataCount(condition, keyword);
+			}
 
 			// 전체페이지수
 			int size = 12;
@@ -115,11 +147,25 @@ public class GalleryServlet extends MyUploadServlet {
 			if(offset < 0) offset = 0;
 			
 			List<GalleryDTO> list = dao.listPhoto(offset, size);
-
+			if (keyword.length() == 0) {
+				list = dao.listPhoto(offset, size);
+			} else {
+				list = dao.listPhoto(offset, size, condition, keyword);
+			}
+			
+			String query = "";
+			if (keyword.length() != 0) {
+				query = "condition=" + condition + "&keyword=" + URLEncoder.encode(keyword, "utf-8");
+			}
 			
 			// 페이징 처리
 			String listUrl = cp + "/gallery/list.do";
 			String articleUrl = cp + "/gallery/article.do?page=" + current_page;
+			if (query.length() != 0) {
+				listUrl += "?" + query;
+				articleUrl += "&" + query;
+			}
+			
 			String paging = util.paging(current_page, total_page, listUrl);
 
 			// 포워딩할 list.jsp에 넘길 값
@@ -129,7 +175,9 @@ public class GalleryServlet extends MyUploadServlet {
 			req.setAttribute("page", current_page);
 			req.setAttribute("total_page", total_page);
 			req.setAttribute("paging", paging);
-			
+			req.setAttribute("size", size);
+			req.setAttribute("condition", condition);
+			req.setAttribute("keyword", keyword);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -560,5 +608,64 @@ public class GalleryServlet extends MyUploadServlet {
 		PrintWriter out = resp.getWriter();
 		out.print(job.toString());
 	}
+	
+	// 답글 저장 - AJAX:JSON
+		protected void insertReplyAnswer(HttpServletRequest req, HttpServletResponse resp)
+				throws ServletException, IOException {
+			insertReply(req, resp);
+		}
+
+		// 리플의 답글 리스트 - AJAX:TEXT
+		protected void listReplyAnswer(HttpServletRequest req, HttpServletResponse resp)
+				throws ServletException, IOException {
+			GalleryDAO dao = new GalleryDAO();
+
+			try {
+				long answer = Long.parseLong(req.getParameter("answer"));
+
+				List<ReplyDTO> listReplyAnswer = dao.listReplyAnswer(answer);
+
+				// 엔터를 <br>(스타일 => style="white-space:pre;")
+				for (ReplyDTO dto : listReplyAnswer) {
+					dto.setContent(dto.getContent().replaceAll("\n", "<br>"));
+				}
+
+				req.setAttribute("listReplyAnswer", listReplyAnswer);
+
+				forward(req, resp, "/WEB-INF/views/gallery/listReplyAnswer.jsp");
+				return;
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+			
+			resp.sendError(400);
+		}
+
+		// 리플 답글 삭제 - AJAX:JSON
+		protected void deleteReplyAnswer(HttpServletRequest req, HttpServletResponse resp)
+				throws ServletException, IOException {
+			deleteReply(req, resp);
+		}
+
+		// 리플의 답글 개수 - AJAX:JSON
+		protected void countReplyAnswer(HttpServletRequest req, HttpServletResponse resp)
+				throws ServletException, IOException {
+			GalleryDAO dao = new GalleryDAO();
+			int count = 0;
+
+			try {
+				long answer = Long.parseLong(req.getParameter("answer"));
+				count = dao.dataCountReplyAnswer(answer);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+
+			JSONObject job = new JSONObject();
+			job.put("count", count);
+
+			resp.setContentType("text/html;charset=utf-8");
+			PrintWriter out = resp.getWriter();
+			out.print(job.toString());
+		}
 	
 }

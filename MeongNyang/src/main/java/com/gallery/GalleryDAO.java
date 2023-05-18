@@ -114,6 +114,60 @@ public class GalleryDAO {
 
 		return result;
 	}
+	
+	public int dataCount(String condition, String keyword) {
+		int result = 0;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		String sql;
+
+		try {
+			//sql = "SELECT NVL(COUNT(*), 0) FROM gallery WHERE userId = ?";
+			sql = "SELECT NVL(COUNT(*), 0) FROM gallery g"
+					+ " JOIN member m ON g.userId = m.userId ";
+			if (condition.equals("all")) {
+				sql += " WHERE INSTR(subject, ?) >= 1 OR INSTR(content, ?) >= 1 ";
+			} else if (condition.equals("reg_date")) {
+				keyword = keyword.replaceAll("(\\-|\\/|\\.)", "");
+				sql += " WHERE TO_CHAR(reg_date, 'YYYYMMDD') = ? ";
+			} else {
+				sql += " WHERE INSTR(" + condition + ", ?) >= 1 ";
+			}
+			
+			pstmt = conn.prepareStatement(sql);
+			
+			//pstmt.setString(1, userId);
+			pstmt.setString(1, keyword);
+			if (condition.equals("all")) {
+				pstmt.setString(2, keyword);
+			}
+			
+			rs = pstmt.executeQuery();
+			
+			if (rs.next()) {
+				result = rs.getInt(1);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			if (rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException e) {
+				}
+			}
+
+			if (pstmt != null) {
+				try {
+					pstmt.close();
+				} catch (SQLException e) {
+				}
+			}
+		}
+
+		return result;
+	}
+	
 
 	public List<GalleryDTO> listPhoto(int offset, int size) {
 		List<GalleryDTO> list = new ArrayList<GalleryDTO>();
@@ -179,6 +233,92 @@ public class GalleryDAO {
 
 		return list;
 	}
+	
+
+	public List<GalleryDTO> listPhoto(int offset, int size, String condition, String keyword) {
+		List<GalleryDTO> list = new ArrayList<GalleryDTO>();
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		StringBuilder sb = new StringBuilder();
+
+		try {
+			sb.append(" SELECT g.photoNum, g.userId, userName, subject, imageFilename, hitCount ");
+			sb.append(" FROM gallery g ");
+			sb.append(" JOIN member m ON g.userId = m.userId ");
+			sb.append(" LEFT OUTER JOIN ( ");
+			sb.append("     SELECT fileNum, photoNum, imageFilename FROM ( ");
+			sb.append("        SELECT fileNum, photoNum, imageFilename, ");
+			sb.append("            ROW_NUMBER() OVER(PARTITION BY photoNum ORDER BY fileNum ASC) rank ");
+			sb.append("        FROM galleryImgFile");
+			sb.append("     ) WHERE rank = 1 ");
+			sb.append(" ) i ON g.photoNum = i.photoNum ");
+			//sb.append(" WHERE g.userId = ? ");
+			if (condition.equals("all")) {
+				sb.append(" WHERE INSTR(subject, ?) >= 1 OR INSTR(content, ?) >= 1 ");
+			} else if (condition.equals("reg_date")) {
+				keyword = keyword.replaceAll("(\\-|\\/|\\.)", "");
+				sb.append(" WHERE TO_CHAR(reg_date, 'YYYYMMDD') = ?");
+			} else {
+				sb.append(" WHERE INSTR(" + condition + ", ?) >= 1 ");
+			}
+			sb.append(" ORDER BY photoNum DESC ");
+			sb.append(" OFFSET ? ROWS FETCH FIRST ? ROWS ONLY ");
+			
+			pstmt = conn.prepareStatement(sb.toString());
+			
+			if (condition.equals("all")) {
+				pstmt.setString(1, keyword);
+				pstmt.setString(2, keyword);
+				pstmt.setInt(3, offset);
+				pstmt.setInt(4, size);
+			} else {
+				pstmt.setString(1, keyword);
+				pstmt.setInt(2, offset);
+				pstmt.setInt(3, size);
+			}
+			
+			//pstmt.setString(1, userId);
+			//pstmt.setInt(1, offset);
+			//pstmt.setInt(2, size);
+
+			rs = pstmt.executeQuery();
+
+			while (rs.next()) {
+				GalleryDTO dto = new GalleryDTO();
+				
+				dto.setPhotoNum(rs.getLong("photoNum"));
+				dto.setUserId(rs.getString("userId"));
+				dto.setUserName(rs.getString("userName"));
+				dto.setSubject(rs.getString("subject"));
+				dto.setImageFilename(rs.getString("imageFilename"));
+				dto.setHitCount(rs.getInt("hitCount"));
+				
+				dto.setReplyCount(dataCountReply(rs.getLong("photoNum")));
+				dto.setBoardLikeCount(countBoardLike(rs.getLong("photoNum")));
+				
+				list.add(dto);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			if (rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException e) {
+				}
+			}
+
+			if (pstmt != null) {
+				try {
+					pstmt.close();
+				} catch (SQLException e) {
+				}
+			}
+		}
+
+		return list;
+	}
+
 
 	public GalleryDTO readPhoto(long num) {
 		GalleryDTO dto = null;
@@ -902,6 +1042,98 @@ public class GalleryDAO {
 			}
 		}		
 		
+	}
+	
+	// 댓글의 답글 리스트
+	public List<ReplyDTO> listReplyAnswer(long answer) {
+		List<ReplyDTO> list = new ArrayList<>();
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		StringBuilder sb = new StringBuilder();
+
+		try {
+			sb.append(" SELECT replyNum, photoNum, r.userId, userName, content, reg_date, originalReplyNum ");
+			sb.append(" FROM galleryReply r ");
+			sb.append(" JOIN member m ON r.userId=m.userId ");
+			sb.append(" WHERE originalReplyNum=? ");
+			sb.append(" ORDER BY replyNum DESC ");
+			pstmt = conn.prepareStatement(sb.toString());
+
+			pstmt.setLong(1, answer);
+
+			rs = pstmt.executeQuery();
+
+			while (rs.next()) {
+				ReplyDTO dto = new ReplyDTO();
+
+				dto.setReplyNum(rs.getLong("replyNum"));
+				dto.setNum(rs.getLong("photoNum"));
+				dto.setUserId(rs.getString("userId"));
+				dto.setUserName(rs.getString("userName"));
+				dto.setContent(rs.getString("content"));
+				dto.setReg_date(rs.getString("reg_date"));
+				dto.setAnswer(rs.getLong("originalReplyNum"));
+
+				list.add(dto);
+			}
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			if (rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException e) {
+				}
+			}
+
+			if (pstmt != null) {
+				try {
+					pstmt.close();
+				} catch (SQLException e) {
+				}
+			}
+		}
+		return list;
+	}
+
+	// 댓글의 답글 개수
+	public int dataCountReplyAnswer(long answer) {
+		int result = 0;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		String sql;
+
+		try {
+			sql = "SELECT NVL(COUNT(*), 0) FROM galleryReply WHERE originalReplyNum=?";
+			pstmt = conn.prepareStatement(sql);
+
+			pstmt.setLong(1, answer);
+
+			rs = pstmt.executeQuery();
+
+			if (rs.next()) {
+				result = rs.getInt(1);
+			}
+
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			if (rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException e) {
+				}
+			}
+			if (pstmt != null) {
+				try {
+					pstmt.close();
+				} catch (SQLException e) {
+				}
+			}
+		}
+
+		return result;
 	}
 
 }

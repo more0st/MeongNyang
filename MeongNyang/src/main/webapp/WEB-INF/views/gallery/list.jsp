@@ -67,7 +67,12 @@
 }
 
 </style>
-
+<script type="text/javascript">
+function searchList() {
+	const f = document.searchForm;
+	f.submit();
+}
+</script>
 </head>
 <body>
 
@@ -90,10 +95,11 @@
 						${dataCount}개(${page}/${total_page} 페이지)
 					</td>
 					
+					<!-- 
 					<td align="right">
 						<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/gallery/write.do';">등록</button>
 					</td>
-					
+					 -->
 				</tr>
 			</table>
 			
@@ -110,7 +116,7 @@
 								</div> 
 								<div>
 								<span><img src="${pageContext.request.contextPath}/resource/images/heart.png" style="width: 23px;">${dto.boardLikeCount}</span>
-								<span><img src="${pageContext.request.contextPath}/resource/images/view.png" style="width: 23px;">${dto.hitCount}</span>
+								<span><img src="${pageContext.request.contextPath}/resource/images/view.png" style="width: 25px;">${dto.hitCount}</span>
 								<span><img src="${pageContext.request.contextPath}/resource/images/reply.png" style="width: 23px;">${dto.replyCount}</span>
 								</div>
 								
@@ -124,6 +130,30 @@
 			<div class="page-navigation">
 				${dataCount == 0 ? "등록된 게시물이 없습니다." : paging}
 			</div>
+			
+			<table class="table">
+				<tr>
+					<td width="100">
+						<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/gallery/list.do';" title="새로고침"><i class="fa-solid fa-arrow-rotate-right"></i></button>
+					</td>
+					<td align="center">
+						<form name="searchForm" action="${pageContext.request.contextPath}/gallery/list.do" method="post">
+							<select name="condition" class="form-select">
+								<option value="all"      ${condition=="all"?"selected='selected'":"" }>제목+내용</option>
+								<option value="userName" ${condition=="userName"?"selected='selected'":"" }>작성자</option>
+								<option value="reg_date"  ${condition=="reg_date"?"selected='selected'":"" }>등록일</option>
+								<option value="subject"  ${condition=="subject"?"selected='selected'":"" }>제목</option>
+								<option value="content"  ${condition=="content"?"selected='selected'":"" }>내용</option>
+							</select>
+							<input type="text" name="keyword" value="${keyword}" class="form-control">
+							<button type="button" class="btn" onclick="searchList();">검색</button>
+						</form>
+					</td>
+					<td align="right" width="100">
+						<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/gallery/write.do';">글올리기</button>
+					</td>
+				</tr>
+			</table>
 
 	    </div>
 	</div>
