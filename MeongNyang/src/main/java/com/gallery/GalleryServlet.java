@@ -71,6 +71,15 @@ public class GalleryServlet extends MyUploadServlet {
 		} else if (uri.indexOf("insertBoardLike.do") != -1) {
 			// 게시글 공감
 			insertBoardLike(req, resp);
+		} else if(uri.indexOf("insertReply.do") != -1) {
+			// 댓글 등록
+			insertReply(req, resp);
+		} else if(uri.indexOf("listReply.do") != -1) {
+			// 댓글 리스트
+			listReply(req, resp);
+		} else if(uri.indexOf("deleteReply.do") != -1) {
+			// 댓글 삭제
+			deleteReply(req, resp);
 		};
 	}
 
@@ -107,6 +116,7 @@ public class GalleryServlet extends MyUploadServlet {
 			
 			List<GalleryDTO> list = dao.listPhoto(offset, size);
 
+			
 			// 페이징 처리
 			String listUrl = cp + "/gallery/list.do";
 			String articleUrl = cp + "/gallery/article.do?page=" + current_page;
@@ -189,10 +199,12 @@ public class GalleryServlet extends MyUploadServlet {
 		String cp = req.getContextPath();
 		String page = req.getParameter("page");
 		
+		
 		if (info == null) { // 로그인되지 않은 경우
 			resp.sendRedirect(cp + "/member/login.do");
 			return;
 		}
+		
 		
 		try {
 			long num = Long.parseLong(req.getParameter("num"));
@@ -201,10 +213,12 @@ public class GalleryServlet extends MyUploadServlet {
 			dao.updateHitCount(num);
 			
 			GalleryDTO dto = dao.readPhoto(num);
-			if (dto == null || !dto.getUserId().equals(info.getUserId())) {
+			
+			if (dto == null) {
 				resp.sendRedirect(cp + "/gallery/list.do?page=" + page);
 				return;
 			}
+			
 			dto.setContent(util.htmlSymbols(dto.getContent()));
 			
 			// 로그인 유저의 게시글 공감 여부 
@@ -394,7 +408,7 @@ public class GalleryServlet extends MyUploadServlet {
 		resp.sendRedirect(cp + "/gallery/list.do?page=" + page);
 	}
 	
-	
+	// 좋아요 추가
 	protected void insertBoardLike(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		GalleryDAO dao = new GalleryDAO();
 		
@@ -432,6 +446,119 @@ public class GalleryServlet extends MyUploadServlet {
 		PrintWriter out = resp.getWriter();
 		out.print(job.toString());
 	
+	}
+	
+	// 댓글 리스트
+	protected void listReply(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		GalleryDAO dao = new GalleryDAO();
+		MyUtil util = new MyUtil();
+
+		try {
+			long num = Long.parseLong(req.getParameter("num"));
+			String pageNo = req.getParameter("pageNo");
+			int current_page = 1;
+			if (pageNo != null) {
+				current_page = Integer.parseInt(pageNo);
+			}
+
+			int size = 5;
+			int total_page = 0;
+			int replyCount = 0;
+
+			replyCount = dao.dataCountReply(num);
+			total_page = util.pageCount(replyCount, size);
+			if (current_page > total_page) {
+				current_page = total_page;
+			}
+
+			// 리스트에 출력할 데이터
+			int offset = (current_page - 1) * size;
+			if(offset < 0) offset = 0;
+			
+			List<ReplyDTO> listReply = dao.listReply(num, offset, size);
+
+			// 엔터를 <br>
+			for (ReplyDTO dto : listReply) {
+				dto.setContent(dto.getContent().replaceAll("\n", "<br>"));
+			}
+
+			// 페이징 처리 : AJAX 용 - listPage : 자바스크립트 함수명
+			String paging = util.pagingMethod(current_page, total_page, "listPage");
+
+			req.setAttribute("listReply", listReply);
+			req.setAttribute("pageNo", current_page);
+			req.setAttribute("replyCount", replyCount);
+			req.setAttribute("total_page", total_page);
+			req.setAttribute("paging", paging);
+			
+			forward(req, resp, "/WEB-INF/views/gallery/listReply.jsp");
+			return;
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		resp.sendError(400);
+	}
+	
+	// 리플 또는 답글 저장 - AJAX:JSON
+	protected void insertReply(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		GalleryDAO dao = new GalleryDAO();
+
+		HttpSession session = req.getSession();
+		SessionInfo info = (SessionInfo) session.getAttribute("member");
+		
+		String state = "false";
+		try {
+			ReplyDTO dto = new ReplyDTO();
+
+			long num = Long.parseLong(req.getParameter("num"));
+			dto.setNum(num);
+			dto.setUserId(info.getUserId());
+			dto.setContent(req.getParameter("content"));
+			String answer = req.getParameter("answer");
+			if (answer != null) {
+				dto.setAnswer(Long.parseLong(answer));
+			}
+			
+			dao.insertReply(dto);
+			
+			state = "true";
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		JSONObject job = new JSONObject();
+		job.put("state", state);
+
+		resp.setContentType("text/html;charset=utf-8");
+		PrintWriter out = resp.getWriter();
+		out.print(job.toString());
+	}
+	
+	// 리플 또는 답글 삭제 - AJAX:JSON
+	protected void deleteReply(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		GalleryDAO dao = new GalleryDAO();
+
+		HttpSession session = req.getSession();
+		SessionInfo info = (SessionInfo) session.getAttribute("member");
+		String state = "false";
+
+		try {
+			long replyNum = Long.parseLong(req.getParameter("replyNum"));
+
+			dao.deleteReply(replyNum, info.getUserId());
+			
+			state = "true";
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+		JSONObject job = new JSONObject();
+		job.put("state", state);
+
+		resp.setContentType("text/html;charset=utf-8");
+		PrintWriter out = resp.getWriter();
+		out.print(job.toString());
 	}
 	
 }

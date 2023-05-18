@@ -19,8 +19,8 @@
 	display: grid;
 	/* auto-fill :  남는 공간(빈 트랙)을 그대로 유지, minmax : '최소, 최대 크기'를 정의 */
 	grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-	grid-column-gap: 50px;
-	grid-row-gap: 150px;
+	grid-column-gap: 40px;
+	grid-row-gap: 60px;
 	
 }
 .grid-box .item { border: 1px solid #DAD9FF; height: 250px; cursor: pointer;  border-radius: 40px; }
@@ -33,7 +33,7 @@
 	font-weight: 900;
 }
 
-.item > .desc-area > .info > span {
+.item > .desc-area > .info > div span {
 	font-size: 15px;
 	color: #777;
 	font-weight: 600;
@@ -52,7 +52,7 @@
     padding-top: 35px;
     padding-bottom: 7px;
     margin: 0 0 25px 0;
-    border-bottom: 2px solid rgb(251, 167, 138);
+   
 }
 .body-title h2 {
     font-size: 24px;
@@ -80,10 +80,10 @@
 <main>
 	<div class="container body-container">
 	    <div class="body-title">
-			<img src="${pageContext.request.contextPath}/resource/images/gallerypage.png" style="width: 200px;" >
+			<img src="${pageContext.request.contextPath}/resource/images/gallerypage2.png" style="width: 200px;" >
 	    </div>
 	    
-	    <div class="body-main mx-auto">
+	    <div class="body-main mx-auto" style="box-shadow: 0 0 15px 0 rgb(2 59 109 / 10%); border-radius: 30px; padding: 15px;">
 			<table class="table">
 				<tr>
 					<td width="50%">
@@ -105,9 +105,15 @@
 						
 						<div class="desc-area">
 							<div class="info">
+								<div style="text-align: center;">
 								<span>${dto.subject}</span>
-								<span><img src="${pageContext.request.contextPath}/resource/images/like2.png" style="width: 25px;">${dto.boardLikeCount}</span>
-								<span><img src="${pageContext.request.contextPath}/resource/images/hitCount.jpg" style="width: 25px; margin-bottom: 5px;" >${dto.hitCount}</span>
+								</div> 
+								<div>
+								<span><img src="${pageContext.request.contextPath}/resource/images/heart.png" style="width: 23px;">${dto.boardLikeCount}</span>
+								<span><img src="${pageContext.request.contextPath}/resource/images/view.png" style="width: 23px;">${dto.hitCount}</span>
+								<span><img src="${pageContext.request.contextPath}/resource/images/reply.png" style="width: 23px;">${dto.replyCount}</span>
+								</div>
+								
 							</div>
 						</div>
 					</div>

@@ -154,6 +154,7 @@ public class GalleryDAO {
 				dto.setImageFilename(rs.getString("imageFilename"));
 				dto.setHitCount(rs.getInt("hitCount"));
 				
+				dto.setReplyCount(dataCountReply(rs.getLong("photoNum")));
 				dto.setBoardLikeCount(countBoardLike(rs.getLong("photoNum")));
 				
 				list.add(dto);
@@ -674,6 +675,233 @@ public class GalleryDAO {
 		return result;
 	}
 	
+	// 게시물의 댓글 및 답글 추가
+	public void insertReply(ReplyDTO dto) throws SQLException {
+		PreparedStatement pstmt = null;
+		String sql;
+		
+		try {
+			sql = "INSERT INTO galleryReply(replyNum, photoNum, userId, content, originalReplyNum, reg_date) "
+					+ " VALUES (galleryReply_seq.NEXTVAL, ?, ?, ?, ?, SYSDATE)";
+			pstmt = conn.prepareStatement(sql);
+			
+			pstmt.setLong(1, dto.getNum());
+			pstmt.setString(2, dto.getUserId());
+			pstmt.setString(3, dto.getContent());
+			pstmt.setLong(4, dto.getAnswer());
+			
+			pstmt.executeUpdate();
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw e;
+		} finally {
+			if(pstmt != null)
+				try {
+					pstmt.close();
+				} catch (SQLException e) {
+				}
+		}
+		
+	}
 	
+	// 게시물의 댓글 개수
+	public int dataCountReply(long num) {
+		int result = 0;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		String sql;
+		
+		try {
+			sql = "SELECT NVL(COUNT(*), 0) FROM galleryReply WHERE photoNum=? AND originalReplyNum=0";
+			pstmt = conn.prepareStatement(sql);
+			
+			pstmt.setLong(1, num);
+			
+			rs = pstmt.executeQuery();
+			
+			if(rs.next()) {
+				result = rs.getInt(1);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			if(rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException e) {
+				}
+			}
+				
+			if(pstmt != null) {
+				try {
+					pstmt.close();
+				} catch (SQLException e) {
+				}
+			}
+		}
+		
+		return result;
+	}
+	
+	
+
+	// 게시물 댓글 리스트
+	public List<ReplyDTO> listReply(long num, int offset, int size) {
+		List<ReplyDTO> list = new ArrayList<>();
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		StringBuilder sb = new StringBuilder();
+		
+		try {
+			sb.append(" SELECT r.replyNum, r.userId, userName, photoNum, content, r.reg_date, ");
+			sb.append("     NVL(answerCount, 0) answerCount ");
+			//sb.append("     NVL(likeCount, 0) likeCount, ");
+			//sb.append("     NVL(disLikeCount, 0) disLikeCount ");
+			sb.append(" FROM galleryReply r ");
+			sb.append(" JOIN member m ON r.userId = m.userId ");
+			sb.append(" LEFT OUTER  JOIN (");
+			sb.append("	    SELECT originalReplyNum, COUNT(*) answerCount ");
+			sb.append("     FROM galleryReply ");
+			sb.append("     WHERE originalReplyNum != 0 ");
+			sb.append("     GROUP BY originalReplyNum ");
+			sb.append(" ) a ON r.replyNum = a.originalReplyNum ");
+			/*
+			sb.append(" LEFT OUTER  JOIN ( ");
+			sb.append("	    SELECT replyNum, ");
+			sb.append("         COUNT(DECODE(replyLike, 1, 1)) likeCount, ");
+			sb.append("         COUNT(DECODE(replyLike, 0, 1)) disLikeCount ");
+			sb.append("     FROM bbsReplyLike ");
+			sb.append("     GROUP BY replyNum ");
+			sb.append(" ) b ON r.replyNum = b.replyNum  ");
+			*/
+			sb.append(" WHERE photoNum = ? AND r.originalReplyNum=0 ");
+			sb.append(" ORDER BY r.replyNum DESC ");
+			sb.append(" OFFSET ? ROWS FETCH FIRST ? ROWS ONLY ");
+			
+			pstmt = conn.prepareStatement(sb.toString());
+			
+			pstmt.setLong(1, num);
+			pstmt.setInt(2, offset);
+			pstmt.setInt(3, size);
+
+			rs = pstmt.executeQuery();
+			
+			while(rs.next()) {
+				ReplyDTO dto = new ReplyDTO();
+				
+				dto.setReplyNum(rs.getLong("replyNum"));
+				dto.setNum(rs.getLong("photoNum"));
+				dto.setUserId(rs.getString("userId"));
+				dto.setUserName(rs.getString("userName"));
+				dto.setContent(rs.getString("content"));
+				dto.setReg_date(rs.getString("reg_date"));
+				dto.setAnswerCount(rs.getInt("answerCount"));
+				
+				list.add(dto);
+			}
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			if(rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException e) {
+				}
+			}
+			if(pstmt != null) {
+				try {
+					pstmt.close();
+				} catch (SQLException e) {
+				}
+			}
+		}
+		
+		return list;
+	}
+	
+	public ReplyDTO readReply(long replyNum) {
+		ReplyDTO dto = null;
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		String sql;
+		
+		try {
+			sql = "SELECT replyNum, photoNum, r.userId, userName, content , r.reg_date "
+					+ " FROM galleryReply r JOIN member m ON r.userId=m.userId  "
+					+ " WHERE replyNum = ? ";
+			pstmt = conn.prepareStatement(sql);
+			
+			pstmt.setLong(1, replyNum);
+
+			rs=pstmt.executeQuery();
+			
+			if(rs.next()) {
+				dto=new ReplyDTO();
+				
+				dto.setReplyNum(rs.getLong("replyNum"));
+				dto.setNum(rs.getLong("photoNum"));
+				dto.setUserId(rs.getString("userId"));
+				dto.setUserName(rs.getString("userName"));
+				dto.setContent(rs.getString("content"));
+				dto.setReg_date(rs.getString("reg_date"));
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			if(rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException e) {
+				}
+			}
+				
+			if(pstmt != null) {
+				try {
+					pstmt.close();
+				} catch (SQLException e) {
+				}
+			}
+		}
+		
+		return dto;
+	}
+	
+	// 게시물의 댓글 삭제
+	public void deleteReply(long replyNum, String userId) throws SQLException {
+		PreparedStatement pstmt = null;
+		String sql;
+		
+		if(! userId.equals("admin")) {
+			ReplyDTO dto = readReply(replyNum);
+			if(dto == null || (! userId.equals(dto.getUserId()))) {
+				return;
+			}
+		}
+		
+		try {
+			sql = "DELETE FROM galleryReply "
+					+ " WHERE replyNum IN  "
+					+ " (SELECT replyNum FROM galleryReply START WITH replyNum = ?"
+					+ "     CONNECT BY PRIOR replyNum = originalReplyNum)";
+			pstmt = conn.prepareStatement(sql);
+			
+			pstmt.setLong(1, replyNum);
+			
+			pstmt.executeUpdate();
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw e;
+		} finally {
+			if(pstmt != null) {
+				try {
+					pstmt.close();
+				} catch (SQLException e) {
+				}
+			}
+		}		
+		
+	}
 
 }
