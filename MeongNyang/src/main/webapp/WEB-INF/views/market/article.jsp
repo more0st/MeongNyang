@@ -68,7 +68,11 @@
 
 .photo-layout img { width: 570px; height: 450px; }
 </style>
+<!-- <script type="text/javascript" src="https://code.jquery.com/jquery-1.12.4.min.js" ></script> -->
+    <!-- iamport.payment.js -->
+<script type="text/javascript" src="https://cdn.iamport.kr/js/iamport.payment-1.2.0.js"></script>
 <script type="text/javascript">
+
 function login() {
 	loaction.href = "${pageContext.request.contextPath}/member/login.do";
 }
@@ -149,9 +153,25 @@ function modal() {
 	let sessionId = "${sessionScope.member.userId}";
 	let s;
 	if(userId === sessionId){
-		s="<button class='btn'>판매확정</button> <button class='btn'>취소</button>";
+		s ="<form name='buyForm' metod='post'>"
+		s += "<table class='table table-border table-form'>"
+		s += "<tr>"
+		s += "<td>"
+		s += "구매자 : "
+		s += "</td>"
+		s += "<td>"
+		s += "<input type='text' name='buyerId'><br>"
+		s += "</td>"
+		s += "</tr>"
+		s += "<tr>"
+		s += "<td>"
+		s +="<button type='button' class='btn' onclick='buy_ok();'>판매확정</button>"
+		s += "</td>"
+		s += "<td>"
+		s += "</table>"
+		s +="<form>"
 	}else{
-		s="<button>결재하기</button>";
+		s="<button type='button' class='btn' onclick='requestPay();'>결재하기</button>";
 	}
 	viewer.html(s);
 	
@@ -219,6 +239,152 @@ $(function () {
 		
 		ajaxFun(url, "post", qs, "json", fn);
 	});
+});
+
+function buy_ok() {
+	const f = document.buyForm;
+	buyerId = f.buyerId.value.trim();
+	marketNum = ${dto.marketNum};
+	location.href = "${pageContext.request.contextPath}/market/buy_ok.do?buyerId="+buyerId+"&marketNum="+marketNum;
+}
+
+var IMP = window.IMP; 
+IMP.init("imp85702804"); 
+
+function requestPay() {
+    IMP.request_pay({
+        pg : 'html5_inicis.INIBillTst',
+        pay_method : 'card',
+        merchant_uid: '${sessionScope.member.userName}', 
+        name : '${dto.subject}',
+        amount : '${dto.price}',
+        buyer_addr : '${dto.addr}',
+    }, function (rsp) { // callback
+        if(rsp.success){
+      	  console.log(rsp);
+        }else{
+      	  console.log(rsp);
+        }
+    });
+}
+
+$(function () {
+	$("#listReply").on("click", ".btnReplyAnswerLayout", function () {
+		const $trAnswer = $(this).closest("tr").next();
+		
+		let isVisible = $trAnswer.is(":visible");
+		let replyNum = $(this).attr("data-replyNum");
+		
+		if(isVisible){
+			$trAnswer.hide();
+		}else{
+			$trAnswer.show();
+			
+			//답글 리스트
+			listReplyAnswer(replyNum);
+			
+			// 답글 개수
+			countReplyAnswer(replyNum);
+		}
+	});
+});
+
+function listReplyAnswer(answer) {
+	let url = "${pageContext.request.contextPath}/market/listReplyAnswer.do";
+	let qs = "answer="+answer;
+	let selector = "#listReplyAnswer"+answer;
+	
+	const fn = function(data) {
+		$(selector).html(data);
+	};
+	
+	ajaxFun(url, "get", qs, "text" ,fn);
+}
+
+function countReplyAnswer(answer) {
+	let url = "${pageContext.request.contextPath}/market/countReplyAnswer.do";
+	let qs = "answer="+answer;
+	
+	const fn = function (data) {
+		let count = data.count;
+		let selector = "#answerCount"+answer;
+		$(selector).html(count);
+	};
+	
+	ajaxFun(url, "post", qs, "json", fn);
+}
+
+//답글 등록 버튼
+$(function () {
+	$("#listReply").on("click", ".btnSendReplyAnswer",function(){
+		let marketNum = "${dto.marketNum}";
+		let replyNum = $(this).attr("data-replyNum");
+		const $td = $(this).closest("td");
+		
+		let content = $td.find("textarea").val().trim();
+		if(! content){
+			$td.find("textarea").focus();
+			return false;
+		}
+		content = encodeURIComponent(content);
+		
+		let url = "${pageContext.request.contextPath}/market/insertReply.do";
+		let qs = "marketNum="+marketNum+"&content="+content+"&rereplynum="+replyNum;
+		
+		const fn = function (data) {
+			let state = data.state;
+			
+			$td.find("textarea").val("");
+			
+			if(state === "true"){
+				listReplyAnswer(replyNum);
+				countReplyAnswer(replyNum);
+			}
+		};
+		
+		ajaxFun(url, "post", qs, "json", fn);
+	});
+});
+
+$(function() {
+	$("#listReply").on("click",".deleteReply", function() {
+		if(! confirm("게시글을 삭제하시겠습니까?")){
+			return false;
+		}
+		
+		let replyNum = $(this).attr("data-replyNum");
+		let page = $(this).attr("data-pageNo");
+		
+		let url = "${pageContext.request.contextPath}/market/deleteReply.do";
+		let qs = "replyNum="+replyNum;
+		
+		const fn = function(data) {
+			listPage(page);
+		};
+		
+		ajaxFun(url, "post", qs, "json", fn);
+	});	
+});
+
+$(function() {
+	$("#listReply").on("click",".deleteReplyAnswer", function() {
+		if(! confirm("댓글을 삭제하시겠습니까?")){
+			return false;
+		}
+		
+		let replyNum = $(this).attr("data-replyNum");
+		let answer = $(this).attr("data-answer");
+		
+		let url = "${pageContext.request.contextPath}/market/deleteReply.do";
+		let qs = "replyNum="+replyNum;
+		
+		const fn = function(data) {
+			listReplyAnswer(answer);
+			countReplyAnswer(answer);
+		};
+		
+		ajaxFun(url, "post", qs, "json", fn);
+	});	
 });
 </script>
 
@@ -326,8 +492,11 @@ $(function () {
 					</td>
 					<td align="right">
 					<c:choose>
-						<c:when test="${sessionScope.member.userId==dto.sellerId}">
+						<c:when test="${sessionScope.member.userId==dto.sellerId && dto.state == 1}">
 							<button type="button" class="btn" onclick="modal();">판매시작</button>
+						</c:when>
+						<c:when test="${dto.state == 0}">
+							<button type="button" class="btn" disabled="disabled">판매완료</button>
 						</c:when>
 						<c:otherwise>
 							<button type="button" class="btn" onclick="modal();">카드결재</button>

@@ -4,7 +4,7 @@
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
 <div class='reply-info'>
-	<span class='reply-count'>댓글 ${replyCoint }개</span>
+	<span class='reply-count'>댓글 ${replyCount}개</span>
 	<span>[목록, ${pageNo}/${total_page} 페이지]</span>
 </div>
 
@@ -12,25 +12,33 @@
 	<c:forEach var="vo" items="${listReply}">
 		<tr class='list-header'>
 			<td width='50%'>
-				<span class='bold'>${vo.userId }</span>
+				<span class='bold'>${vo.userName}</span>
 			</td>
 			<td width='50%' align='right'>
-				<span>${dto.reg_date }</span> |
-				<span class='deleteReply' data-replyNum='${vo.replyNum}' data-pageNo='${pageNo}'>삭제</span>
+				<span>${vo.reg_date}</span> 
+				<c:choose>
+					<c:when test="${sessionScope.member.userId=='admin' || sessionScope.member.userId==vo.userId}">
+						<span class='deleteReply' data-replyNum='${vo.replyNum}' data-pageNo='${pageNo}'>삭제</span>
+					</c:when>
+					<c:otherwise>
+						<span class="notifyReply">신고</span>
+					</c:otherwise>
+				</c:choose>
 			</td>
 		</tr>
-		<tr>
-			<td colspan='2' valign='top'>${vo.content }</td>
-		</tr>
+			<tr>
+			   <td colspan='2' valign='top'><c:out value='${vo.content}' /></td>
+			</tr>
+
 
 		<tr>
 			<td>
-				<button type='button' class='btn btnReplyAnswerLayout' data-replyNum='${vo.replyNum}'>답글 <span id="answerCount${vo.replyNum}">${vo.answerCount}</span></button>
+				<button type='button' class='btn btnReplyAnswerLayout' data-replyNum='${vo.replyNum}'>답글 <span id="answerCount${vo.replyNum}">${vo.originalReplyNumCount}</span></button>
 			</td>
-			<%-- <td align='right'>
+			<td align='right'>
 				<button type='button' class='btn btnSendReplyLike' data-replyNum='${vo.replyNum}' data-replyLike='1' title="좋아요"><i class="fas fa-thumbs-up"></i> <span>${vo.likeCount}</span></button>
 				<button type='button' class='btn btnSendReplyLike' data-replyNum='${vo.replyNum}' data-replyLike='0' title="싫어요"><i class="fas fa-thumbs-down"></i> <span>${vo.disLikeCount}</span></button>	        
-			</td> --%>
+			</td>
 		</tr>
 	
 	    <tr class='reply-answer'>

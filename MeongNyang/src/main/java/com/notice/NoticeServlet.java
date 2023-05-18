@@ -205,8 +205,8 @@ public class NoticeServlet extends MyServlet {
 			e.printStackTrace();
 		}
 		// 여기
-		//resp.sendRedirect(cp + "/notice/list.do?size=" + size);
-		resp.sendRedirect(cp + "/notice/list.do");
+		resp.sendRedirect(cp + "/notice/list.do?size=" + size);
+		//resp.sendRedirect(cp + "/notice/list.do");
 		}
 
 	protected void article(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {

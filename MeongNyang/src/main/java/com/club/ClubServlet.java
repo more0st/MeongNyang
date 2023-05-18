@@ -39,10 +39,19 @@ public class ClubServlet extends MyUploadServlet {
 
 		HttpSession session = req.getSession();
 		SessionInfo info = (SessionInfo) session.getAttribute("member");
-		if (info == null) { // 로그인되지 않은 경우
+		
+		//헤더 정보
+		String ajax = req.getHeader("AJAX");
+		
+		if(ajax != null && uri.indexOf("list.do") == -1 && info == null) {
+			resp.sendError(403);
+			return;
+		}else if (uri.indexOf("list.do") == -1 && info == null) { // 로그인되지 않은 경우
 			resp.sendRedirect(cp + "/member/login.do");
 			return;
 		}
+		
+		
 
 		// 이미지를 저장할 경로(pathname)
 		String root = session.getServletContext().getRealPath("/");
@@ -76,10 +85,10 @@ public class ClubServlet extends MyUploadServlet {
 			insertBoardLike(req, resp);
 		} else if (uri.indexOf("insertReply.do") != -1) {
 			//댓글 등록
-			//insertReply(req, resp);
+			insertReply(req, resp);
 		} else if (uri.indexOf("listReply.do") != -1) {
 			//댓글 리스트
-			//listReply(req, resp);
+			listReply(req, resp);
 		} else if (uri.indexOf("deleteReply.do") != -1) {
 			//댓글 삭제
 			deleteReply(req, resp);
@@ -105,8 +114,6 @@ public class ClubServlet extends MyUploadServlet {
 		ClubDAO dao = new ClubDAO();
 		MyUtil util = new MyUtil();
 		
-		HttpSession session = req.getSession();
-		SessionInfo info = (SessionInfo) session.getAttribute("member");
 		
 		String cp = req.getContextPath();
 		
@@ -149,7 +156,6 @@ public class ClubServlet extends MyUploadServlet {
 			int offset = (current_page - 1) * size;
 			if(offset < 0) offset = 0;
 			
-			String userId = info.getUserId();
 			List<ClubDTO> list = null;
 			if (keyword.length() == 0) {
 				//list = dao.myClubList(offset, size, userId);
@@ -186,7 +192,6 @@ public class ClubServlet extends MyUploadServlet {
 			req.setAttribute("paging", paging);
 			req.setAttribute("condition", condition);
 			req.setAttribute("keyword", keyword);
-			req.setAttribute("userId", userId);
 			
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -271,7 +276,6 @@ public class ClubServlet extends MyUploadServlet {
 			req.setAttribute("condition", condition);
 			req.setAttribute("keyword", keyword);
 			req.setAttribute("paging", paging);
-			req.setAttribute("userId", userId);
 			req.setAttribute("val", "true");
 			
 		} catch (Exception e) {
@@ -640,6 +644,7 @@ public class ClubServlet extends MyUploadServlet {
 		
 		HttpSession session = req.getSession();
 		SessionInfo info = (SessionInfo) session.getAttribute("member");
+		String val = req.getParameter("val");
 		
 		try {
 			long num = Long.parseLong(req.getParameter("num"));
@@ -658,7 +663,11 @@ public class ClubServlet extends MyUploadServlet {
 			e.printStackTrace();
 		}
 		
-		resp.sendRedirect(cp + "/club/list.do");
+		if(val.equals("true")) {
+			resp.sendRedirect(cp + "/club/my.do");
+			return;
+		}else
+			resp.sendRedirect(cp + "/club/list.do");
 		
 		
 	}
@@ -706,102 +715,124 @@ public class ClubServlet extends MyUploadServlet {
 		
 	}
 	
-//	protected void insertReply(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-//		//게시글 댓글/답글 저장 : AJAX-JSON
-//		ClubDAO dao = new ClubDAO();
-//		
-//		HttpSession session = req.getSession();
-//		SessionInfo info = (SessionInfo)session.getAttribute("member");
-//		
-//		String state = "false";
-//		
-//		try {
-//			ReplyDTO dto = new ReplyDTO();
-//			
-//			long num = Long.parseLong(req.getParameter("num"));
-//			dto.setClubNum(num);
-//			dto.setUserId(info.getUserId());
-//			dto.setContent(req.getParameter("content"));
-//			String answer = req.getParameter("answer");
-//			if(answer != null) {//answer가 넘어오지 않았으면 
-//				dto.setAnswer(Long.parseLong(answer));
-//			}
-//			
-//			dao.insertReply(dto);
-//			
-//			state = "true";
-//			
-//			
-//			
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
-//		
-//		JSONObject job = new JSONObject();
-//		job.put("state", state);
-//		
-//		resp.setContentType("text/html;charset=utf-8");//설정 안하면 한글 깨짐
-//		PrintWriter out = resp.getWriter();
-//		out.print(job.toString());
-//		
-//		
-//	}
-//	
-//	protected void listReply(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-//		//게시글 댓글 리스트 : AJAX-Text
-//		ClubDAO dao = new ClubDAO();
-//		MyUtil util = new MyUtil();
-//		
-//		try {
-//			long num = Long.parseLong(req.getParameter("num"));
-//			String pageNo = req.getParameter("pageNo");
-//			int current_page = 1;
-//			
-//			if(pageNo != null) {
-//				current_page = Integer.parseInt(pageNo);
-//			}
-//			
-//			int size = 5;
-//			int total_page = 0;
-//			int replyCount = 0;
-//			
-//			replyCount = dao.dataCountReply(num);
-//			total_page = util.pageCount(replyCount, size);
-//			if(current_page > total_page) {
-//				current_page = total_page;
-//			}
-//			
-//			int offset = (current_page - 1)*size;
-//			if(offset < 0) offset = 0;
-//			
-//			
-//			List<ReplyDTO> listReply = dao.listReply(num, offset, size);
-//			
-//			for(ReplyDTO dto : listReply) {
-//				dto.setContent(dto.getContent().replaceAll("\n", "<br>"));
-//			}
-//			
-//			String paging = util.pagingMethod(current_page, total_page, "listPage");
-//			
-//			req.setAttribute("listReply", listReply);
-//			req.setAttribute("pageNo",current_page);
-//			req.setAttribute("replyCount",replyCount);
-//			req.setAttribute("total_page",total_page);
-//			req.setAttribute("paging",paging);
-//			
-//			forward(req, resp, "/WEB-INF/views/bbs/listReply.jsp");
-//			return;
-//			
-//		} catch (Exception e) {
-//			e.printStackTrace();
-//		}
-//		
-//		resp.sendError(400);//문제가 있으면 400에러 던짐
-//	}
+	protected void insertReply(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		//게시글 댓글/답글 저장 : AJAX-JSON
+		ClubDAO dao = new ClubDAO();
+		
+		HttpSession session = req.getSession();
+		SessionInfo info = (SessionInfo)session.getAttribute("member");
+		
+		String state = "false";
+		
+		try {
+			ReplyDTO dto = new ReplyDTO();
+			
+			long num = Long.parseLong(req.getParameter("num"));
+			dto.setClubNum(num);
+			dto.setUserId(info.getUserId());
+			dto.setContent(req.getParameter("content"));
+			String answer = req.getParameter("answer");
+			if(answer != null) {//answer가 넘어오지 않았으면 
+				dto.setAnswer(Long.parseLong(answer));
+			}
+			
+			dao.insertReply(dto);
+			
+			state = "true";
+			
+			
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		JSONObject job = new JSONObject();
+		job.put("state", state);
+		
+		resp.setContentType("text/html;charset=utf-8");//설정 안하면 한글 깨짐
+		PrintWriter out = resp.getWriter();
+		out.print(job.toString());
+		
+		
+	}
+	
+	protected void listReply(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		//게시글 댓글 리스트 : AJAX-Text
+		ClubDAO dao = new ClubDAO();
+		MyUtil util = new MyUtil();
+		
+		try {
+			long num = Long.parseLong(req.getParameter("num"));
+			String pageNo = req.getParameter("pageNo");
+			int current_page = 1;
+			
+			if(pageNo != null) {
+				current_page = Integer.parseInt(pageNo);
+			}
+			
+			int size = 5;
+			int total_page = 0;
+			int replyCount = 0;
+			
+			replyCount = dao.dataCountReply(num);
+			total_page = util.pageCount(replyCount, size);
+			if(current_page > total_page) {
+				current_page = total_page;
+			}
+			
+			int offset = (current_page - 1)*size;
+			if(offset < 0) offset = 0;
+			
+			
+			List<ReplyDTO> listReply = dao.listReply(num, offset, size);
+			
+			for(ReplyDTO dto : listReply) {
+				dto.setContent(dto.getContent().replaceAll("\n", "<br>"));
+			}
+			
+			String paging = util.pagingMethod(current_page, total_page, "listPage");
+			
+			req.setAttribute("listReply", listReply);
+			req.setAttribute("pageNo",current_page);
+			req.setAttribute("replyCount",replyCount);
+			req.setAttribute("total_page",total_page);
+			req.setAttribute("paging",paging);
+			
+			forward(req, resp, "/WEB-INF/views/club/listReply.jsp");
+			return;
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		resp.sendError(400);//문제가 있으면 400에러 던짐
+	}
 	
 	protected void deleteReply(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		//게시글 댓글 삭제 : AJAX-Text
+		ClubDAO dao = new ClubDAO();
 		
+		HttpSession session = req.getSession();
+		SessionInfo info = (SessionInfo) session.getAttribute("member");
+		String state = "false";
+		
+		try {
+			long replyNum = Long.parseLong(req.getParameter("replyNum"));
+			dao.deleteReply(replyNum, info.getUserId());
+			
+			state = "true";
+			
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		JSONObject job = new JSONObject();
+		job.put("state", state);
+		
+		resp.setContentType("text/html; charset=utf-8");
+		PrintWriter out = resp.getWriter();
+		out.print(job.toString());
 	}
 	
 	
@@ -812,7 +843,27 @@ public class ClubServlet extends MyUploadServlet {
 	
 	protected void listReplyAnswer(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		//게시글 댓글의 답글 리스트 : AJAX-Text
+		ClubDAO dao = new ClubDAO();
 		
+		try {//answer: 해당되는 아버지 번호
+			long answer = Long.parseLong(req.getParameter("answer"));
+			
+			List<ReplyDTO> listReplyAnswer = dao.listReplyAnswer(answer);
+			
+			for(ReplyDTO dto : listReplyAnswer) {
+				dto.setContent(dto.getContent().replaceAll("\n", "<br>"));
+			}
+			
+			req.setAttribute("listReplyAnswer", listReplyAnswer);
+			
+			forward(req, resp, "/WEB-INF/views/club/listReplyAnswer.jsp");
+			return;
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		resp.sendError(400);
 	}
 	
 	protected void deleteReplyAnswer(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -822,7 +873,23 @@ public class ClubServlet extends MyUploadServlet {
 	
 	protected void countReplyAnswer(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		//게시글 댓글의 답글 개수 : AJAX-JSON
+		ClubDAO dao = new ClubDAO();
+		int count = 0;
 		
+		try {
+			long answer = Long.parseLong(req.getParameter("answer"));
+			count = dao.dataCountReplyAnswer(answer);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		JSONObject job = new JSONObject();
+		job.put("count", count);
+		
+		resp.setContentType("text/html; charset=utf-8");
+		PrintWriter out = resp.getWriter();
+		out.print(job.toString());
 	}
 	
 	

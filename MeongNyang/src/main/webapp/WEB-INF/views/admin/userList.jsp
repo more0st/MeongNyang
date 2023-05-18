@@ -1,4 +1,4 @@
-﻿<%@ page contentType="text/html; charset=UTF-8" %>
+<%@ page contentType="text/html; charset=UTF-8" %>
 <%@ page trimDirectiveWhitespaces="true" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
@@ -14,7 +14,7 @@
 	max-width: 700px;
 }
 
-.table-list thead > tr:first-child{ background: #f8f8f8; }
+.table-list thead > tr:first-child{ background: #ffedea; }
 .table-list th, .table-list td { text-align: center; }
 .table-list .left { text-align: left; padding-left: 5px; }
 
@@ -39,10 +39,10 @@ function searchList() {
 	
 <main>
 	<div class="container body-container">
-	    <div class="body-title" style="text-align: center;">
-			<img src="${pageContext.request.contextPath}/resource/images/questionpage.png" style="width: 250px;">
+	    <div class="body-title">
+			<h2> 전체 사용자 조회 </h2>
 	    </div>
-	    
+	   <div style="box-shadow: 0 0 15px 0 rgb(2 59 109 / 10%);border-radius: 30px; margin: 0 auto ; width: 70%;">
 	    <div class="body-main mx-auto">
 			<table class="table">
 				<tr>
@@ -57,25 +57,32 @@ function searchList() {
 				<thead>
 					<tr>
 						<th class="num">번호</th>
-						<th class="subject">제목</th>
-						<th class="name">작성자</th>
-						<th class="date">작성일</th>
-					<!-- <th class="hit">조회수</th>  -->
+						<th class="userid">회원ID</th>
+						<th class="name">이름</th>
+						<th class="birth">생년월일</th>
+						<th class="tel">전화번호</th>
+						<th class="addr">주소</th>
+						<th class="email">이메일</th>
+						<th class="sell">마켓판매횟수</th>
+						<th class="buy">마켓구매횟수</th>
+						<th class="club">참여중인 모임</th>
+						<th class="state">회원상태</th>
 					</tr>
 				</thead>
 				
-				<c:if test="${empty dto.replyContent}" >
-				<tbody style="font-weight: bold;">
-				</c:if>
+				<tbody>
 					<c:forEach var="dto" items="${list}" varStatus="status">
 						<tr>
 							<td>${dataCount - (page-1) * size - status.index}</td>
-							<td class="left">
-							
-								<a href="${articleUrl}&qesNum=${dto.qesNum}">${dto.subject}</a>
-							</td>
+							<td class="left">${dto.userId}</td>
 							<td>${dto.userName}</td>
-							<td>${dto.reg_date}</td>
+							<td>${dto.birth}</td>
+							<td>${dto.tel}</td>
+							<td>${dto.addr}</td>
+							<td>${dto.email}</td>
+							<td>${dto.sellCount}</td>
+							<td>${dto.buyCount}</td>
+							<td>${dto.enabled}</td>
 						</tr>
 					</c:forEach>
 				</tbody>
@@ -88,27 +95,26 @@ function searchList() {
 			<table class="table">
 				<tr>
 					<td width="100">
-						<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/qna/list.do';" title="새로고침"><i class="fa-solid fa-arrow-rotate-right"></i></button>
+						<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/admin/userList.do';" title="새로고침"><i class="fa-solid fa-arrow-rotate-right"></i></button>
 					</td>
 					<td align="center">
-						<form name="searchForm" action="${pageContext.request.contextPath}/qna/list.do" method="post">
+						<form name="searchForm" action="${pageContext.request.contextPath}/admin/userList.do" method="post">
 							<select name="condition" class="form-select">
-								<option value="all"      ${condition=="all"?"selected='selected'":"" }>제목+내용</option>
-								<option value="userName" ${condition=="userName"?"selected='selected'":"" }>작성자</option>
-								<option value="reg_date"  ${condition=="reg_date"?"selected='selected'":"" }>등록일</option>
-								<option value="subject"  ${condition=="subject"?"selected='selected'":"" }>제목</option>
-								<option value="content"  ${condition=="content"?"selected='selected'":"" }>내용</option>
+								<option value="userId"      ${condition=="userId"?"selected='selected'":"" }>회원ID</option>
+								<option value="userName" ${condition=="userName"?"selected='selected'":"" }>회원이름</option>
 							</select>
-							<input type="text" name="keyword" value="${keyword}" class="form-control">
+							<input type="text" name="keyword" value="${keyword}" class="form-control" style="border-radius: 20px;">
 							<button type="button" class="btn" onclick="searchList();">검색</button>
 						</form>
 					</td>
 					<td align="right" width="100">
-						<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/qna/write.do';">글올리기</button>
+						<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/bbs/write.do';">글올리기</button>
 					</td>
 				</tr>
-			</table>	
+			</table>
+
 	    </div>
+	  </div>
 	</div>
 </main>
 

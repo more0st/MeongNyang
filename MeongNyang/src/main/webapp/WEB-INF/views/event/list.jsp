@@ -23,13 +23,14 @@ a:hover{color: black; text-decoration: none;}
 			overflow: hidden; white-space: nowrap; text-overflow: ellipsis; margin-bottom: 4px; 
 			line-height: 1.5; font-weight: 900; display: flex; justify-content: center; width: 200px;}
 
-.card-price{font-size: 12px; font-weight: 500; line-height: 1.5; margin-bottom: 30px; margin-right:15px; display: flex; justify-content: right;}
+.card-price{font-size: 12px; font-weight: 500; line-height: 1.5; margin-bottom: 10px; margin-right:15px; display: flex; justify-content: right;}
+.card-date{font-size: 12px; font-weight: 500; line-height: 1.5; margin-bottom: 10px; margin-right:15px; display: flex; justify-content: center;}
 
 .card-region{font-size: 13px; color: #212529; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; margin-left:4px; margin-bottom: 4px; line-height: 1.5; display: block;}
 
 .card-count{color: #868e96; font-size: 13px; display: block;}
 
-.club {
+.event {
  background: white; width: 200px; height: 200px; 
  border-radius: 30px; border: 5px solid tomato;
  }
@@ -80,6 +81,8 @@ function searchList() {
 	const f = document.searchForm;
 	f.submit();
 }
+
+
 </script>
 </head>
 <body>
@@ -94,7 +97,8 @@ function searchList() {
 
 	<div class="container body-container" style="width: 60%; margin-bottom: 0;">
 	   <div class="body-title" style="text-align: center;">
-			<img src="${pageContext.request.contextPath}/resource/images/clubpage.png" style="width: 250px;">
+			<h2>이벤트</h2>
+			 
 	    </div>
 	   <div style="box-shadow: 0 0 15px 0 rgb(2 59 109 / 10%);border-radius: 30px; margin: 0 auto 30px ; width: 100%;">
 	    <div class="body-main mx-auto">
@@ -106,27 +110,23 @@ function searchList() {
 					<td align="right">&nbsp;</td>
 				</tr>
 			</table>
-			
 	<div class="container body-container">
 
 	    <div style="width: 100%; display: flex; justify-content: space-around; flex-wrap: wrap;">
 	    
-	    <!-- 여기서 list 객체 반복 설정 -->
-	    <c:forEach  var="n" begin="1" end="6" step="1">
+	    <c:forEach   var="dto" items="${list}" varStatus="status">
 	   	<article class = "card">
-			   		<div class="club" >
+			   		<div class="event" >
 			   			<span>
 					   		<a href="#">
 					   			<span class="card-body" style="display: inline-block; justify-content: center;">
-									<span class="card-region" > <br>no.1 </span>	
-					   				<span class="card-title"> 이벤트입니다 </span>
-									<span style="display: flex; justify-content: center; padding-bottom: 30px;">
-										<!-- 자세히 : 글보기 -->
-										<button type="button" class="btn more" style="display: inline-block;">자세히</button>
-										<!-- 가입 : 바로 가입할 수 있게 ?  -->
+									<span class="card-region" > <br>No.${dataCount - (page-1) * size - status.index} </span>	
+					   				<span class="card-title"> ${dto.subject} </span>
+									<span style="display: flex; justify-content: center; padding-bottom: 10px;">
+										<button type="button" class="btn more" style="display: inline-block;" onclick="location.href='${articleUrl}&eNum=${dto.eNum}';">자세히</button>
 										<button type="button" class="btn join" style="display: inline-block;" >참여</button>
 									</span>
-									<span class="card-price"> <i class="fa-solid fa-user" style="color: #fd855d; margin-top: 4px; margin-right: 4px;"></i> 1 / 5 </span>
+									<span class="card-date"> ${dto.start_date} ~ ${dto.end_date} </span>
 					   			</span>
 					   		</a> 
 			   			</span>
@@ -138,7 +138,7 @@ function searchList() {
 	</div>
 			
 			<div class="page-navigation">
-				${dataCount == 0 ? "등록된 게시물이 없습니다." : paging}
+				${dataCount == 0 ? "등록된 이벤트가 없습니다." : paging}
 			</div>
 			
 			<table class="table">
@@ -148,22 +148,26 @@ function searchList() {
 					</td>
 					<td align="center">
 						<form name="searchForm" action="${pageContext.request.contextPath}/event/list.do" method="post">
-							<select name="condition" class="form-select">
-								<option value="all"      ${condition=="all"?"selected='selected'":"" }>제목+내용</option>
-								<option value="userName" ${condition=="userName"?"selected='selected'":"" }>모임장</option>
-								<option value="reg_date"  ${condition=="reg_date"?"selected='selected'":"" }>등록일</option>
-								<option value="subject"  ${condition=="subject"?"selected='selected'":"" }>제목</option>
-								<option value="content"  ${condition=="content"?"selected='selected'":"" }>내용</option>
+							<select name="eventStatus" class="form-select" style="width: 70px; text-align: center;">
+								<option value="2"      ${eventStatus=="2"?"selected='selected'":"" }>전체</option>
+								<option value="1"      ${eventStatus=="1"?"selected='selected'":"" }>진행</option>
+								<option value="0" ${eventStatus=="0"?"selected='selected'":"" }>종료</option>
 							</select>
-							<input type="text" name="keyword" value="${keyword}" class="form-control" style="border-radius: 20px;">
 							<button type="button" class="btn" onclick="searchList();">검색</button>
+							<input type="hidden" name="page" value="${page}">
+							<input type="hidden" name="size" value="${size}">
+							<input type="hidden" name="eNum" value="${dto.eNum}">
 						</form>
 					</td>
 					<td align="right" width="100">
-						<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/club/list.do';">내모임</button>
+						<c:if test="${sessionScope.member.userId != 'admin'}">
+						<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/event/list.do';">내참여현황</button>
+						</c:if>
 					</td>
 					<td align="right" width="100">
-						<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/club/write.do';">등록하기</button>
+						<c:if test="${sessionScope.member.userId == 'admin'}">
+						<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/event/write.do';">등록하기</button>
+						</c:if>
 					</td>
 				</tr>
 			</table>

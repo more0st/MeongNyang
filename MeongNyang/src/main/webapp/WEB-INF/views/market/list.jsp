@@ -70,7 +70,7 @@ function searchList() {
 			<table class="table">
 				<tr>
 					<td width="50%">
-						${dataCount}개(${page}/${total_page} 페이지)
+						${dataCount}개(${page}/${total_page} 페이지) 
 					</td>
 					<td align="right">
 						<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/market/write.do';">내 물건 팔기</button>
@@ -82,7 +82,14 @@ function searchList() {
 				<c:forEach var="dto" items="${list}" varStatus="status">
 					<div class="item" title="${dto.subject}"
 						onclick="location.href='${articleUrl}&marketNum=${dto.marketNum}';">
-						<img src="${pageContext.request.contextPath}/uploads/market/${dto.imageFilename}">
+					<c:choose>
+						<c:when test="${dto.state == 0}">
+							<img src="${pageContext.request.contextPath}/resource/images/buy.jpg">
+						</c:when>
+						<c:otherwise>
+							<img src="${pageContext.request.contextPath}/uploads/market/${dto.imageFilename}">
+						</c:otherwise>
+					</c:choose>	
 						<div class="border">
 						<div>제목 : ${dto.subject}</div>
 						<div>거래지 : ${dto.addr}</div>

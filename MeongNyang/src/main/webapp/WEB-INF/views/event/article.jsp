@@ -21,7 +21,7 @@
 <c:if test="${sessionScope.member.userId==dto.userId || sessionScope.member.userId=='admin'}">
 	function deleteBoard() {
 	    if(confirm("게시글을 삭제 하시 겠습니까 ? ")) {
-		    let query = "num=${dto.num}&${query}";
+		    let query = "eNum=${dto.eNum}&${query}";
 		    let url = "${pageContext.request.contextPath}/event/delete.do?" + query;
 	    	location.href = url;
 	    }
@@ -34,93 +34,6 @@ const isHidden = ele => {
 	return styles.display === 'none' || styles.visibility === 'hidden'; //숨겨져있는지 아닌지 확인
 	
 };
-
-//댓글 등록
-window.addEventListener('load',()=>{
-	const btnEL = document.querySelector('.btnSendReply');
-	
-	btnEL.addEventListener('click', e =>{
-		const El = e.target.closest('table');
-		let content = El.querySelector('textarea').value.trim();
-		if(!content) {
-			alert('내용을입력하세요');
-			El.querySelector('textarea').focus();
-			return;
-		}
-		
-		content = encodeURIComponent(content);
-		alert('등록할 댓글 :' + content);
-	});
-	
-});
-
-//댓글 삭제
-window.addEventListener('load',() => {
-	const listReplyEL = document.querySelector('#listReply');	
-
-	listReplyEL.addEventListener('click',e =>{
-		if(e.target.matches('.deleteReply')){
-			
-			if(! confirm('게시글을 삭제하시겠습니까 ? ')){
-				return;
-			}
-			let pageNo = e.target.getAttribute('data-pageNo');
-			let replyNum = e.target.getAttribute('data-replyNum');
-			
-			alert('삭제할 댓글번호 :'+replyNum+",페이지번호:"+pageNo);
-		}
-	
-	});
-});
-
-
-
-//답글 버튼 : 댓글별 답글 등록폼 및 답글 리스트 표시/숨김
-window.addEventListener('load',() => {
-	const listReplyEL = document.querySelector('#listReply');	
-	
-	listReplyEL.addEventListener('click',e =>{
-		if(e.target.matches('.btnReplyAnswerLayout')||e.target.parentElement.matches('.btnReplyAnswerLayout')){
-			let $El = e.target.closest('tr').nextElementSibling;//다음형제
-			
-			//$El.classList.toggle('reply-answer'); //tr태그라 화면이 이상하게나옴
-			//$El.style.display = 'block'; //tr태그엔 block속성 사용안됨, 화면이 이상하게 나옴
-			
-			if(isHidden($El)){//숨겨져있으면 table-row, 아니면 none
-				$El.style.display = 'table-row'; //tr태그에 보이게할수있는 속성은 table-row!!!
-			}else{
-				$El.style.display = 'none';
-			}
-		}
-	});
-});
-
-//답글 등록 버튼
-
-window.addEventListener('load',() => {
-	const listReplyEL = document.querySelector('#listReply');	
-	
-	listReplyEL.addEventListener('click',e =>{
-		if(e.target.matches('.btnSendReplyAnswer')){
-			let replyNum = e.target.getAttribute('data-replyNum');
-			
-			let El = e.target.closest('td');
-			let content = El.querySelector('textarea').value.trim();
-			if( ! content){
-				alert('내용을 입력해주세요');
-				El.querySelector('textarea').focus();
-				return;
-			}
-			
-			content = encodeURIComponent(content);//서버로 데이터 보내는것
-			
-			alert('댓글번호 : '+ replyNum+', 등록할 답글 : '+content);
-			
-			
-		}
-		
-	});
-});
 
 
 </script>
@@ -151,10 +64,10 @@ window.addEventListener('load',() => {
 				<tbody>
 					<tr>
 						<td width="50%">
-							이름 : ${dto.userName}
+							기간 : ${dto.start_date} ~ ${dto.end_date}
 						</td>
 						<td align="right">
-							${dto.reg_date} | 조회 ${dto.hitCount}
+							추첨인원 : 
 						</td>
 					</tr>
 					
@@ -167,16 +80,16 @@ window.addEventListener('load',() => {
 					<tr>
 						<td colspan="2">
 							이전글 :
-							<c:if test="${not empty preReadDto}">
-								<a href="${pageContext.request.contextPath}/event/article.do?${query}&num=${preReadDto.num}">${preReadDto.subject}</a>
+							<c:if test="${not empty preReadDTO}">
+								<a href="${pageContext.request.contextPath}/event/article.do?${query}&eNum=${preReadDTO.eNum}">${preReadDTO.subject}</a>
 							</c:if>
 						</td>
 					</tr>
 					<tr>
 						<td colspan="2">
 							다음글 :
-							<c:if test="${not empty nextReadDto}">
-								<a href="${pageContext.request.contextPath}/event/article.do?${query}&num=${nextReadDto.num}">${nextReadDto.subject}</a>
+							<c:if test="${not empty nextReadDTO}">
+								<a href="${pageContext.request.contextPath}/event/article.do?${query}&eNum=${nextReadDTO.eNum}">${nextReadDTO.subject}</a>
 							</c:if>
 						</td>
 					</tr>
@@ -188,7 +101,7 @@ window.addEventListener('load',() => {
 					<td width="50%">
 						<c:choose>
 							<c:when test="${sessionScope.member.userId==dto.userId}">
-								<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/event/update.do?num=${dto.num}&page=${page}';">수정</button>
+								<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/event/update.do?eNum=${dto.eNum}&page=${page}';">수정</button>
 							</c:when>
 							<c:otherwise>
 								<button type="button" class="btn" disabled="disabled">수정</button>
@@ -209,107 +122,12 @@ window.addEventListener('load',() => {
 					</td>
 				</tr>
 			</table>
+					<input type="hidden" name="eNum" value="${dto.eNum}">
+					<input type="hidden" name="eventStatus" value="${eventStatus}">
 
 	    </div>
 	    </div>
 	</div>
-	
-	
-	<!-- 댓글 폼 -->
-	<div class="body-container">
-
-	<div class="reply">
-		<form name="replyForm" method="post">
-			<div class='form-header'>
-				<span class="bold">댓글쓰기</span><span> - 타인을 비방하거나 개인정보를 유출하는 글의 게시를 삼가해 주세요.</span>
-			</div>
-			
-			<table class="table reply-form">
-				<tr>
-					<td>
-						<textarea class='form-control' name="content" style="height: 120px;"></textarea>
-					</td>
-				</tr>
-				<tr>
-				   <td align='right'>
-				        <button type='button' class='btn btnSendReply'>댓글 등록</button>
-				    </td>
-				 </tr>
-			</table>
-		</form>
-		
-		<div id="listReply">
-		
-			<div class='reply-info'>
-				<span class='reply-count'>댓글 15개</span>
-				<span>[목록, 1/3 페이지]</span>
-			</div>
-			
-			<table class='table reply-list'>
-			
-					<tr class='list-header'>
-						<td width='50%'>
-							<span class='bold'>홍길동</span>
-						</td>
-						<td width='50%' align='right'>
-							<span>2021-11-01</span> |
-							<span class='deleteReply' data-replyNum='10' data-pageNo='1'>삭제</span>
-						</td>
-					</tr>
-					<tr>
-						<td colspan='2' valign='top'>내용입니다.</td>
-					</tr>
-			
-					<tr>
-						<td>
-							<button type='button' class='btn btnReplyAnswerLayout' data-replyNum='10'>답글 <span id="answerCount10">3</span></button>
-						</td>
-						<td align='right'>
-							<button type='button' class='btn btnSendReplyLike' data-replyNum='10' data-replyLike='1' title="좋아요">좋아요 <span>3</span></button>
-							<button type='button' class='btn btnSendReplyLike' data-replyNum='10' data-replyLike='0' title="싫어요">싫어요 <span>1</span></button>	        
-						</td>
-					</tr>
-				
-				    <tr class='reply-answer'>
-				        <td colspan='2'>
-				            <div id='Answer10' class='answer-list'>
-				            
-								<div class='answer-article'>
-									<div class='answer-article-header'>
-										<div class='answer-left'>└</div>
-										<div class='answer-right'>
-											<div style='float: left;'><span class='bold'>스프링</span></div>
-											<div style='float: right;'>
-												<span>2021-11-01</span> |
-												<span class='deleteReplyAnswer' data-replyNum='10' data-answer='15'>삭제</span>
-											</div>
-										</div>
-									</div>
-									<div class='answer-article-body'>
-										답글입니다.
-									</div>
-								</div>
-												            
-				            </div>
-				            <div class="answer-form">
-				                <div class='answer-left'>└</div>
-				                <div class='answer-right'><textarea class='form-control' ></textarea></div>
-				            </div>
-				             <div class='answer-footer'>
-				                <button type='button' class='btn btnSendReplyAnswer' data-replyNum='10'>답글 등록</button>
-				            </div>
-						</td>
-				    </tr>
-				
-
-					
-				
-			</table>
-		
-		</div>
-	</div>
-
-</div>
 	
 	
 </main>

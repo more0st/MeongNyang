@@ -12,6 +12,15 @@ public class EventDTO {
 	
 	private long fileNum;
 	private String imageFileName;
+	
+	private String[] imageFiles;
+	
+	public String[] getImageFiles() {
+		return imageFiles;
+	}
+	public void setImageFiles(String[] imageFiles) {
+		this.imageFiles = imageFiles;
+	}
 	public long geteNum() {
 		return eNum;
 	}

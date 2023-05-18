@@ -3,10 +3,12 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
 
-<div class='reply-info'>
-	<span class='reply-count'>댓글 ${replyCount }개</span>
-	<span>[목록, ${pageNo }/${total_page} 페이지]</span>
-</div>
+<c:if test="${not empty listReply }">
+	<div class='reply-info'>
+		<span class='reply-count'>댓글 ${replyCount }개</span>
+		<span>[목록 ${pageNo }/${total_page} 페이지]</span>
+	</div>
+</c:if>
 
 <table class='table reply-list'>
 	<c:forEach var="vo" items="${listReply }">
@@ -16,7 +18,16 @@
 			</td>
 			<td width='50%' align='right'>
 				<span>${vo.reg_date }</span> |
-				<span class='deleteReply' data-replyNum='10' data-pageNo='1'>삭제</span>
+				
+				<c:choose>
+					<c:when test="${sessionScope.member.userId == 'admin' || sessionScope.member.userId == vo.userId }">
+						<span class='deleteReply' data-replyNum='${vo.replyNum }' data-pageNo='${pageNo}'>삭제</span>
+					</c:when>
+					<c:otherwise>
+						<span class="notifyReply">신고</span>
+					</c:otherwise>
+				</c:choose>
+				
 			</td>
 		</tr>
 		<tr>
@@ -26,10 +37,6 @@
 		<tr>
 			<td>
 				<button type='button' class='btn btnReplyAnswerLayout' data-replyNum='${vo.replyNum }'>답글 <span id="answerCount${vo.replyNum }">${vo.answerCount }</span></button>
-			</td>
-			<td align='right'>
-				<button type='button' class='btn btnSendReplyLike' data-replyNum='${vo.replyNum }' data-replyLike='1' title="좋아요"><i class="fas fa-thumbs-up"></i> <span>${vo.likeCount }</span></button>
-				<button type='button' class='btn btnSendReplyLike' data-replyNum='${vo.replyNum }' data-replyLike='0' title="싫어요"><i class="fas fa-thumbs-down"></i> <span>${vo.disLikeCount }</span></button>	        
 			</td>
 		</tr>
 	
