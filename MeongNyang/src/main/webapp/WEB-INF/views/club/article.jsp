@@ -414,7 +414,7 @@ $(function(){
 	    <div class="body-main mx-auto">
 			<table class="table table-border table-article">
 				<thead>
-					<tr>
+					<tr style="border-top: 2px solid #eee; border-bottom: 2px solid #eee;">
 						<td colspan="2" align="center">
 							<h3>${dto.subject} </h3>
 						</td>
@@ -557,11 +557,11 @@ $(function(){
 					<div class=" popup-dialog" style="display: none;">
 							<c:forEach var="list" items="${list }">
 								<c:choose>
-									<c:when test="${list.status!='1' }">
-										<p style="font-size: 15px;"><i class="fa-solid fa-user" style="color: #fd855d;"></i>${list.userName }</p>
+									<c:when test="${list.status=='1' }">
+										<p style="font-size: 15px;"><i class="fa-solid fa-crown" style="color: #f2eb1c;"></i>&nbsp;&nbsp;${list.userName }</p>
 									</c:when>
 									<c:otherwise>
-										<p style="font-size: 15px;"><i class="fa-solid fa-crown" style="color: #f2eb1c;"></i>${list.userName }</p>
+										<p style="font-size: 15px;"><i class="fa-solid fa-user" style="color: #fd855d;"></i>&nbsp;&nbsp;${list.userName }</p>
 									</c:otherwise>
 								</c:choose>
 							

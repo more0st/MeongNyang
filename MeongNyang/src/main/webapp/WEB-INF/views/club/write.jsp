@@ -115,7 +115,9 @@ function sendOk() {
 
 	<div class="container body-container">
 	    <div class="body-title" style="text-align: center;">
-			<img src="${pageContext.request.contextPath}/resource/images/clubpage.png" style="width: 250px;">
+			<a href="${pageContext.request.contextPath}/club/list.do';">
+				<img src="${pageContext.request.contextPath}/resource/images/clubpage.png" style="width: 250px;">
+			</a>
 	    </div>
 	    <div style="box-shadow: 0 0 15px 0 rgb(2 59 109 / 10%);border-radius: 30px; margin: 0 auto ; width: 70%;">
 	    <div class="body-main mx-auto">
