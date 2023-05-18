@@ -6,17 +6,17 @@
 	<div class="header-top">
 
 		<div class="header-center">
-			<h1 class="logo"><a href="${pageContext.request.contextPath}/main.do"><img src="${pageContext.request.contextPath}/resource/images/logo.png" style="width: 300px;"></a></h1>
+			<h1 class="logo"><a href="${pageContext.request.contextPath}/main.do"><img src="${pageContext.request.contextPath}/resource/images/mainlogo.png" style="width: 300px;"></a></h1>
 		</div>
 		<div class="header-right">
             <c:if test="${empty sessionScope.member}">
 				&nbsp;
-                <a href="${pageContext.request.contextPath}/member/login.do" title="로그인"><img src="${pageContext.request.contextPath}/resource/images/login.png" style="width: 30px;"></a>
+                <a href="${pageContext.request.contextPath}/member/login.do" title="로그인"><img src="${pageContext.request.contextPath}/resource/images/loginICON.png" style="width: 30px;"></a>
             </c:if>
             <c:if test="${not empty sessionScope.member}">
-            	<a href="#" title="알림"><img src="${pageContext.request.contextPath}/resource/images/message.png" style="width: 30px;"></a>
+            	<a href="${pageContext.request.contextPath}/message/list_receive.do" title="알림"><img src="${pageContext.request.contextPath}/resource/images/message2.PNG" style="width: 30px;"></a>
             	&nbsp;
-				<a href="${pageContext.request.contextPath}/member/logout.do" title="로그아웃"><img src="${pageContext.request.contextPath}/resource/images/logout.png" style="width: 30px;"></a>
+				<a href="${pageContext.request.contextPath}/member/logout.do" title="로그아웃"><img src="${pageContext.request.contextPath}/resource/images/logoutICON.png" style="width: 30px;"></a>
             </c:if>
 		</div>
 	</div>

@@ -79,7 +79,7 @@
 
 <main>
 	<div class="container body-container">
-	    <div class="body-title">
+	    <div class="body-title" style="text-align: center;">
 			<img src="${pageContext.request.contextPath}/resource/images/gallerypage2.png" style="width: 200px;" >
 	    </div>
 	    
