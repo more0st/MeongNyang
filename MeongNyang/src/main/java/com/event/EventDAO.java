@@ -127,6 +127,7 @@ public class EventDAO {
 		try {
 			sb.append("select eNum, subject, content, to_char(start_date, 'YYYY-MM-DD') start_date, to_char(end_date, 'YYYY-MM-DD') end_date, enabled ,passCount ");
 			sb.append(" from event ");
+			//sb.append(" left join participant p on e.enum=p.enum ");
 			sb.append(" order by eNum DESC ");
 			sb.append(" offset ? rows fetch first ? rows only ");
 			
@@ -145,6 +146,7 @@ public class EventDAO {
 				dto.setEnd_date(rs.getString("end_date"));
 				dto.setEnabled(rs.getInt("enabled"));
 				dto.setPassCount(rs.getLong("passCount"));
+				//dto.setUserId(rs.getString("userId"));
 				
 				list.add(dto);
 			}
@@ -177,6 +179,7 @@ public class EventDAO {
 		try {
 			sb.append("select eNum, subject, content, to_char(start_date, 'YYYY-MM-DD') start_date, to_char(end_date, 'YYYY-MM-DD') end_date, enabled ,passCount ");
 			sb.append(" from event ");
+			//sb.append(" left join participant p on e.enum=p.enum ");
 			sb.append(" where enabled=? ");
 			sb.append(" order by eNum DESC ");
 			sb.append(" offset ? rows fetch first ? rows only ");
@@ -198,6 +201,7 @@ public class EventDAO {
 				dto.setEnd_date(rs.getString("end_date"));
 				dto.setEnabled(rs.getInt("enabled"));
 				dto.setPassCount(rs.getLong("passCount"));
+				//dto.setUserId(rs.getString("userId"));
 				
 				list.add(dto);
 			}
@@ -403,7 +407,7 @@ public class EventDAO {
 		
 		try {
 			sql="update event set subject=?, content=?, "
-					+ "start_date=to_date(?,'YYYY-MM-DD'), end_date=to_date(?,'YYYY-MM-DD'), passCount "
+					+ "start_date=to_date(?,'YYYY-MM-DD'), end_date=to_date(?,'YYYY-MM-DD'), passCount=? "
 					+ "where eNum=? ";
 			
 			pstmt=conn.prepareStatement(sql);
@@ -489,8 +493,32 @@ public class EventDAO {
 	}
 
 //참여자
-	public void insertParticipant(EventDTO dto) throws SQLException{
+	public void insertParticipant(long eNum, String userId) throws SQLException{
 		//이벤트 등록
+		PreparedStatement pstmt=null;
+		String sql;
+		
+		try {
+			sql="insert into participant (eNum, userId) values(?,?)";
+			
+			pstmt=conn.prepareStatement(sql);
+			
+			pstmt.setLong(1, eNum);
+			pstmt.setString(2, userId);
+			
+			pstmt.executeUpdate();
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw e;
+		} finally {
+			if (pstmt != null) {
+				try {
+					pstmt.close();
+				} catch (SQLException e) {
+				}
+			}
+		}
 	}
 	public int memberCount(long eNum) {
 		//이벤트 참여인원 수
