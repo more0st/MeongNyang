@@ -9,7 +9,15 @@ public class EventDTO {
 	private String end_date;
 	private int enabled;
 	private String userId;
+	private long passCount;
 	
+	
+	public long getPassCount() {
+		return passCount;
+	}
+	public void setPassCount(long passCount) {
+		this.passCount = passCount;
+	}
 	private long fileNum;
 	private String imageFileName;
 	

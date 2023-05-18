@@ -104,8 +104,8 @@ function sendOk() {
 						<td>이벤트기간</td>
 						<td>
 							<p>
-							 	<input type="date" name="start_date"> ~ 
-								<input type="date" name="end_date">
+							 	<input type="date" name="start_date" value="${dto.start_date}"> ~ 
+								<input type="date" name="end_date" value="${dto.end_date}">
 							</p>
 						</td>
 					</tr>
@@ -113,7 +113,7 @@ function sendOk() {
 						<td>추첨인원</td>
 						<td>
 							<p>
-							 	<input type="number" name="passNum" min="1" max="10"> 
+							 	<input type="number" name="passCount" min="1" max="10" value="${dto.passCount}"> 
 							</p>
 						</td>
 					</tr>
@@ -133,7 +133,7 @@ function sendOk() {
 							<button type="reset" class="btn">다시입력</button>
 							<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/event/list.do';">${mode=='update'?'수정취소':'등록취소'}</button>
 							<c:if test="${mode=='update'}">
-								<input type="hidden" name="num" value="${dto.num}">
+								<input type="hidden" name="eNum" value="${dto.eNum}">
 								<input type="hidden" name="page" value="${page}">
 							</c:if>
 						</td>

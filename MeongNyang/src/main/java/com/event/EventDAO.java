@@ -18,7 +18,7 @@ public class EventDAO {
 		PreparedStatement pstmt=null;
 		String sql;
 		try {
-			sql="insert into event(eNum, subject, content, start_date, end_date, enabled) values(event_seq.nextval,?,?,TO_DATE(?,'YYYY-MM-DD'),TO_DATE(?,'YYYY-MM-DD'),1)";
+			sql="insert into event(eNum, subject, content, start_date, end_date, enabled, passCount) values(event_seq.nextval,?,?,TO_DATE(?,'YYYY-MM-DD'),TO_DATE(?,'YYYY-MM-DD'),1,?)";
 			
 			pstmt=conn.prepareStatement(sql);
 			
@@ -26,7 +26,7 @@ public class EventDAO {
 			pstmt.setString(2, dto.getContent());
 			pstmt.setString(3, dto.getStart_date());
 			pstmt.setString(4, dto.getEnd_date());
-			//pstmt.setInt(5, dto.getEnabled());
+			pstmt.setLong(5, dto.getPassCount());
 			
 			pstmt.executeUpdate();
 		} catch (SQLException e) {
@@ -125,7 +125,7 @@ public class EventDAO {
 		StringBuilder sb=new StringBuilder();
 		
 		try {
-			sb.append("select eNum, subject, content, to_char(start_date, 'YYYY-MM-DD') start_date, to_char(end_date, 'YYYY-MM-DD') end_date, enabled ");
+			sb.append("select eNum, subject, content, to_char(start_date, 'YYYY-MM-DD') start_date, to_char(end_date, 'YYYY-MM-DD') end_date, enabled ,passCount ");
 			sb.append(" from event ");
 			sb.append(" order by eNum DESC ");
 			sb.append(" offset ? rows fetch first ? rows only ");
@@ -144,6 +144,7 @@ public class EventDAO {
 				dto.setStart_date(rs.getString("start_date"));
 				dto.setEnd_date(rs.getString("end_date"));
 				dto.setEnabled(rs.getInt("enabled"));
+				dto.setPassCount(rs.getLong("passCount"));
 				
 				list.add(dto);
 			}
@@ -174,7 +175,7 @@ public class EventDAO {
 		StringBuilder sb=new StringBuilder();
 		
 		try {
-			sb.append("select eNum, subject, content, to_char(start_date, 'YYYY-MM-DD') start_date, to_char(end_date, 'YYYY-MM-DD') end_date, enabled ");
+			sb.append("select eNum, subject, content, to_char(start_date, 'YYYY-MM-DD') start_date, to_char(end_date, 'YYYY-MM-DD') end_date, enabled ,passCount ");
 			sb.append(" from event ");
 			sb.append(" where enabled=? ");
 			sb.append(" order by eNum DESC ");
@@ -196,6 +197,7 @@ public class EventDAO {
 				dto.setStart_date(rs.getString("start_date"));
 				dto.setEnd_date(rs.getString("end_date"));
 				dto.setEnabled(rs.getInt("enabled"));
+				dto.setPassCount(rs.getLong("passCount"));
 				
 				list.add(dto);
 			}
@@ -230,7 +232,7 @@ public class EventDAO {
 		String sql;
 		
 		try {
-			sql="select eNum, subject, content, to_char(start_date, 'YYYY-MM-DD') start_date, to_char(end_date, 'YYYY-MM-DD') end_date, enabled "
+			sql="select eNum, subject, content, to_char(start_date, 'YYYY-MM-DD') start_date, to_char(end_date, 'YYYY-MM-DD') end_date, enabled ,passCount "
 					+ "from event "
 					+ "where eNum=?";
 			
@@ -247,6 +249,7 @@ public class EventDAO {
 				dto.setStart_date(rs.getString("start_date"));
 				dto.setEnd_date(rs.getString("end_date"));
 				dto.setEnabled(rs.getInt("enabled"));
+				dto.setPassCount(rs.getLong("passCount"));
 			}
 			
 		} catch (SQLException e) {
@@ -400,7 +403,7 @@ public class EventDAO {
 		
 		try {
 			sql="update event set subject=?, content=?, "
-					+ "start_date=to_date(?,'YYYY-MM-DD'), end_date=to_date(?,'YYYY-MM-DD') "
+					+ "start_date=to_date(?,'YYYY-MM-DD'), end_date=to_date(?,'YYYY-MM-DD'), passCount "
 					+ "where eNum=? ";
 			
 			pstmt=conn.prepareStatement(sql);
@@ -409,7 +412,8 @@ public class EventDAO {
 			pstmt.setString(2, dto.getContent());
 			pstmt.setString(3, dto.getStart_date());
 			pstmt.setString(4, dto.getEnd_date());
-			pstmt.setLong(5, dto.geteNum());
+			pstmt.setLong(5, dto.getPassCount());
+			pstmt.setLong(6, dto.geteNum());
 			
 			pstmt.executeUpdate();
 			

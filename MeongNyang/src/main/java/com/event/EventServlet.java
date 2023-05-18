@@ -173,6 +173,11 @@ public class EventServlet extends MyUploadServlet{
 			return;
 		}
 		
+		if(!info.getUserId().equals("admin")) {
+			resp.sendRedirect(cp+"/event/list.do");
+			return;
+		}
+		
 		try {
 			EventDTO dto=new EventDTO();
 			
@@ -182,6 +187,7 @@ public class EventServlet extends MyUploadServlet{
 			dto.setContent(req.getParameter("content"));
 			dto.setStart_date(req.getParameter("start_date"));
 			dto.setEnd_date(req.getParameter("end_date"));
+			dto.setPassCount(Long.parseLong(req.getParameter("passCount")));
 			
 			Map<String, String[]> map = doFileUpload(req.getParts(), pathname);
 			if (map != null) {
@@ -195,6 +201,7 @@ public class EventServlet extends MyUploadServlet{
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+		
 		resp.sendRedirect(cp+"/event/list.do");
 	}
 	
@@ -255,15 +262,137 @@ public class EventServlet extends MyUploadServlet{
 	}
 	protected void updateForm(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		//이벤트 수정
+		EventDAO dao=new EventDAO();
+		
+		HttpSession session=req.getSession();
+		SessionInfo info=(SessionInfo)session.getAttribute("member");
+		
+		String cp=req.getContextPath();
+		String page=req.getParameter("page");
+		
+		try {
+			long eNum=Long.parseLong(req.getParameter("eNum"));
+			EventDTO dto=dao.readEvent(eNum);
+			
+			if(dto==null) {
+				resp.sendRedirect(cp+"/event/list.do?page="+page);
+				return;
+			}
+			
+			if(!info.getUserId().equals("admin")) {
+				resp.sendRedirect(cp+"/event/list.do?page="+page);
+				return;
+			}
+			
+			//파일처리
+			
+			req.setAttribute("dto", dto);
+			req.setAttribute("page", page);
+			req.setAttribute("mode", "update");
+			
+			forward(req, resp, "/WEB-INF/views/event/write.jsp");
+			return;
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		resp.sendRedirect(cp+"/event/list.do?page="+page);
+		
+		
 	}
 	protected void updateSubmit(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		//이벤트 수정 완료
+		EventDAO dao= new EventDAO();
+		
+		HttpSession session=req.getSession();
+		SessionInfo info=(SessionInfo)session.getAttribute("member");
+		
+		String cp=req.getContextPath();
+		String page=req.getParameter("page");
+		
+		if(req.getMethod().equalsIgnoreCase("GET")) {
+			resp.sendRedirect(cp+"/event/list.do");
+			return;
+		}
+		
+		if(!info.getUserId().equals("admin")) {
+			resp.sendRedirect(cp+"/event/list.do?page="+page);
+			return;
+		}
+		
+		try {
+			
+			EventDTO dto=new EventDTO();
+			
+			dto.seteNum(Long.parseLong(req.getParameter("eNum")));
+			dto.setSubject(req.getParameter("subject"));
+			dto.setContent(req.getParameter("content"));
+			dto.setStart_date(req.getParameter("start_date"));
+			dto.setEnd_date(req.getParameter("end_date"));
+			dto.setUserId(info.getUserId());
+			
+			//파일처리
+			
+			dao.updateEvent(dto);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		resp.sendRedirect(cp+"/event/list.do?page="+page);
+		
+		
 	}
 	protected void deleteFile(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		//수정에서 사진만 삭제
 	}
 	protected void delete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		//이벤트 삭제
+		EventDAO dao=new EventDAO();
+		
+		HttpSession session = req.getSession();
+		SessionInfo info = (SessionInfo) session.getAttribute("member");
+		
+		String cp = req.getContextPath();
+		
+		if(!info.getUserId().equals("admin")) {
+			resp.sendRedirect(cp+"/event/list.do");
+			return;
+		}
+		
+		String page = req.getParameter("page");
+		String query = "page=" + page;
+		
+		try {
+			long eNum=Long.parseLong(req.getParameter("eNum"));
+			
+			int eventStatus=2;
+			String status=req.getParameter("eventStatus");
+			
+			if(status!=null) {
+				eventStatus=Integer.parseInt(status);
+			}
+			
+			query+="&eventStatus="+eventStatus;
+			
+			EventDTO dto=dao.readEvent(eNum);
+			if(dto==null) {
+				resp.sendRedirect(cp+"/event/list.do?page="+page);
+				return;
+			}
+			
+			//이미지 파일 지우기
+			
+			dao.deleteEvent(eNum);
+			
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		resp.sendRedirect(cp+"/event/list.do?"+query);
+		
+		
 	}
 	protected void eventParticipant(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		//이벤트 참여

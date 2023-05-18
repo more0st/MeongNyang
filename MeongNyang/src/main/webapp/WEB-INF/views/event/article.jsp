@@ -67,7 +67,7 @@ const isHidden = ele => {
 							기간 : ${dto.start_date} ~ ${dto.end_date}
 						</td>
 						<td align="right">
-							추첨인원 : 
+							추첨인원 : ${dto.passCount}
 						</td>
 					</tr>
 					
@@ -100,7 +100,7 @@ const isHidden = ele => {
 				<tr>
 					<td width="50%">
 						<c:choose>
-							<c:when test="${sessionScope.member.userId==dto.userId}">
+							<c:when test="${sessionScope.member.userId=='admin'}">
 								<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/event/update.do?eNum=${dto.eNum}&page=${page}';">수정</button>
 							</c:when>
 							<c:otherwise>

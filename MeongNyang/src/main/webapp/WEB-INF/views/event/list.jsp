@@ -82,6 +82,12 @@ function searchList() {
 	f.submit();
 }
 
+function join(){
+	if(confirm("이벤트에 참여하시겠습니까 ? ")){
+		location.href='${pageContext.request.contextPath}/event/참여.do?eNum=${dto.eNum}';
+	}
+}
+
 
 </script>
 </head>
@@ -110,7 +116,7 @@ function searchList() {
 					<td align="right">&nbsp;</td>
 				</tr>
 			</table>
-	<div class="container body-container">
+	<div class="container body-container" style="min-height: 100px;">
 
 	    <div style="width: 100%; display: flex; justify-content: space-around; flex-wrap: wrap;">
 	    
@@ -124,7 +130,7 @@ function searchList() {
 					   				<span class="card-title"> ${dto.subject} </span>
 									<span style="display: flex; justify-content: center; padding-bottom: 10px;">
 										<button type="button" class="btn more" style="display: inline-block;" onclick="location.href='${articleUrl}&eNum=${dto.eNum}';">자세히</button>
-										<button type="button" class="btn join" style="display: inline-block;" >참여</button>
+										<button type="button" class="btn join" style="display: inline-block;" onclick="join();">참여</button>
 									</span>
 									<span class="card-date"> ${dto.start_date} ~ ${dto.end_date} </span>
 					   			</span>
