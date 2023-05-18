@@ -7,11 +7,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>spring</title>
+<title>멍냥모임</title>
 <jsp:include page="/WEB-INF/views/layout/staticHeader.jsp"/>
 
 <style type="text/css">
-.fas fa-thumbs-up , i {font-size: 18px}
+.fa-thumbs-up, i {font-size: 30px;}
 
 .body-main {
 	max-width: 700px;
@@ -167,7 +167,7 @@ function ajaxFun(url,method,query,dataType,fn){//3.
 $(function(){
 	$(".btnSendBoardLike").click(function(){
 		const $i = $(this).find("i");
-		let isNoLike = $i.css("color")=="rgb(0, 0, 0)";
+		let isNoLike = $i.css("color")=="rgb(255, 99, 71)";
 		let msg = isNoLike ? "게시글에 공감하십니까? " : "게시글 공감을 취소하시겠습니까?";
 		
 		if(! confirm(msg)){
@@ -181,14 +181,14 @@ $(function(){
 		const fn = function(data){
 			let state = data.state;
 			if(state === "true"){
-				let color = "black";
+				let color = "tomato";
 				if(isNoLike){
-					color = "blue";
+					color = "#ff9054";
 				}
 				$i.css("color",color);
 				
 				let count = data.boardLikeCount;
-				$("#boardLikeCount").text(count);
+				$("#boardLikeCount").text("${dto.reg_date} | 조회수 ${dto.hitCount} | 좋아요 "+count);
 				
 			}else if(state ==="liked"){
 				alert("좋아요는 한번만 가능합니다.");
@@ -407,7 +407,7 @@ $(function(){
 	<div class="container body-container" >
 	    <div class="body-title" style="text-align: center;">
 			<a href="${pageContext.request.contextPath}/club/list.do';">
-				<img src="${pageContext.request.contextPath}/resource/images/clubpage.png" style="width: 250px;">
+				<img src="${pageContext.request.contextPath}/resource/images/clubPage.png" style="width: 250px;">
 			</a>
 	    </div>
 	    <div style="box-shadow: 0 0 15px 0 rgb(2 59 109 / 10%);border-radius: 30px; margin: 0 auto ; width: 70%; margin-bottom: 50px;">
@@ -424,8 +424,8 @@ $(function(){
 				<tbody>
 					<tr>
 						<td><span class="bold">모임명</span> : ${dto.clubName }</td>
-						<td align="right">
-							${dto.reg_date} | 조회수 ${dto.hitCount}
+						<td align="right" id="boardLikeCount">
+							${dto.reg_date} | 조회수 ${dto.hitCount} | 좋아요 ${dto.boardLikeCount }
 						</td>
 					</tr>
 					<tr>
@@ -537,13 +537,13 @@ $(function(){
 				    	
 					</td>
 					<td align="right">
-						<button type="button" class="btn btnSendBoardLike" title="좋아요">
-								<i class="fas fa-thumbs-up" style= "color:${isUserLike? 'blue':'black'} "></i>&nbsp; &nbsp; 
-									<span id="boardLikeCount">${dto.boardLikeCount }</span> 
-							</button>
-						
-						
 						<button type="button" class="btn" onclick="listOrMy();">리스트</button>
+					</td>
+					
+					<td style="width: 10%">
+						<button type="button" class="btn btnSendBoardLike" title="좋아요" style="background: white; color: black; margin-bottom: 7px; ">
+								<i class="fas fa-thumbs-up" style= "color:${isUserLike? '#ff9054':'tomato'} "></i> 
+							</button>
 					</td>
 					
 				</tr>
@@ -556,16 +556,14 @@ $(function(){
 					<!-- 멤버리스트 -->
 					<div class=" popup-dialog" style="display: none;">
 							<c:forEach var="list" items="${list }">
-								<c:choose>
-									<c:when test="${list.status=='1' }">
-										<p style="font-size: 15px;"><i class="fa-solid fa-crown" style="color: #f2eb1c;"></i>&nbsp;&nbsp;${list.userName }</p>
-									</c:when>
-									<c:otherwise>
-										<p style="font-size: 15px;"><i class="fa-solid fa-user" style="color: #fd855d;"></i>&nbsp;&nbsp;${list.userName }</p>
-									</c:otherwise>
-								</c:choose>
-							
-							
+								<c:if test="${list.status=='1' }">
+									<p style="font-size: 15px;"><i class="fa-solid fa-crown" style="color: #f2eb1c; font-size: 15px;"></i>&nbsp;&nbsp;${list.userName }</p>
+								</c:if>
+							</c:forEach>
+							<c:forEach var="list" items="${list }">
+								<c:if test="${list.status=='0' }">
+									<p style="font-size: 15px;"><i class="fa-solid fa-user" style="color: #fd855d; font-size: 15px;"></i>&nbsp;&nbsp;${list.userName }</p>
+								</c:if>
 							</c:forEach>
 					</div>
 
