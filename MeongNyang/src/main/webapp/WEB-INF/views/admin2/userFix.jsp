@@ -63,9 +63,6 @@ function searchList() {
 						<th class="tel">전화번호</th>
 						<th class="addr">주소</th>
 						<th class="email">이메일</th>
-						<th class="sell">마켓판매횟수</th>
-						<th class="buy">마켓구매횟수</th>
-						<th class="club">참여중인 모임</th>
 						<th class="state">회원상태</th>
 					</tr>
 				</thead>
@@ -80,9 +77,10 @@ function searchList() {
 							<td>${dto.tel}</td>
 							<td>${dto.addr}</td>
 							<td>${dto.email}</td>
-							<td>${dto.sellCount}</td>
-							<td>${dto.buyCount}</td>
 							<td>${dto.enabled}</td>
+							<td align="right" width="100">
+								<button type="button" name="control" value="${control}" onclick="location.href='${pageContext.request.contextPath}/admin/userFix.do';">회원정지</button>
+							</td>
 						</tr>
 					</c:forEach>
 				</tbody>
@@ -107,7 +105,9 @@ function searchList() {
 							<button type="button" class="btn" onclick="searchList();">검색</button>
 						</form>
 					</td>
-
+					<td align="right" width="100">
+						<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/bbs/write.do';">글올리기</button>
+					</td>
 				</tr>
 			</table>
 

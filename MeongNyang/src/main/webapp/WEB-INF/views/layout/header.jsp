@@ -57,7 +57,7 @@
 			<li><a href="#">관리페이지</a>
 			   	<ul class="sub-menu">
 					<li><a href="${pageContext.request.contextPath}/admin/userList.do">전체 사용자 조회</a></li>
-					<li><a href="${pageContext.request.contextPath}/admin/userFix.do">사용자 관리</a></li>
+					<li><a href="${pageContext.request.contextPath}/admin2/userFix.do">사용자 관리</a></li>
             	</ul>
 			</li>
             </c:if>
