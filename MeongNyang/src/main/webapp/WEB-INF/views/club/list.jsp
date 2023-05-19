@@ -14,7 +14,7 @@
 	max-width: 700px;
 }
 
-.table-list thead > tr:first-child{ background: #ffedea; }
+.table-list thead > tr:first-child{ background: #ffedea; border: none; }
 .table-list th, .table-list td { text-align: center; }
 .table-list .left { text-align: left; padding-left: 5px; }
 
@@ -95,24 +95,6 @@ function searchList() {
 					<td width="100">
 						<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/club/list.do';" title="새로고침"><i class="fa-solid fa-arrow-rotate-right"></i></button>
 					</td>
-					<c:choose>
-						<c:when test="${val=='my' }">
-							<td align="center">
-								<form name="searchForm" action="${pageContext.request.contextPath}/club/my.do" method="post">
-									<select name="condition" class="form-select">
-										<option value="all"      ${condition=="all"?"selected='selected'":"" }>제목+내용</option>
-										<option value="userName" ${condition=="userName"?"selected='selected'":"" }>모임장</option>
-										<option value="reg_date"  ${condition=="reg_date"?"selected='selected'":"" }>등록일</option>
-										<option value="subject"  ${condition=="subject"?"selected='selected'":"" }>제목</option>
-										<option value="content"  ${condition=="content"?"selected='selected'":"" }>내용</option>
-									</select>
-									<input type="text" name="keyword" value="${keyword}" class="form-control" style="border-radius: 20px;">
-									<button type="button" class="btn" onclick="searchList();">검색</button>
-								</form>
-							</td>
-						</c:when>						
-						
-						<c:otherwise>
 							<td align="center">
 								<form name="searchForm" action="${pageContext.request.contextPath}/club/list.do" method="post">
 									<select name="condition" class="form-select">
@@ -126,9 +108,6 @@ function searchList() {
 									<button type="button" class="btn" onclick="searchList();">검색</button>
 								</form>
 							</td>
-						</c:otherwise>
-					
-					</c:choose>
 					
 					
 					<td align="right" width="100">

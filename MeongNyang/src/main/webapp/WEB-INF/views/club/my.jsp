@@ -14,7 +14,7 @@
 	max-width: 700px;
 }
 
-.table-list thead > tr:first-child{ background: #ffedea; }
+.table-list thead > tr:first-child{ background: #ffedea; border: none; }
 .table-list th, .table-list td { text-align: center; }
 .table-list .left { text-align: left; padding-left: 5px; }
 
@@ -46,9 +46,9 @@ function searchList() {
 	    </div>
 	   <div style="box-shadow: 0 0 15px 0 rgb(2 59 109 / 10%);border-radius: 30px; margin: 0 auto ; width: 70%;">
 	    <div class="body-main mx-auto">
-			<table class="table">
+			<table class="table" >
 				<tr>
-					<td width="50%">
+					<td width="50%" >
 						${dataCount}개(${page}/${total_page} 페이지)
 					</td>
 					<td align="right">&nbsp;</td>
