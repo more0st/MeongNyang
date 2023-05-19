@@ -91,6 +91,30 @@
 	overflow: hidden;
 	white-space: nowrap;
 }
+.user-wrap {
+	width: 100%;
+	margin: 10px auto;
+	position: relative;
+}
+.user-wrap img {
+	width: 100%;
+	vertical-align: middle;
+}
+
+.user-text {
+	position: absolute;
+	top: 45%;
+	left: 50%;
+	width: 100%;
+	transform: translate( -50%, -50% );
+	font-weight: bold;
+    font-size: 15px;
+    font-family: 'ypseo';
+    text-align:center;
+    color: white;
+}
+
+
 </style>
 
 </head>
@@ -161,14 +185,30 @@
 								</td>
 							</tr>
 							<tr>
-								<td colspan="2" align="center" style="border-bottom: 20px;">
-									<button type="button" class="btn btnSendBoardLike" title="좋아요">
-										<i class="fas fa-thumbs-up"
-											style="color:${isUserLike?'blue':'black'}"></i>&nbsp;&nbsp;<span
-											id="boardLikeCount">${dto.boardLikeCount}</span>
-									</button>
-								</td>
-							</tr>
+						<td colspan="2" align="center" style="border-bottom: 20px;">
+							<!-- 
+							<button type="button" class="btn btnSendBoardLike" title="좋아요"><i class="fas fa-thumbs-up" style="color:${isUserLike?'blue':'black'}"></i>&nbsp;&nbsp;<span id="boardLikeCount">${dto.boardLikeCount}</span></button>
+							 -->
+							<button type="button" class="btn btnSendBoardLike" title="좋아요" style="background: white">
+								<div class="user-wrap">
+									<div class="user-image">
+								    <c:choose>
+										<c:when test="${isUserLike == true}">
+												<img src="${pageContext.request.contextPath}/resource/images/heart_red.png" style="width: 40px; color:blue;" >										
+										</c:when>
+										<c:otherwise>
+												<img src="${pageContext.request.contextPath}/resource/images/heart.png" style="width: 40px; color:black;" >										
+										</c:otherwise>
+									</c:choose>
+								    </div>
+								    <div class="user-text" id="boardLikeCount">
+								        <p>${dto.boardLikeCount}</p>
+								    </div>
+								    
+								</div>
+							</button>
+						</td>
+					</tr>
 
 						</tbody>
 					</table>
@@ -304,7 +344,7 @@
 			});
 		
 			//마커가 지도 위에 표시되도록 설정합니다
-			marker.setMap(map);
+			// marker.setMap(map);
 
 
 	        // 인포윈도우에 클릭한 위치에 대한 법정동 상세 주소정보를 표시합니다
@@ -382,10 +422,11 @@ function ajaxFun(url, method, query, dataType, fn) {
 	});
 }
 
-// 게시글 공감 여부 
+//게시글 공감 여부 
 $(function() {
 	$(".btnSendBoardLike").click(function() {
-		const $i = $(this).find("i");
+		const $i = $(this).find('img');
+		console.log($i.css("color"));
 		let isNoLike = $i.css("color") == "rgb(0, 0, 0)";
 		let msg = isNoLike ? "게시글에 공감하십니까 ?" : "게시글 공감을 취소하시겠습니까 ?"; 
 		
@@ -400,10 +441,13 @@ $(function() {
 		const fn = function(data) {
 			let state = data.state;
 			if(state === "true") {
+				let img = "heart";
 				let color = "black";
 				if( isNoLike) {
+					img = "heart_red";
 					color = "blue";
 				}
+				$i.attr("src", "${pageContext.request.contextPath}/resource/images/"+img+".png");
 				$i.css("color", color);
 				
 				let count = data.boardLikeCount;
@@ -418,6 +462,7 @@ $(function() {
 		
 	});
 });
+
 
 // 댓글 리스트 및 페이징
 $(function() {

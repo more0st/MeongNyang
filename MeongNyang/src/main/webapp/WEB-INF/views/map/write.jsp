@@ -227,11 +227,11 @@
 						    <div id="menu_wrap" class="bg_white">
 						        <div class="option">
 						            <div>
-						                <form onsubmit="searchPlaces(); return false;">
+						                <div onsubmit="searchPlaces(); return false;">
 						                    키워드 : <input type="text" value="서울 공원" id="keyword" size="15"> 
 						                    <button type="submit">검색하기</button> 
 						                    <input type="hidden" id="coordinate" value="">
-						                </form>
+						                </div>
 						            </div>
 						        </div>
 						        <hr>
@@ -257,7 +257,7 @@
 							<td> 
 								<div class="img-box">
 									<c:forEach var="vo" items="${listFile}">
-										<img src="${pageContext.request.contextPath}/uploads/map/${vo.imageFilename}"
+										<img style="width: 100px; height: 100px; " src="${pageContext.request.contextPath}/uploads/map/${vo.imageFilename}"
 											onclick="deleteImg('${vo.fileNum}');">
 									</c:forEach>
 								</div>

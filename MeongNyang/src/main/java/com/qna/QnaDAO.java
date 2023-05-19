@@ -212,7 +212,7 @@ public class QnaDAO {
 				sb.append(" FROM questions q ");
 				sb.append(" JOIN member m ON q.userId = m.userId ");
 				sb.append(" WHERE q.userId = ? ");
-				sb.append(" ORDER BY qesNum DESC ");
+				sb.append(" ORDER BY CASE WHEN replyContent IS NULL THEN 0 ELSE 1 END ASC, qesNum DESC ");
 				sb.append(" OFFSET ? ROWS FETCH FIRST ? ROWS ONLY ");
 
 				pstmt = conn.prepareStatement(sb.toString());
@@ -229,7 +229,7 @@ public class QnaDAO {
 				sb.append(" FROM questions q ");
 				sb.append(" JOIN member m ON q.userId = m.userId ");
 				// sb.append(" WHERE q.userId = ? OR q.userId = 'admin'");
-				sb.append(" ORDER BY qesNum DESC ");
+				sb.append("  ORDER BY CASE WHEN replyContent IS NULL THEN 0 ELSE 1 END ASC, qesNum DESC");
 				sb.append(" OFFSET ? ROWS FETCH FIRST ? ROWS ONLY ");
 
 				pstmt = conn.prepareStatement(sb.toString());
@@ -299,7 +299,7 @@ public class QnaDAO {
 					sb.append(" WHERE INSTR(" + condition + ", ?) >= 1 ");
 				}
 				sb.append(" AND q.userId = ? ");
-				sb.append(" ORDER BY qesNum DESC ");
+				sb.append(" ORDER BY CASE WHEN replyContent IS NULL THEN 0 ELSE 1 END ASC, qesNum DESC ");
 				sb.append(" OFFSET ? ROWS FETCH FIRST ? ROWS ONLY ");
 
 				pstmt = conn.prepareStatement(sb.toString());
@@ -333,7 +333,7 @@ public class QnaDAO {
 				} else {
 					sb.append(" WHERE INSTR(" + condition + ", ?) >= 1 ");
 				}
-				sb.append(" ORDER BY qesNum DESC ");
+				sb.append(" ORDER BY CASE WHEN replyContent IS NULL THEN 0 ELSE 1 END ASC, qesNum DESC ");
 				sb.append(" OFFSET ? ROWS FETCH FIRST ? ROWS ONLY ");
 
 				pstmt = conn.prepareStatement(sb.toString());
