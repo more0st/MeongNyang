@@ -16,7 +16,7 @@ a:active, a:hover { color: #f28011; text-decoration: underline; }
 .btn {
 	color: white;
 	border: 1px solid white;
-	background-color: #FFA28B;
+	background-color:#FF5722;
 	padding: 5px 10px;
 	border-radius: 10px;
 	font-weight: 700;
