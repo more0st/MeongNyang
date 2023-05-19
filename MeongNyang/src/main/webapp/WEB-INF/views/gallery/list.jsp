@@ -85,7 +85,9 @@ function searchList() {
 <main>
 	<div class="container body-container">
 	    <div class="body-title" style="text-align: center;">
-			<img src="${pageContext.request.contextPath}/resource/images/gallerypage2.png" style="width: 200px;" >
+	    	<a href="${pageContext.request.contextPath}/gallery/list.do">
+			<img src="${pageContext.request.contextPath}/resource/images/gallerypage2.png" style="width: 250px;" >
+	    	</a>
 	    </div>
 	    
 	    <div class="body-main mx-auto" style="box-shadow: 0 0 15px 0 rgb(2 59 109 / 10%); border-radius: 30px; padding: 15px;">
