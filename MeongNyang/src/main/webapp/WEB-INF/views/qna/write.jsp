@@ -36,16 +36,17 @@ function sendBoard() {
         f.subject.focus();
         return;
     }
-/*
- 
+
+ /*
    str = f.content.value.trim();
     if(!str) {
         alert("내용을 입력하세요. ");
         f.content.focus();
         return;
     }
+ */   
 
- */
+ 
     f.action = "${pageContext.request.contextPath}/qna/${mode}_ok.do";
     f.submit();
 }

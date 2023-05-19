@@ -147,7 +147,7 @@ public class MapServlet extends MyUploadServlet{
 			}
 			
 			// 전체 페이지 수
-			int size = 2;
+			int size = 10;
 			int total_page = util.pageCount(dataCount, size);
 			if (current_page > total_page) {
 				current_page = total_page;
@@ -277,6 +277,7 @@ public class MapServlet extends MyUploadServlet{
 						resp.sendRedirect(cp + "/map/list.do?" + query);
 						return;
 					}
+					
 					dto.setContent(util.htmlSymbols(dto.getContent()));
 
 					
@@ -627,6 +628,7 @@ public class MapServlet extends MyUploadServlet{
 			for(MapReplyDTO dto : listReply) {
 				dto.setContent(dto.getContent().replaceAll("\n", "<br>"));
 			}
+			
 			// 페이징 처리 : AJAX 용 - listPage : 자바스크립트 함수명
 			String paging = util.pagingMethod(current_page, total_page, "listPage");
 			

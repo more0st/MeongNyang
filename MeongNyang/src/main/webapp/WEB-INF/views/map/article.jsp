@@ -123,7 +123,7 @@
 							</tr>
 
 							<tr>
-								<td colspan="2" valign="top" height="200"><c:out value="${dto.content}" /></td>
+								<td colspan="2" valign="top" height="200">${dto.content}</td>
 							</tr>
 
 							<tr style="border-bottom: none; text-align: center;">
@@ -141,7 +141,7 @@
 
 
 							<tr>
-								<td style="text-align: center;">
+								<td  colspan="2" height="110">
 									<div id="map" style="width: 100%; height: 350px;"></div>
 								</td>
 							</tr>
@@ -289,7 +289,7 @@
 	        var detailAddr = !!result[0].road_address ? '<div>도로명주소 : ' + result[0].road_address.address_name + '</div>' : '';
 	        detailAddr += '<div>지번 주소 : ' + result[0].address.address_name + '</div>';
 	        
-	        var content = '<div class="bAddr">' +
+	        var contentM = '<div class="bAddr">' +
 	                        '<span class="title">상세 주소</span>' + 
 	                        detailAddr + 
 	                    '</div>';
@@ -308,7 +308,7 @@
 
 
 	        // 인포윈도우에 클릭한 위치에 대한 법정동 상세 주소정보를 표시합니다
-	        infowindow.setContent(content);
+	        infowindow.setContent(contentM);
 	        infowindow.open(map, marker);
 	    }   
 	});

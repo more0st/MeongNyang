@@ -65,18 +65,27 @@ function searchList() {
 				</thead>
 				
 				<tbody>
-					<c:forEach var="dto" items="${list}" varStatus="status">
-						<tr>
-							<td>${dataCount - (page-1) * size - status.index}</td>
-							<td class="left">
-							
-								<a href="${articleUrl}&qesNum=${dto.qesNum}">${dto.subject}</a>
-							</td>
-							<td>${dto.userName}</td>
-							<td>${dto.reg_date}</td>
-						</tr>
-					</c:forEach>
-				</tbody>
+					   <c:forEach var="dto" items="${list}" varStatus="status">
+					      <tr>
+					         <td>${dataCount - (page-1) * size - status.index}</td>
+					         <td class="left">
+					            <c:choose>
+					               <c:when test="${empty dto.replyContent}">
+					                  <strong>
+					                     <a href="${articleUrl}&qesNum=${dto.qesNum}">${dto.subject}</a>
+					                 	<c:if test="${empty dto.replyContent}"><i class="fa-solid fa-question fa-bounce"></i></c:if>
+					                  </strong>
+					               </c:when>
+					               <c:otherwise>
+					                  <a href="${articleUrl}&qesNum=${dto.qesNum}">${dto.subject}</a>
+					               </c:otherwise>
+					            </c:choose>
+					         </td>
+					         <td>${dto.userName}</td>
+					         <td>${dto.reg_date}</td>
+					      </tr>
+					   </c:forEach>
+					</tbody>
 			</table>
 			
 			<div class="page-navigation">

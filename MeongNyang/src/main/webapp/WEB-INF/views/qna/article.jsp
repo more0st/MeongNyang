@@ -57,7 +57,7 @@
 							이름 : ${dto.userName}
 						</td>
 						<td align="right">
-							${dto.reg_date}
+							 ${dto.reg_date}
 						</td>
 					</tr>
 					
@@ -67,22 +67,7 @@
 						</td>
 					</tr>
 					
-					<tr>
-						<td colspan="2">
-							이전글 :
-							<c:if test="${not empty preReadDto}">
-								<a href="${pageContext.request.contextPath}/qna/article.do?${query}&qesNum=${preReadDto.qesNum}">${preReadDto.subject}</a>
-							</c:if>
-						</td>
-					</tr>
-					<tr>
-						<td colspan="2">
-							다음글 :
-							<c:if test="${not empty nextReadDto}">
-								<a href="${pageContext.request.contextPath}/qna/article.do?${query}&qesNum=${nextReadDto.qesNum}">${nextReadDto.subject}</a>
-							</c:if>
-						</td>
-					</tr>
+					
 				</tbody>
 			</table>
 			
@@ -128,7 +113,7 @@
 				<thead>
 					<tr>
 						<td colspan="2" align="center">
-							'${dto.subject}'에 대한 답변입니다!
+							'--${dto.subject}--'에 대한 답변입니다!
 						</td>
 					</tr>
 				</thead>
@@ -139,7 +124,7 @@
 							이름 : 관리자
 						</td>
 						<td align="right">
-							${dto.replyReg_date}
+							답변시간 : ${dto.replyReg_date}
 						</td>
 					</tr>
 					
