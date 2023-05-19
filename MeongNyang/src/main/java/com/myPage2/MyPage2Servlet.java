@@ -43,9 +43,8 @@ public class MyPage2Servlet extends MyServlet{
 
 		if (uri.indexOf("salesList.do") != -1) {	
 			list(req, resp);
-		} else if (uri.indexOf("salesArticle.do") != -1) {
-			article(req,resp);
 		}
+		
 	}
 
 	private void list(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -115,7 +114,7 @@ public class MyPage2Servlet extends MyServlet{
 			}
 			
 			String listUrl = cp + "/myPage2/salesList.do";
-			String articleUrl = cp + "/myPage2/salesArticle.do?page=" + current_page;
+			String articleUrl = cp + "/market/article.do?";
 			if(query.length() != 0) {
 				listUrl += "?" + query;
 				articleUrl += "&" + query;
@@ -140,6 +139,7 @@ public class MyPage2Servlet extends MyServlet{
 		forward(req, resp, "/WEB-INF/views/myPage2/salesList.jsp");
 	}
 	
+/*
 	private void article(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 
 		MyPage2DAO dao = new MyPage2DAO();
@@ -183,5 +183,5 @@ public class MyPage2Servlet extends MyServlet{
 		
 		forward(req, resp, "/WEB-INF/views/myPage2/salesArticle.jsp");
 	}
-
+*/
 }

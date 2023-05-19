@@ -3,10 +3,10 @@ package com.myPage4;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.myPage.MyPageDTO;
 import com.util.DBConn;
 
 public class MyPage4DAO {
@@ -173,8 +173,81 @@ public class MyPage4DAO {
 	}
 
 	public List<MyPage4DTO> listBoard(String userId, int offset, int size, String condition, String keyword) {
-		// TODO Auto-generated method stub
-		return null;
+		List<MyPage4DTO> list = new ArrayList<MyPage4DTO>();
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		StringBuilder sb = new StringBuilder();
+		
+		try {
+			sb.append("SELECT a.marketnum,sellerid,subject,content,addr, price, hitCount, TO_CHAR(a.reg_date, 'YYYY-MM-DD') reg_date, TO_CHAR(pay_date, 'YYYY-MM-DD') pay_date, state, imgname");
+			sb.append(" FROM market a");
+			sb.append(" JOIN marketimgfile b on a.marketnum = b.marketnum");
+			sb.append(" JOIN (SELECT marketnum, MIN(imgnum) imgnum FROM marketimgfile");
+			sb.append(" GROUP BY marketnum) c ON c.imgnum = b.imgnum");
+			sb.append(" JOIN zzim z on a.marketnum = z.marketnum");
+			sb.append(" WHERE z.userid = ? AND state = 0");
+			
+			if(condition.equals("all")) {
+				sb.append(" AND INSTR(subject ,?) >= 1 OR INSTR(content, ?) >= 1 ");
+			} else {
+				sb.append(" AND INSTR(" + condition + " ,?) >= 1");
+			}
+			
+			sb.append(" ORDER BY marketnum DESC");
+			sb.append(" OFFSET ? ROWS FETCH FIRST ? ROWS ONLY");
+			
+			pstmt = conn.prepareStatement(sb.toString());
+			
+			if(condition.equals("all")) {
+				pstmt.setString(1, userId);
+				pstmt.setString(2, keyword);
+				pstmt.setString(3, keyword);
+				pstmt.setInt(4, offset);
+				pstmt.setInt(5, size);			
+			} else {
+				pstmt.setString(1, userId);
+				pstmt.setString(2, keyword);
+				pstmt.setInt(3, offset);
+				pstmt.setInt(4, size);				
+			}
+			
+			rs = pstmt.executeQuery();
+			
+			while(rs.next()) {
+				MyPage4DTO dto = new MyPage4DTO();
+				
+				dto.setMarketNum(rs.getLong("marketnum"));
+				dto.setSellerId(rs.getString("sellerid"));
+				dto.setSubject(rs.getString("subject"));
+				dto.setContent(rs.getString("content"));
+				dto.setAddr(rs.getString("addr"));
+				dto.setPrice(rs.getString("price"));
+				dto.setHitCount(rs.getInt("hitCount"));
+				dto.setReg_Date(rs.getString("reg_date"));
+				dto.setState(rs.getInt("state"));
+				dto.setImageFileName(rs.getString("imgname"));
+				dto.setHitCount(rs.getInt("hitCount"));
+				
+				list.add(dto);
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			if (rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException e2) {
+				}
+			}
+			if (pstmt != null) {
+				try {
+					pstmt.close();
+				} catch (SQLException e2) {
+				}
+			}
+		}
+
+		return list;
 	}
 
 }

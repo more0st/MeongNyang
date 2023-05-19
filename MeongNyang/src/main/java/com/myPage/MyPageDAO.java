@@ -283,6 +283,7 @@ public class MyPageDAO {
 		}
 	}
 
+	/*
 	// 해당 게시물 보기
 	public MyPageDTO readBoard(long marketnum) {
 		MyPageDTO dto = new MyPageDTO();
@@ -337,7 +338,7 @@ public class MyPageDAO {
 
 		return dto;
 	}
-	
+	*/
 	
 	public List<MyPageDTO> listPhotoFile(long marketnum) {
 		List<MyPageDTO> list = new ArrayList<>();
@@ -386,6 +387,7 @@ public class MyPageDAO {
 	}
 
 
+	/*
 	// 이전글
 	public MyPageDTO preReadBoard(long marketnum, String userId) {
 		MyPageDTO dto = null;
@@ -481,7 +483,7 @@ public class MyPageDAO {
 		
 		return dto;
 	}
-
+*/
 
 	
 /*	

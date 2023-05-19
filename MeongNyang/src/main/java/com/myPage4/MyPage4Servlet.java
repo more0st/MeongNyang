@@ -45,7 +45,7 @@ public class MyPage4Servlet extends MyServlet {
 		// uri에 따른 작업 구분
 		if (uri.indexOf("likeList.do") != -1) {		// 나의 구매내역 리스트
 			list(req, resp);
-		} 	
+		}
 
 	}
 
@@ -116,7 +116,7 @@ public class MyPage4Servlet extends MyServlet {
 			}
 			
 			String listUrl = cp + "/myPage4/likeList.do";
-			String articleUrl = cp + "/myPage4/likeList.do?page=" + current_page;	// 클릭해서 다른조원이 만든 글로 이동하게 수정하기
+			String articleUrl = cp + "/market/article.do?"; // 클릭해서 다른조원이 만든 글로 이동하게 수정하기
 			if(query.length() != 0) {
 				listUrl += "?" + query;
 				articleUrl += "&" + query;

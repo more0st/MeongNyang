@@ -45,9 +45,8 @@ public class MyPageServlet extends MyServlet{
 		// uri에 따른 작업 구분
 		if (uri.indexOf("buyList.do") != -1) {		// 나의 구매내역 리스트
 			list(req, resp);
-		} else if (uri.indexOf("buyArticle.do") != -1) {	// 클릭하면 글로 이동
-			article(req, resp);
 		} 
+		
 	}
 
 	private void list(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -122,7 +121,7 @@ public class MyPageServlet extends MyServlet{
 			}
 			
 			String listUrl = cp + "/myPage/buyList.do";
-			String articleUrl = cp + "/myPage/buyArticle.do?page=" + current_page;
+			String articleUrl = cp + "/market/article.do?";
 			if(query.length() != 0) {
 				listUrl += "?" + query;
 				articleUrl += "&" + query;
@@ -153,6 +152,7 @@ public class MyPageServlet extends MyServlet{
 	}
 
 
+/*
 	private void article(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		// 글 보기
 		MyPageDAO dao = new MyPageDAO();
@@ -203,7 +203,7 @@ public class MyPageServlet extends MyServlet{
 		forward(req, resp, "/WEB-INF/views/myPage/buyArticle.jsp");
 	}
 
-	
+*/	
 	
 	/*
 	private void article(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {

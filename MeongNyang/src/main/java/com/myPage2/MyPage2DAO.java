@@ -279,7 +279,8 @@ public class MyPage2DAO {
 			}
 		}
 	}
-	
+
+	/*
 	public myPage2DTO readBoard(long marketnum) {
 		myPage2DTO dto = new myPage2DTO();
 		PreparedStatement pstmt = null;
@@ -333,7 +334,7 @@ public class MyPage2DAO {
 
 		return dto;
 	}
-	
+	*/
 	
 	public List<myPage2DTO> listPhotoFile(long marketnum) {
 		List<myPage2DTO> list = new ArrayList<>();
@@ -382,6 +383,7 @@ public class MyPage2DAO {
 	}
 	
 	
+	/*
 	public myPage2DTO preReadBoard(long marketnum, String userId) {
 		myPage2DTO dto = null;
 		PreparedStatement pstmt = null;
@@ -428,8 +430,10 @@ public class MyPage2DAO {
 		
 		return dto;
 	}
+	*/
 
-
+	
+	/*
 	public myPage2DTO nextReadBoard(long marketnum, String userId) {
 		myPage2DTO dto = null;
 		PreparedStatement pstmt = null;
@@ -476,7 +480,7 @@ public class MyPage2DAO {
 		
 		return dto;
 	}
-
+	*/
 
 
 	

@@ -83,7 +83,7 @@ function searchList() {
 			<div class="market-box">
 				<c:forEach var="dto" items="${list}" varStatus="status">
 					<div class="item" title="${dto.subject}"
-						onclick="location.href='${articleUrl}&marketnum=${dto.marketnum}';">
+						onclick="location.href='${articleUrl}&marketNum=${dto.marketnum}';">
 						<img src="${pageContext.request.contextPath}/uploads/market/${dto.imageFilename}">
 						<div class="border">
 						<div>제목 : ${dto.subject}</div>
