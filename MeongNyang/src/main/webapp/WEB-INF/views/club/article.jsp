@@ -55,6 +55,29 @@
 
 .bold { font-weight: bold;}
 
+
+.user-wrap {
+	width: 100%;
+	margin: 10px auto;
+	position: relative;
+}
+.user-wrap img {
+	width: 100%;
+	vertical-align: middle;
+}
+.user-text {
+	position: absolute;
+	top: 45%;
+	left: 50%;
+	width: 100%;
+	transform: translate( -50%, -50% );
+	font-weight: bold;
+    font-size: 15px;
+    font-family: 'ypseo';
+    text-align:center;
+    color: white;
+}
+
 </style>
 
 <script type="text/javascript">
@@ -163,39 +186,43 @@ function ajaxFun(url,method,query,dataType,fn){//3.
 	
 }
 
-//게시글 공감 여부
-$(function(){
-	$(".btnSendBoardLike").click(function(){
-		const $i = $(this).find("i");
-		let isNoLike = $i.css("color")=="rgb(255, 99, 71)";
-		let msg = isNoLike ? "게시글에 공감하십니까? " : "게시글 공감을 취소하시겠습니까?";
+//게시글 공감 여부 
+$(function() {
+	$(".btnSendBoardLike").click(function() {
+		const $i = $(this).find('img');
+		console.log($i.css("color"));
+		let isNoLike = $i.css("color") == "rgb(0, 0, 0)";
+		let msg = isNoLike ? "게시글에 공감하십니까 ?" : "게시글 공감을 취소하시겠습니까 ?"; 
 		
-		if(! confirm(msg)){
-			return false;
+		if(! confirm(msg)) {
+			return false; 
 		}
 		
 		let url = "${pageContext.request.contextPath}/club/insertBoardLike.do";
-		let num = "${dto.clubNum}";
-		let qs = "num="+num+"&isNoLike="+isNoLike;
+		let num = "${dto.clubNum}"; 
+		let qs = "num=" + num + "&isNoLike=" + isNoLike;
 		
-		const fn = function(data){
+		const fn = function(data) {
 			let state = data.state;
-			if(state === "true"){
-				let color = "tomato";
-				if(isNoLike){
-					color = "#ff9054";
+			if(state === "true") {
+				let img = "heart";
+				let color = "black";
+				if( isNoLike) {
+					img = "heart_red";
+					color = "blue";
 				}
-				$i.css("color",color);
+				$i.attr("src", "${pageContext.request.contextPath}/resource/images/"+img+".png");
+				$i.css("color", color);
 				
 				let count = data.boardLikeCount;
-				$("#boardLikeCount").text("${dto.reg_date} | 조회수 ${dto.hitCount} | 좋아요 "+count);
+				$("#boardLikeCount").text(count);
 				
-			}else if(state ==="liked"){
+			} else if (state === "liked") {
 				alert("좋아요는 한번만 가능합니다.");
 			}
 		};
 		
-		ajaxFun(url,"post",qs,"json",fn);
+		ajaxFun(url, "post", qs, "json", fn);
 		
 	});
 });
@@ -424,8 +451,8 @@ $(function(){
 				<tbody>
 					<tr>
 						<td><span class="bold">모임명</span> : ${dto.clubName }</td>
-						<td align="right" id="boardLikeCount">
-							${dto.reg_date} | 조회수 ${dto.hitCount} | 좋아요 ${dto.boardLikeCount }
+						<td align="right" >
+							${dto.reg_date} | 조회수 ${dto.hitCount} 
 						</td>
 					</tr>
 					<tr>
@@ -541,8 +568,23 @@ $(function(){
 					</td>
 					
 					<td style="width: 10%">
-						<button type="button" class="btn btnSendBoardLike" title="좋아요" style="background: white; color: black; margin-bottom: 7px; ">
-								<i class="fas fa-thumbs-up" style= "color:${isUserLike? '#ff9054':'tomato'} "></i> 
+						<button type="button" class="btn btnSendBoardLike" title="좋아요" style="background: white">
+								<div class="user-wrap">
+									<div class="user-image">
+								    <c:choose>
+										<c:when test="${isUserLike == true}">
+												<img src="${pageContext.request.contextPath}/resource/images/heart_red.png" style="width: 40px; color:blue;" >										
+										</c:when>
+										<c:otherwise>
+												<img src="${pageContext.request.contextPath}/resource/images/heart.png" style="width: 40px; color:black;" >										
+										</c:otherwise>
+									</c:choose>
+								    </div>
+								    <div class="user-text" id="boardLikeCount">
+								        <p>${dto.boardLikeCount}</p>
+								    </div>
+								    
+								</div>
 							</button>
 					</td>
 					
