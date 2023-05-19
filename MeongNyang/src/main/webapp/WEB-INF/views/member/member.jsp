@@ -128,6 +128,42 @@ function changeEmail() {
         f.email1.focus();
     }
 }
+function userIdCheck() {
+	// 아이디 중복 검사
+	let userId = $("#userId").val();
+
+	if(!/^[a-z][a-z0-9_]{4,9}$/i.test(userId)) { 
+		let str = "아이디는 5~10자 이내이며, 첫글자는 영문자로 시작해야 합니다.";
+		$("#userId").focus();
+		$(".table-form").find(".testId").html(str);
+		return;
+	}
+	
+	let url = "${pageContext.request.contextPath}/member/userIdCheck.do";
+	let query = "userId=" + userId;
+	$.ajax({
+		type:"POST"
+		,url:url
+		,data:query
+		,dataType:"json"
+		,success:function(data) {
+			let passed = data.passed;
+
+			if(passed === "true") {
+				let str = "<span style='color:blue; font-weight: bold;'>" + userId + "</span> 아이디는 사용가능합니다.";
+				$(".table-form").find(".testId").html(str);
+				$("#userIdValid").val("true");
+			} else {
+				let str = "<span style='color:red; font-weight: bold;'>" + userId + "</span> 아이디는 이미 존재하는 아이디입니다..";
+				$(".table-form").find(".testId").html(str);
+				$("#userId").val("");
+				$("#userIdValid").val("false");
+				$("#userId").focus();
+			}
+		}
+	});
+}
+
 
 </script>
 </head>
@@ -150,13 +186,16 @@ function changeEmail() {
 					<td>아&nbsp;이&nbsp;디</td>
 					<td>
 						<p>
-							<input type="text" name="userId" id="userId" maxlength="10" class="form-control" value="${dto.userId}" 
-								style="width: 50%;" 
-								${mode=="update" ? "readonly='readonly' ":""}>
-						</p>
+							<input type="text" name="userId" id="userId" class="form-control" value="${dto.userId}" 
+									${mode=="update" ? "readonly='readonly' ":""}
+									placeholder="아이디">
+							<c:if test="${mode=='member'}">
+								<button type="button" class="btn btn-light" onclick="userIdCheck();">아이디중복검사</button>
+							</c:if>
 						<c:if test="${mode=='member'}">
-							<p class="help-block">아이디는 5~10자 이내이며, 첫글자는 영문자로 시작해야 합니다.</p>
+							<p class="help-block testId">아이디는 5~10자 이내이며, 첫글자는 영문자로 시작해야 합니다.</p>
 						</c:if>
+						</p>
 					</td>
 				</tr>
 			
@@ -281,6 +320,7 @@ function changeEmail() {
 					    <button type="reset" class="btn"> 다시입력 </button>
 					    <button type="button" class="btn" 
 					    	onclick="javascript:location.href='${pageContext.request.contextPath}/';"> ${mode=="member"?"가입취소":"수정취소"} </button>
+					    <input type="hidden" name="userIdValid" id="userIdValid" value="false">
 					</td>
 				</tr>
 				

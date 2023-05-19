@@ -60,8 +60,6 @@ public class EventServlet extends MyUploadServlet{
 			delete(req, resp);
 		} else if(uri.indexOf("participant.do")!=-1) {
 			eventParticipant(req, resp);
-		} else if(uri.indexOf("disable.do")!=-1) {
-			eventDisable(req, resp);
 		} else if(uri.indexOf("pass.do")!=-1) {
 			eventPass(req, resp);
 		} else if(uri.indexOf("join.do")!=-1) {
@@ -118,6 +116,11 @@ public class EventServlet extends MyUploadServlet{
 				list=dao.listEvent(offset, size, eventStatus);
 			}
 			
+			//long eNum=Long.parseLong(req.getParameter("eNum"));//nullpointer
+			
+			//List<EventDTO> list_par=dao.participantList(eNum);
+			
+			
 			String query="eventStatus="+eventStatus;
 			String listUrl=cp+"/event/list.do";
 			String articleUrl=cp+"/event/article.do?page="+current_page;
@@ -128,6 +131,7 @@ public class EventServlet extends MyUploadServlet{
 			}
 			String paging=util.paging(current_page, total_page, listUrl);
 			
+			//req.setAttribute("list_par", list_par);
 			req.setAttribute("list", list);
 			req.setAttribute("page", current_page);
 			req.setAttribute("total_page", total_page);
@@ -322,9 +326,17 @@ public class EventServlet extends MyUploadServlet{
 			return;
 		}
 		
+		String enabled1=req.getParameter("enabled");
+		int enabled=1;
+		if(enabled1!=null) {
+			enabled=Integer.parseInt(req.getParameter("enabled"));
+		}
+
+		
 		try {
 			
 			EventDTO dto=new EventDTO();
+			
 			
 			dto.seteNum(Long.parseLong(req.getParameter("eNum")));
 			dto.setSubject(req.getParameter("subject"));
@@ -332,6 +344,7 @@ public class EventServlet extends MyUploadServlet{
 			dto.setStart_date(req.getParameter("start_date"));
 			dto.setEnd_date(req.getParameter("end_date"));
 			dto.setUserId(info.getUserId());
+			dto.setEnabled(enabled);
 			
 			//파일처리
 			
@@ -419,9 +432,7 @@ public class EventServlet extends MyUploadServlet{
 	protected void eventParticipant(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		//이벤트 참여
 	}
-	protected void eventDisable(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		//이벤트 활성화/비활성화
-	}
+
 	protected void eventPass(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		//이벤트 추첨
 	}

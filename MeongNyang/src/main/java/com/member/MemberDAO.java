@@ -11,6 +11,7 @@ public class MemberDAO {
 	private Connection conn = DBConn.getConnection();
 	
 	public MemberDTO loginMember(String userId, String userPwd) {
+		//로그인
 		MemberDTO dto = null;
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
@@ -94,6 +95,7 @@ public class MemberDAO {
 	}
 	
 	public MemberDTO readMember(String userId) {
+		//userId 회원정보 찾기
 		MemberDTO dto=null;
 		PreparedStatement pstmt=null;
 		ResultSet rs=null;
@@ -194,6 +196,7 @@ public class MemberDAO {
 	}
 	
 	public void updateMember(MemberDTO dto) throws SQLException {
+		//회원정보 수정
 		PreparedStatement pstmt = null;
 		String sql;
 		
@@ -225,8 +228,36 @@ public class MemberDAO {
 		}
 
 	}
+	public void updatePwd(MemberDTO dto) throws SQLException {
+		//발급받은 임시 패스워드로 패스워드 변경
+		PreparedStatement pstmt = null;
+		String sql;
+		
+		try {
+			sql = "UPDATE member SET userPwd=? WHERE userId=?";
+			pstmt = conn.prepareStatement(sql);
+			
+			pstmt.setString(1, dto.getUserPwd());
+			pstmt.setString(2, dto.getUserId());
+			
+			pstmt.executeUpdate();
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw e;
+		} finally {
+			if(pstmt != null) {
+				try {
+					pstmt.close();
+				} catch (SQLException e) {
+				}
+			}
+		}
+		
+	}
 	
-	public void deleteMember(String userId) throws SQLException {
+	public void deleteMember(String userId) throws SQLException {//사용안하면 지우기
+		//회원 삭제
 		PreparedStatement pstmt = null;
 		String sql;
 		

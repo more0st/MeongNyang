@@ -30,8 +30,9 @@ function sendOk() {
     const f = document.boardForm;
 	let str;
 	
-	let start_date;
-	let end_date;
+	let start_date=new Date(f.start_date.value);
+	let end_date=new Date(f.end_date.value);
+	let current_date=new Date(new Date().setHours(0, 0, 0, 0));
 	
     str = f.subject.value.trim();
     if(!str) {
@@ -48,20 +49,24 @@ function sendOk() {
     }
     
     //종료일 시작일 비교 하기
-    /*
-    start_date=f.start_date.value;
-    end_date=f.start_date.value;
+    //start_date=f.start_date.value;
+    //end_date=f.start_date.value;
 
     if(start_date>=end_date){
     	alert("종료일은 시작일보다 작을 수 없습니다.");
     	f.end_date.focus();
     	return;
+    } else if(current_date>start_date){
+    	alert("현재보다 이전일을 시작일로 설정할 수 없습니다.");
+    	f.start_date.focus();
+    	return;
     }
-    */
     
     f.action = "${pageContext.request.contextPath}/event/${mode}_ok.do";
     f.submit();
 }
+
+
 </script>
 </head>
 <body>
@@ -106,8 +111,15 @@ function sendOk() {
 							<p>
 							 	<input type="date" name="start_date" value="${dto.start_date}"> ~ 
 								<input type="date" name="end_date" value="${dto.end_date}">
+								<c:if test="${mode=='update' && dto.enabled == 0}">
+										종료 <input type="checkbox" name="enabled" value="0" checked="checked">
+								</c:if>
+								<c:if test="${mode=='update' && dto.enabled != 0}">
+										종료 <input type="checkbox" name="enabled" value="1">
+								</c:if>
 							</p>
 						</td>
+						
 					</tr>
 					<tr>
 						<td>추첨인원</td>

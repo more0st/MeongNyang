@@ -1,4 +1,5 @@
-﻿<%@ page contentType="text/html; charset=UTF-8" %>
+﻿<%@page import="com.member.MemberDAO"%>
+<%@ page contentType="text/html; charset=UTF-8" %>
 <%@ page trimDirectiveWhitespaces="true" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt"%>
@@ -108,6 +109,7 @@ function join_ok(){
 }
 
 
+
 </script>
 </head>
 <body>
@@ -150,6 +152,7 @@ function join_ok(){
 									<span class="card-region" > <br>No.${dataCount - (page-1) * size - status.index} </span>	
 					   				<span class="card-title"> ${dto.subject} </span>
 									<span style="display: flex; justify-content: center; padding-bottom: 10px;">
+									<input type="hidden" name="eNum" value="${dto.eNum}">
 										<button type="button" class="btn more" style="display: inline-block;" onclick="location.href='${articleUrl}&eNum=${dto.eNum}';">자세히</button>
 												<button type="button" class="btn join_ok" style="display: inline-block;" onclick="join_ok();">완료</button>
 												<button type="button" class="btn join" style="display: inline-block;" onclick="join(${dto.eNum});">참여</button>
@@ -160,7 +163,7 @@ function join_ok(){
 			   			</span>
 		   			</div>
 	   	</article>
-	   	</c:forEach>
+	 </c:forEach>
 
 	    </div>
 	</div>

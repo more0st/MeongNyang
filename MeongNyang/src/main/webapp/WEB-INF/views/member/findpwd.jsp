@@ -36,17 +36,19 @@
 </style>
 
 <script type="text/javascript">
+
+
 function sendOk() {
 	const f = document.pwdForm;
 
-	let str = f.userPwd.value;
+	let str = f.userId.value;
 	if(!str) {
-		alert("패스워드를 입력하세요. ");
-		f.userPwd.focus();
+		alert("아이디를 입력하세요. ");
+		f.userId.focus();
 		return;
 	}
 
-	f.action = "${pageContext.request.contextPath}/";
+	f.action = "${pageContext.request.contextPath}/member/pwdFind_ok.do";
 	f.submit();
 }
 </script>
@@ -69,13 +71,10 @@ function sendOk() {
 				<div class="info-box">
 					<form name="pwdForm" method="post">
 						<div class="row text-center">
-							아이디와 메일을 입력해주세요.
+							아이디를 입력해주세요.
 						</div>
 						<div class="row">
 							<input name="userId" type="text" class="form-control" placeholder="아이디">
-						</div>
-						<div class="row">
-							<input name="email" type="email" class="form-control" placeholder="이메일">
 						</div>
 						<div>
 							<button type="button" class="btnConfirm" onclick="sendOk();">확인</button>
@@ -86,7 +85,6 @@ function sendOk() {
 			</div>
 			<div class="members-message">
 				<p class="text-center">${message}</p>
-				<!-- 일치하는 회원이 있으면 메일이 발송되었습니다. 메세지 띄움 -->
 			</div>
 	    </div>
 	</div>

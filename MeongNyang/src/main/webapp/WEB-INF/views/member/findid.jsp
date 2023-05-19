@@ -53,7 +53,7 @@ function sendOk() {
 		return;
 	}
 
-	f.action = "${pageContext.request.contextPath}/member/id_find.do";
+	f.action = "${pageContext.request.contextPath}/member/idFind_ok.do";
 	f.submit();
 }
 </script>
@@ -87,7 +87,7 @@ function sendOk() {
 						</div>
 						<div>
 							<button type="button" class="btnConfirm" onclick="sendOk();">확인</button>
-							<input type="hidden" name="mode" value="">
+							<input type="hidden" name="mode" value="${mode}">
 						</div>
 					</form>
 				</div>
