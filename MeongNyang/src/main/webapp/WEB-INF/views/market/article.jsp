@@ -68,7 +68,7 @@
 
 .photo-layout img { width: 570px; height: 450px; }
 </style>
-<!-- <script type="text/javascript" src="https://code.jquery.com/jquery-1.12.4.min.js" ></script> -->
+<script type="text/javascript" src="https://code.jquery.com/jquery-1.12.4.min.js" ></script>
     <!-- iamport.payment.js -->
 <script type="text/javascript" src="https://cdn.iamport.kr/js/iamport.payment-1.2.0.js"></script>
 <script type="text/javascript">
@@ -242,6 +242,10 @@ $(function () {
 function buy_ok() {
 	const f = document.buyForm;
 	buyerId = f.buyerId.value.trim();
+	if(buyerId == null || buyerId == ""){
+		alert("구매자의 ID를 입력해주세요");
+		return;
+	}
 	marketNum = ${dto.marketNum};
 	location.href = "${pageContext.request.contextPath}/market/buy_ok.do?buyerId="+buyerId+"&marketNum="+marketNum;
 }
@@ -249,23 +253,30 @@ function buy_ok() {
 var IMP = window.IMP; 
 IMP.init("imp85702804"); 
 
+var today = new Date();   
+var hours = today.getHours(); // 시
+var minutes = today.getMinutes();  // 분
+var seconds = today.getSeconds();  // 초
+var milliseconds = today.getMilliseconds();
+var makeMerchantUid = hours +  minutes + seconds + milliseconds;
+
 function requestPay() {
     IMP.request_pay({
-        pg : 'html5_inicis.INIBillTst',
+        pg : 'html5_inicis', //html5_inicis
         pay_method : 'card',
-        merchant_uid: '${dto.marketNum}', 
-        name: '${dto.subject}',
-        amount: '${dto.price}',                         // 숫자 타입
-        buyer_email: "xx37820@gmail.com",
-        buyer_name: "${dto.sellerId}",
-        buyer_tel: "010-1234-5678",
-        buyer_addr: "서울특별시 강남구 신사동",
-        buyer_postcode: "01181"
+        merchant_uid: "IMP"+makeMerchantUid, 
+        name : '${dto.subject}',
+        amount : '${dto.price}',
+        buyer_email : 'Iamport@chai.finance',
+        buyer_name : '아임포트 기술지원팀',
+        buyer_tel : '010-1234-5678',
+        buyer_addr : '서울특별시 강남구 삼성동',
+        buyer_postcode : '123-456'
     }, function (rsp) { // callback
-        if(rsp.success){
-      	  console.log(rsp);
-        }else{
-      	  console.log(rsp);
+        if (rsp.success) {
+            console.log(rsp);
+        } else {
+            console.log(rsp);
         }
     });
 }

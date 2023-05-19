@@ -75,8 +75,14 @@ function sendOk() {
 
     str = f.price.value.trim();
     if(!str) {
-        alert("내용을 입력하세요. ");
+        alert("가격을 입력하세요. ");
         f.price.focus();
+        return;
+    }
+
+    str = f.selectFile.value.trim();
+    if(!str) {
+        alert("사진을 등록해주세요. ");
         return;
     }
 	
