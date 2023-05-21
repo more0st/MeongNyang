@@ -29,6 +29,22 @@ public class EventDAO {
 			pstmt.setLong(5, dto.getPassCount());
 			
 			pstmt.executeUpdate();
+			
+			pstmt.close();
+			pstmt=null;
+			
+			if(dto.getImageFiles()!=null) {
+				//사진첨부가 있다면
+				sql="insert into eventimgfile(fileNum, eNum, imageFileName) values (eventimg_seq.nextval,?,?)";
+				pstmt=conn.prepareStatement(sql);
+				for(int i=0; i<dto.getImageFiles().length;i++) {
+					pstmt.setLong(1, dto.geteNum());
+					pstmt.setString(2, dto.getImageFiles()[i]);
+					
+					pstmt.executeUpdate();
+				}
+			}
+			
 		} catch (SQLException e) {
 			e.printStackTrace();
 			throw e;
@@ -125,9 +141,9 @@ public class EventDAO {
 		StringBuilder sb=new StringBuilder();
 		
 		try {
-			sb.append("select eNum, subject, content, to_char(start_date, 'YYYY-MM-DD') start_date, to_char(end_date, 'YYYY-MM-DD') end_date, enabled ,passCount ");
-			sb.append(" from event ");
-			//sb.append(" left join participant p on e.enum=p.enum ");
+			sb.append("select e.eNum, subject, content, to_char(start_date, 'YYYY-MM-DD') start_date, to_char(end_date, 'YYYY-MM-DD') end_date, enabled ,passCount, imagefilename ");
+			sb.append(" from event e ");
+			sb.append(" left join eventimgfile f on e.enum=f.enum ");
 			sb.append(" order by eNum DESC ");
 			sb.append(" offset ? rows fetch first ? rows only ");
 			
@@ -146,7 +162,7 @@ public class EventDAO {
 				dto.setEnd_date(rs.getString("end_date"));
 				dto.setEnabled(rs.getInt("enabled"));
 				dto.setPassCount(rs.getLong("passCount"));
-				//dto.setUserId(rs.getString("userId"));
+				dto.setImageFileName(rs.getString("imagefilename"));
 				
 				list.add(dto);
 			}
@@ -170,7 +186,7 @@ public class EventDAO {
 		return list;
 	}
 	
-	   public List<EventDTO> listParticipant(int offset, int size){
+	   public List<EventDTO> listParticipant(int offset, int size){//참여/미참여 구분을 위함//사용안함
 		   // 이벤트에 참여한 사람의 리스트
 		      List<EventDTO> list=new ArrayList<EventDTO>();
 		      PreparedStatement pstmt=null;
@@ -232,9 +248,9 @@ public class EventDAO {
 		StringBuilder sb=new StringBuilder();
 		
 		try {
-			sb.append("select eNum, subject, content, to_char(start_date, 'YYYY-MM-DD') start_date, to_char(end_date, 'YYYY-MM-DD') end_date, enabled ,passCount ");
-			sb.append(" from event ");
-			//sb.append(" left join participant p on e.enum=p.enum ");
+			sb.append("select e.eNum, subject, content, to_char(start_date, 'YYYY-MM-DD') start_date, to_char(end_date, 'YYYY-MM-DD') end_date, enabled ,passCount, imagefilename ");
+			sb.append(" from event e ");
+			sb.append(" left join eventimgfile f on e.enum=f.enum ");
 			sb.append(" where enabled=? ");
 			sb.append(" order by eNum DESC ");
 			sb.append(" offset ? rows fetch first ? rows only ");
@@ -256,7 +272,7 @@ public class EventDAO {
 				dto.setEnd_date(rs.getString("end_date"));
 				dto.setEnabled(rs.getInt("enabled"));
 				dto.setPassCount(rs.getLong("passCount"));
-				//dto.setUserId(rs.getString("userId"));
+				dto.setImageFileName(rs.getString("imagefilename"));
 				
 				list.add(dto);
 			}
@@ -477,6 +493,22 @@ public class EventDAO {
 			
 			pstmt.executeUpdate();
 			
+			pstmt.executeUpdate();
+			pstmt.close();
+			pstmt=null;
+			
+			if(dto.getImageFiles()!=null) {
+				//사진첨부가 있다면
+				sql="insert into eventimgfile(fileNum, eNum, imageFileName) values (eventimg_seq.nextval,?,?)";
+				pstmt=conn.prepareStatement(sql);
+				for(int i=0; i<dto.getImageFiles().length;i++) {
+					pstmt.setLong(1, dto.geteNum());
+					pstmt.setString(2, dto.getImageFiles()[i]);
+					
+					pstmt.executeUpdate();
+				}
+			}
+			
 		} catch (SQLException e) {
 			e.printStackTrace();
 			throw e;
@@ -545,7 +577,7 @@ public class EventDAO {
 
 //참여자
 	public void insertParticipant(long eNum, String userId) throws SQLException{
-		//이벤트 등록
+		//이벤트 참여
 		PreparedStatement pstmt=null;
 		String sql;
 		
@@ -571,6 +603,35 @@ public class EventDAO {
 			}
 		}
 	}
+	
+	public void deleteParticipant(long eNum, String userId) throws SQLException{
+		//이벤트 참여 취소
+		PreparedStatement pstmt=null;
+		String sql;
+		
+		try {
+			sql="delete from participant where (eNum=? and userId=?)";
+			
+			pstmt=conn.prepareStatement(sql);
+			
+			pstmt.setLong(1, eNum);
+			pstmt.setString(2, userId);
+			
+			pstmt.executeUpdate();
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw e;
+		} finally {
+			if (pstmt != null) {
+				try {
+					pstmt.close();
+				} catch (SQLException e) {
+				}
+			}
+		}
+	}
+	
 	public int memberCount(long eNum) {
 		//이벤트별 참여인원 수
 		int result=0;
@@ -579,7 +640,7 @@ public class EventDAO {
 		String sql;
 		
 		try {
-			sql="select count(*) from participant where eNum=?";
+			sql="select nvl(count(*),0) from participant where eNum=?";
 			
 			pstmt=conn.prepareStatement(sql);
 			pstmt.setLong(1, eNum);
@@ -610,7 +671,49 @@ public class EventDAO {
 		
 		return result;
 	}
-	public List<EventDTO> participantList(long eNum){
+	
+	public boolean isUserEvent(long eNum, String userId) {
+		//로그인한 회원의 이벤트 참여 여부
+		boolean result=false;
+		PreparedStatement pstmt=null;
+		ResultSet rs=null;
+		String sql;
+		
+		try {
+			sql="";
+			
+			pstmt=conn.prepareStatement(sql);
+			pstmt.setLong(1, eNum);
+			pstmt.setString(2, userId);
+			
+			rs=pstmt.executeQuery();
+			
+			if(rs.next()) {
+				result=true;
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			if(rs != null) {
+				try {
+					rs.close();
+				} catch (Exception e2) {
+				}
+			}
+			
+			if(pstmt != null) {
+				try {
+					pstmt.close();
+				} catch (Exception e2) {
+				}
+			}
+		}
+		
+		return result;
+	}
+	
+	public List<EventDTO> participantList(long eNum){//관리자가 참여현황 확인할떄? 사용안함
 		//이벤트 참여인원 리스트
 		List<EventDTO> list=new ArrayList<EventDTO>();
 		PreparedStatement pstmt=null;
@@ -645,14 +748,93 @@ public class EventDAO {
 		
 		return list;
 	}
+	public List<EventDTO> randomList(long passCount, long eNum){//랜덤
+		//이벤트 참여인원 랜덤 리스트
+		List<EventDTO> list=new ArrayList<EventDTO>();
+		PreparedStatement pstmt=null;
+		ResultSet rs=null;
+		String sql="";
+		
+		try {
+			sql="select * from "
+					+ "(select * from participant order by DBMS_RANDOM.RANDOM) "
+					+ "where rownum<=? and eNum=? ";
+			
+			pstmt=conn.prepareStatement(sql);
+			pstmt.setLong(1, passCount);
+			pstmt.setLong(2, eNum);
+			rs=pstmt.executeQuery();
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			if (rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException e) {
+				}
+			}
+			
+			if (pstmt != null) {
+				try {
+					pstmt.close();
+				} catch (SQLException e) {
+				}
+			}
+		}
+		
+		
+		return list;
+	}
 	
-	public void deleteParticipant(long eNum, String userId) throws SQLException{
-		//이벤트 참여 취소
+	public List<EventDTO> eventList(String userId){//개인의 참여한 이벤트 리스트//사용안함
+		//이벤트 참여인원 리스트
+		List<EventDTO> list=new ArrayList<EventDTO>();
+		PreparedStatement pstmt=null;
+		ResultSet rs=null;
+		String sql="";
+		
+		try {
+			sql="select e.eNum, subject, userId "
+					+ " from event e "
+					+ " left outer join participant p on e.eNum=p.eNum "
+					+ " where userId=? ";
+			
+			pstmt=conn.prepareStatement(sql);
+			pstmt.setString(1, userId);
+			rs=pstmt.executeQuery();
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			if (rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException e) {
+				}
+			}
+			
+			if (pstmt != null) {
+				try {
+					pstmt.close();
+				} catch (SQLException e) {
+				}
+			}
+		}
+		
+		
+		return list;
+	}
+	
+
+//당첨자
+	public void insertPass(long eNum, String userId) throws SQLException{
+		//이벤트 당첨자 등록
 		PreparedStatement pstmt=null;
 		String sql;
 		
 		try {
-			sql="delete from participant where (eNum=? and userId=?)";
+			sql="insert into pass (eNum, userId) values(?,?)";
 			
 			pstmt=conn.prepareStatement(sql);
 			
@@ -673,28 +855,161 @@ public class EventDAO {
 			}
 		}
 	}
-//당첨자
-	public void insertPass(EventDTO dto) throws SQLException{
-		//이벤트 당첨자 등록
-	}
 	public List<EventDTO> passList(long eNum){
 		//이벤트 당첨자 리스트
 		List<EventDTO> list=new ArrayList<EventDTO>();
+		PreparedStatement pstmt=null;
+		ResultSet rs=null;
+		String sql="";
+		
+		try {
+			sql="select p.eNum, subject, userId "
+					+ " from pass p "
+					+ " left outer join participant c on p.eNum=c.eNum "
+					+ " where eNum=? ";
+			
+			pstmt=conn.prepareStatement(sql);
+			pstmt.setLong(1, eNum);
+			rs=pstmt.executeQuery();
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			if (rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException e) {
+				}
+			}
+			
+			if (pstmt != null) {
+				try {
+					pstmt.close();
+				} catch (SQLException e) {
+				}
+			}
+		}
+		
 		return list;
 	}
 //이미지
 	
-	public EventDTO readFile(long num) {
-		//fileNum으로 이미지가져오기
-		//eNum으로 이미지가져오기
+	public List<EventDTO> listFile(long eNum) {
+		//게시글의 파일리스트
+		List<EventDTO> list=new ArrayList<>();
+		PreparedStatement pstmt=null;
+		ResultSet rs=null;
+		String sql;
+		
+		try {
+			sql="select fileNum, eNum, imageFilename from eventimgfile where eNum=? ";
+			
+			pstmt=conn.prepareStatement(sql);
+			pstmt.setLong(1, eNum);
+			rs=pstmt.executeQuery();
+			
+			while(rs.next()) {
+				EventDTO dto=new EventDTO();
+				
+				dto.setFileNum(rs.getLong("fileNum"));
+				dto.seteNum(rs.getLong("eNum"));
+				dto.setImageFileName(rs.getString("imageFilename"));
+				
+				list.add(dto);
+			}
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			if (rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException e) {
+				}
+			}
+	
+			if (pstmt != null) {
+				try {
+					pstmt.close();
+				} catch (SQLException e) {
+				}
+			}
+		}
+		
+		return list;
+	}
+	
+	public EventDTO readFile(long fileNum) {
+		//이미지파일 하나만 가져오기 
 		EventDTO dto=null;
+		PreparedStatement pstmt=null;
+		ResultSet rs=null;
+		String sql;
+		
+		try {
+			sql="select fileNum, eNum, imageFilename from eventimgfile where fileNum=? ";
+			
+			pstmt=conn.prepareStatement(sql);
+			pstmt.setLong(1, fileNum);
+			rs=pstmt.executeQuery();
+			
+			if(rs.next()) {
+				dto=new EventDTO();
+				
+				dto.setFileNum(rs.getLong("fileNum"));
+				dto.seteNum(rs.getLong("eNum"));
+				dto.setImageFileName(rs.getString("imageFilename"));
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			if (rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException e) {
+				}
+			}
+
+			if (pstmt != null) {
+				try {
+					pstmt.close();
+				} catch (SQLException e) {
+				}
+			}
+		}
+		
 		return dto;
 	}
-	public void deleteFile(long fileNum) throws SQLException{
+	
+	public void deleteFile(String mode,long num) throws SQLException{
 		//이미지삭제하기
+		//eNum으로 삭제->게시물에 있는 모든 이미지 삭제
+		//fileNum으로 삭제->해당 이미지 하나만 삭제
+		PreparedStatement pstmt=null;
+		String sql;
+		
+		try {
+			if(mode.equals("all")) {
+				sql="delete from eventimgfile where eNum=? ";
+			} else {
+				sql="delete from eventimgfile where fileNum=? ";
+			}
+			
+			pstmt=conn.prepareStatement(sql);
+			pstmt.setLong(1, num);
+			pstmt.executeUpdate();
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+			throw e;
+		} finally {
+			if (pstmt != null) {
+				try {
+					pstmt.close();
+				} catch (SQLException e2) {
+				}
+			}
+		}
 	}
-	
-	//이미지수정하기
-	
 	
 }

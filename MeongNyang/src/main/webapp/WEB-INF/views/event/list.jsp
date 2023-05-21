@@ -1,4 +1,8 @@
-﻿<%@page import="com.member.MemberDAO"%>
+﻿<%@page import="java.text.SimpleDateFormat"%>
+<%@page import="java.util.Date"%>
+<%@page import="com.event.EventDAO"%>
+<%@page import="com.event.EventDTO"%>
+<%@page import="com.member.MemberDAO"%>
 <%@ page contentType="text/html; charset=UTF-8" %>
 <%@ page trimDirectiveWhitespaces="true" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
@@ -61,12 +65,12 @@ border:5px solid yellow;
  	color : white;
  }
 
- .join_ok{
+ .ok{
  	background: #eee;
  	color: black;
  	disabled="disabled";
  }
- .join_ok:hover{
+ .ok:hover{
  	background: #eee;
  	color: black;
  	disabled="disabled";
@@ -94,6 +98,7 @@ border:5px solid yellow;
 .table-list .hit { width: 70px; color: #787878; }
 </style>
 <script type="text/javascript">
+
 function searchList() {
 	const f = document.searchForm;
 	f.submit();
@@ -104,11 +109,22 @@ function join(eNum){
 		location.href="${pageContext.request.contextPath}/event/join.do?eNum="+eNum;
 	}
 }
-function join_ok(){
-	alert("이미 참여한 이벤트입니다.");
+
+function join_ok(eNum){
+	if(confirm("이미 참여한 이벤트입니다. 참여를 취소하시겠습니까 ? ")){
+		location.href="${pageContext.request.contextPath}/event/delParticipant.do?eNum="+eNum;
+	}
 }
 
+function endEvent(){
+	alert("종료된 이벤트입니다.");
+}
 
+function myEvent(){
+		$(".popup-dialog").dialog({
+			title:"나의 참여현황"
+		});
+}
 
 </script>
 </head>
@@ -144,26 +160,34 @@ function join_ok(){
 	    <div style="width: 100%; display: flex; justify-content: space-around; flex-wrap: wrap;">
 	    
 	    <c:forEach   var="dto" items="${list}" varStatus="status">
-	   	<article class = "card">
-			   		<div class="event" >
-			   			<span>
-					   		<a href="#">
-					   			<span class="card-body" style="display: inline-block; justify-content: center;">
-									<span class="card-region" > <br>No.${dataCount - (page-1) * size - status.index} </span>	
-					   				<span class="card-title"> ${dto.subject} </span>
-									<span style="display: flex; justify-content: center; padding-bottom: 10px;">
-									<input type="hidden" name="eNum" value="${dto.eNum}">
-										<button type="button" class="btn more" style="display: inline-block;" onclick="location.href='${articleUrl}&eNum=${dto.eNum}';">자세히</button>
-												<button type="button" class="btn join_ok" style="display: inline-block;" onclick="join_ok();">완료</button>
-												<button type="button" class="btn join" style="display: inline-block;" onclick="join(${dto.eNum});">참여</button>
-									</span>
-									<span class="card-date"> ${dto.start_date} ~ ${dto.end_date} </span>
-					   			</span>
-					   		</a> 
-			   			</span>
-		   			</div>
-	   	</article>
-	 </c:forEach>
+		   	<article class = "card">
+				   		<div class="event" >
+				   			<span>
+						   		<a href="#">
+						   			<span class="card-body" style="display: inline-block; justify-content: center;">
+										<span class="card-region" > <br>No.${dataCount - (page-1) * size - status.index} </span>	
+						   				<span class="card-title"> ${dto.subject} </span>
+										<span style="display: flex; justify-content: center; padding-bottom: 10px;">
+										<input type="hidden" name="eNum" value="${dto.eNum}">
+											<button type="button" class="btn more" style="display: inline-block;" onclick="location.href='${articleUrl}&eNum=${dto.eNum}';">자세히</button>
+													<button type="button" class="btn ok" style="display: inline-block;" onclick="join_ok(${dto.eNum});">완료</button>
+											<c:if test="${dto.enabled!=0}">
+														<button type="button" class="btn join" style="display: inline-block;" onclick="join(${dto.eNum});">참여</button>
+											</c:if>
+										<c:if test="${dto.enabled==0}">
+													<button type="button" class="btn ok" style="display: inline-block;" onclick="endEvent();">종료</button>
+										</c:if>
+										</span>
+										<span class="card-date"> ${dto.start_date} ~ ${dto.end_date} </span>
+										<c:if test="${dto.enabled==0}">
+										<span class="card-date" style="color: black; font-weight: 700; font-size: 15px;"> 종료된 이벤트입니다. </span>
+										</c:if>
+						   			</span>
+						   		</a> 
+				   			</span>
+			   			</div>
+		   	</article>
+		 </c:forEach>
 
 	    </div>
 	</div>
@@ -191,8 +215,8 @@ function join_ok(){
 						</form>
 					</td>
 					<td align="right" width="100">
-						<c:if test="${sessionScope.member.userId != 'admin'}">
-						<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/event/list.do';">내참여현황</button>
+						<c:if test="${sessionScope.member.userId != 'admin' && sessionScope.member.userId !=null}">
+						<button type="button" class="btn" onclick="myEvent();">내참여현황</button>
 						</c:if>
 					</td>
 					<td align="right" width="100">
@@ -202,7 +226,12 @@ function join_ok(){
 					</td>
 				</tr>
 			</table>
-
+				<div class="popup-dialog" style="display: none;">
+						<p style="display: flex; justify-content: center; text-align: center;">참여한 이벤트가 없습니다.</p>
+					<c:forEach var="user" items="${userList}">
+							<p style="font-size: 15px;">${user.subject}</p>
+					</c:forEach>
+				</div>
 	    </div>
 	  </div>
 	</div>

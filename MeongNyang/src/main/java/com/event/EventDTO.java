@@ -11,6 +11,10 @@ public class EventDTO {
 	private String userId;
 	private long passCount;
 	
+	private long fileNum;
+	private String imageFileName;
+	private String[] imageFiles;
+	
 	
 	public long getPassCount() {
 		return passCount;
@@ -18,10 +22,6 @@ public class EventDTO {
 	public void setPassCount(long passCount) {
 		this.passCount = passCount;
 	}
-	private long fileNum;
-	private String imageFileName;
-	
-	private String[] imageFiles;
 	
 	public String[] getImageFiles() {
 		return imageFiles;

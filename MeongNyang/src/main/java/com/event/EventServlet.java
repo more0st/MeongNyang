@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import com.member.SessionInfo;
+import com.util.FileManager;
 import com.util.MyUploadServlet;
 import com.util.MyUtil;
 
@@ -42,28 +43,28 @@ public class EventServlet extends MyUploadServlet{
 		String root=session.getServletContext().getRealPath("/");
 		pathname=root+"uploads"+File.separator+"event";
 		
-		if(uri.indexOf("list.do")!=-1) {
+		if(uri.indexOf("list.do")!=-1) {//이벤트리스트
 			list(req, resp);
-		} else if(uri.indexOf("write.do")!=-1) {
+		} else if(uri.indexOf("write.do")!=-1) {//글쓰기폼
 			writeForm(req, resp);
-		} else if(uri.indexOf("write_ok.do")!=-1) {
+		} else if(uri.indexOf("write_ok.do")!=-1) {//글저장
 			writeSubmit(req, resp);
-		} else if(uri.indexOf("article.do")!=-1) {
+		} else if(uri.indexOf("article.do")!=-1) {//글보기
 			article(req, resp);
-		} else if(uri.indexOf("update.do")!=-1) {
+		} else if(uri.indexOf("update.do")!=-1) {//글수정폼
 			updateForm(req, resp);
-		} else if(uri.indexOf("update_ok.do")!=-1) {
+		} else if(uri.indexOf("update_ok.do")!=-1) {//글수정완료
 			updateSubmit(req, resp);
-		} else if(uri.indexOf("deleteFile.do")!=-1) {
+		} else if(uri.indexOf("deleteFile.do")!=-1) {//파일삭제
 			deleteFile(req, resp);
-		} else if(uri.indexOf("delete.do")!=-1) {
+		} else if(uri.indexOf("delete.do")!=-1) {//글삭제
 			delete(req, resp);
-		} else if(uri.indexOf("participant.do")!=-1) {
-			eventParticipant(req, resp);
-		} else if(uri.indexOf("pass.do")!=-1) {
-			eventPass(req, resp);
-		} else if(uri.indexOf("join.do")!=-1) {
+		} else if(uri.indexOf("join.do")!=-1) {//이벤트참여
 			join(req, resp);
+		} else if(uri.indexOf("delParticipant.do")!=-1) {//이벤트참여취소
+			delParticipant(req, resp);
+		} else if(uri.indexOf("passEvent.do")!=-1) {//당첨자 
+			passEvent(req, resp);
 		}
 		
 	}
@@ -88,7 +89,7 @@ public class EventServlet extends MyUploadServlet{
 			if(status!=null) {
 				eventStatus=Integer.parseInt(status);
 			}
-	
+			
 			int size=6;
 			
 			//데이터개수
@@ -116,11 +117,6 @@ public class EventServlet extends MyUploadServlet{
 				list=dao.listEvent(offset, size, eventStatus);
 			}
 			
-			//long eNum=Long.parseLong(req.getParameter("eNum"));//nullpointer
-			
-			//List<EventDTO> list_par=dao.participantList(eNum);
-			
-			
 			String query="eventStatus="+eventStatus;
 			String listUrl=cp+"/event/list.do";
 			String articleUrl=cp+"/event/article.do?page="+current_page;
@@ -129,9 +125,9 @@ public class EventServlet extends MyUploadServlet{
 				listUrl+="?"+query;
 				articleUrl+="&"+query;
 			}
+			
 			String paging=util.paging(current_page, total_page, listUrl);
 			
-			//req.setAttribute("list_par", list_par);
 			req.setAttribute("list", list);
 			req.setAttribute("page", current_page);
 			req.setAttribute("total_page", total_page);
@@ -246,6 +242,8 @@ public class EventServlet extends MyUploadServlet{
 	         EventDTO nextReadDTO=dao.nextReadEvent(dto.geteNum(), eventStatus);
 	         
 	         
+	         List<EventDTO> listFile=dao.listFile(eNum);
+	         req.setAttribute("listFile", listFile);
 	         req.setAttribute("dto", dto);
 	         req.setAttribute("query", query);
 	         req.setAttribute("page", page);
@@ -290,10 +288,13 @@ public class EventServlet extends MyUploadServlet{
 			}
 			
 			//파일처리
+			List<EventDTO> listFile=dao.listFile(eNum);
 			
 			req.setAttribute("dto", dto);
 			req.setAttribute("page", page);
 			req.setAttribute("mode", "update");
+			req.setAttribute("listFile", listFile);
+			
 			
 			forward(req, resp, "/WEB-INF/views/event/write.jsp");
 			return;
@@ -327,11 +328,10 @@ public class EventServlet extends MyUploadServlet{
 		}
 		
 		String enabled1=req.getParameter("enabled");
-		int enabled=1;
-		if(enabled1!=null) {
-			enabled=Integer.parseInt(req.getParameter("enabled"));
+		int enabled=0;//종료
+		if(enabled1==null) {//check안된 상태로 넘어온다면 -> 진행중인 이벤트
+			enabled=1;
 		}
-
 		
 		try {
 			
@@ -345,9 +345,14 @@ public class EventServlet extends MyUploadServlet{
 			dto.setEnd_date(req.getParameter("end_date"));
 			dto.setUserId(info.getUserId());
 			dto.setEnabled(enabled);
+			dto.setPassCount(Long.parseLong(req.getParameter("passCount")));
 			
 			//파일처리
-			
+			Map<String, String[]> map=doFileUpload(req.getParts(), pathname);
+			if(map!=null) {
+				String []saveFiles=map.get("saveFilenames");
+				dto.setImageFiles(saveFiles);
+			}
 			dao.updateEvent(dto);
 			
 		} catch (Exception e) {
@@ -359,6 +364,46 @@ public class EventServlet extends MyUploadServlet{
 	}
 	protected void deleteFile(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		//수정에서 사진만 삭제
+		EventDAO dao=new EventDAO();
+		
+		HttpSession session=req.getSession();
+		SessionInfo info=(SessionInfo)session.getAttribute("member");
+		
+		String cp=req.getContextPath();
+		
+		String page=req.getParameter("page");
+		
+		try {
+			long eNum=Long.parseLong(req.getParameter("eNum"));
+			long fileNum=Long.parseLong(req.getParameter("fileNum"));
+			
+			EventDTO dto=dao.readEvent(eNum);
+			
+			if(dto==null) {
+				resp.sendRedirect(cp+"/event/list.do?page="+page);
+				return;
+			}
+			
+			if (!info.getUserId().equals("admin")) {
+				resp.sendRedirect(cp + "/event/list.do?page=" + page);
+				return;
+			}
+			
+			EventDTO file=dao.readFile(fileNum);
+			if(file!=null) {
+				FileManager.doFiledelete(pathname,file.getImageFileName());
+				
+				dao.deleteFile("only", fileNum);
+			}
+			
+			resp.sendRedirect(cp+"/event/update.do?eNum="+eNum+"&page="+page);
+			return;
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		resp.sendRedirect(cp+"/event/list.do?page="+page);
 	}
 	protected void delete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		//이벤트 삭제
@@ -396,9 +441,12 @@ public class EventServlet extends MyUploadServlet{
 			}
 			
 			//이미지 파일 지우기
-			
+			List<EventDTO> listFile=dao.listFile(eNum);
+			for(EventDTO file:listFile){
+				FileManager.doFiledelete(pathname,file.getImageFileName());
+			}
+			dao.deleteFile("all", eNum);
 			dao.deleteEvent(eNum);
-			
 			
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -429,12 +477,47 @@ public class EventServlet extends MyUploadServlet{
 		resp.sendRedirect(cp+"/event/list.do");
 		
 	}
-	protected void eventParticipant(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		//이벤트 참여
+
+	protected void delParticipant(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		//이벤트 참여 취소
+		EventDAO dao=new EventDAO();
+		
+		String cp=req.getContextPath();
+		
+		HttpSession session=req.getSession();
+		SessionInfo info=(SessionInfo)session.getAttribute("member");
+		
+		try {
+			long eNum=Long.parseLong(req.getParameter("eNum"));
+			
+			dao.deleteParticipant(eNum,info.getUserId());
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		resp.sendRedirect(cp+"/event/list.do");
+		
 	}
 
-	protected void eventPass(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+	protected void passEvent(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		//이벤트 추첨
+		EventDAO dao=new EventDAO();
+		String cp=req.getContextPath();
+		
+		try {
+			long eNum=Long.parseLong(req.getParameter("eNum"));
+			long passCount=Long.parseLong(req.getParameter("passCount"));
+			
+			List<EventDTO> random=dao.randomList(passCount, eNum);
+			for(EventDTO dto:random) {
+				dao.insertPass(eNum, dto.getUserId());
+			}
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		resp.sendRedirect(cp+"/event/list.do");
 	}
 	
 

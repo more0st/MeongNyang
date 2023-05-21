@@ -16,6 +16,27 @@
 }
 
 .table-article tr>td { padding-left: 5px; padding-right: 5px; }
+
+img-box {
+	max-width: 700px;
+	padding: 10px;
+	box-sizing: border-box;
+	display: flex;
+	text-align : center;
+	justify-content:center;
+	flex-direction: row;
+	flex-wrap: nowrap;
+	overflow-x: auto;
+}
+
+.img-box img {
+	width: 400px; height: 400px;
+	display: block;
+	margin: auto;
+}
+
+
+
 </style>
 <script type="text/javascript">
 <c:if test="${sessionScope.member.userId==dto.userId || sessionScope.member.userId=='admin'}">
@@ -28,12 +49,21 @@
 	}
 </c:if>
 
+function passEvent(){
+	if(confirm("추첨을 진행하시겠습니까 ? (추첨은 단 한번만 가능하며, 당첨자 변경이 불가합니다.)")){
+		let url="${pageContext.request.contextPath}/event/passEvent.do?eNum=${dto.eNum}&passCount=${dto.passCount}";
+		location.href=url;
+	}
+}
+
+
 //해당되는 객체가 숨겨져있는지 아닌지 확인하는 함수
 const isHidden = ele => {
 	const styles = window.getComputedStyle(ele); //인자로 넘겨 받은 요소의 모든 css 속성 값을 담은 객체 반환
 	return styles.display === 'none' || styles.visibility === 'hidden'; //숨겨져있는지 아닌지 확인
 	
 };
+
 
 
 </script>
@@ -70,13 +100,20 @@ const isHidden = ele => {
 							추첨인원 : ${dto.passCount}
 						</td>
 					</tr>
-					
 					<tr>
-						<td colspan="2" valign="top" height="200">
+						<td colspan="2" valign="top" style="min-height: 50px;">
 							${dto.content}
 						</td>
 					</tr>
-					
+					<tr>
+						<td colspan="2" height="110">
+							<div class="img-box">
+								<c:forEach var="file" items="${listFile}">
+									<img src="${pageContext.request.contextPath}/uploads/event/${file.imageFileName}">
+								</c:forEach>
+							</div>
+						</td>
+					</tr>
 					<tr>
 						<td colspan="2">
 							이전글 :
@@ -118,12 +155,15 @@ const isHidden = ele => {
 				    	</c:choose>
 					</td>
 					<td align="right">
+						<button type="button" class="btn" onclick="passEvent();">추첨</button>
 						<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/event/list.do?${query}';">리스트</button>
 					</td>
 				</tr>
 			</table>
 					<input type="hidden" name="eNum" value="${dto.eNum}">
 					<input type="hidden" name="eventStatus" value="${eventStatus}">
+					<input type="hidden" name="passCount" value="${dto.passCount}">
+					
 
 	    </div>
 	    </div>

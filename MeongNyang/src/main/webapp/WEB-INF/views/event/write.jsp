@@ -23,6 +23,16 @@
 
 .table-form input[type=text], .table-form input[type=file], .table-form textarea {
 	width: 96%; }
+	
+img-box {
+	max-width: 100px;
+	padding: 5px;
+	box-sizing: border-box;
+	display: flex;
+	flex-direction: row;
+	flex-wrap: nowrap;
+	overflow-x: auto;
+}
 </style>
 
 <script type="text/javascript">
@@ -33,6 +43,7 @@ function sendOk() {
 	let start_date=new Date(f.start_date.value);
 	let end_date=new Date(f.end_date.value);
 	let current_date=new Date(new Date().setHours(0, 0, 0, 0));
+	let mode=f.mode.value;
 	
     str = f.subject.value.trim();
     if(!str) {
@@ -48,15 +59,11 @@ function sendOk() {
         return;
     }
     
-    //종료일 시작일 비교 하기
-    //start_date=f.start_date.value;
-    //end_date=f.start_date.value;
-
     if(start_date>=end_date){
     	alert("종료일은 시작일보다 작을 수 없습니다.");
     	f.end_date.focus();
     	return;
-    } else if(current_date>start_date){
+    } else if(current_date>start_date && mode!='update'){
     	alert("현재보다 이전일을 시작일로 설정할 수 없습니다.");
     	f.start_date.focus();
     	return;
@@ -66,6 +73,18 @@ function sendOk() {
     f.submit();
 }
 
+<c:if test="${mode=='update'}">
+function deleteFile(fileNum){
+	if(!confirm("이미지를 삭제 하시겠습니까 ?")){
+		return;
+	}
+	
+	let query="eNum=${dto.eNum}&fileNum="+fileNum+"&page=${page}";
+	let url = "${pageContext.request.contextPath}/event/deleteFile.do?" + query;
+	location.href = url;
+	
+}
+</c:if>
 
 </script>
 </head>
@@ -111,11 +130,8 @@ function sendOk() {
 							<p>
 							 	<input type="date" name="start_date" value="${dto.start_date}"> ~ 
 								<input type="date" name="end_date" value="${dto.end_date}">
-								<c:if test="${mode=='update' && dto.enabled == 0}">
-										종료 <input type="checkbox" name="enabled" value="0" checked="checked">
-								</c:if>
-								<c:if test="${mode=='update' && dto.enabled != 0}">
-										종료 <input type="checkbox" name="enabled" value="1">
+								<c:if test="${mode=='update'}">
+										종료 <input type="checkbox" name="enabled" value="0" ${dto.enabled == 0?'checked="checked"':''}>
 								</c:if>
 							</p>
 						</td>
@@ -135,6 +151,19 @@ function sendOk() {
 							<input type="file" name="selectFile" accept="image/*" multiple="multiple" class="form-control">
 						</td>
 					</tr>
+					<c:if test="${mode=='update'}">
+						<tr>
+							<td>등록이미지</td>
+							<td> 
+								<div class="img-box">
+									<c:forEach var="file" items="${listFile}">
+										<img src="${pageContext.request.contextPath}/uploads/event/${file.imageFileName}"
+											onclick="deleteFile('${file.fileNum}');" style="width: 15%;" >
+									</c:forEach>
+								</div>
+							</td>
+						</tr>
+					</c:if>
 
 				</table>
 					
@@ -144,6 +173,7 @@ function sendOk() {
 							<button type="button" class="btn" onclick="sendOk();">${mode=='update'?'수정완료':'등록하기'}</button>
 							<button type="reset" class="btn">다시입력</button>
 							<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/event/list.do';">${mode=='update'?'수정취소':'등록취소'}</button>
+								<input type="hidden" name="mode" value="${mode}">
 							<c:if test="${mode=='update'}">
 								<input type="hidden" name="eNum" value="${dto.eNum}">
 								<input type="hidden" name="page" value="${page}">
