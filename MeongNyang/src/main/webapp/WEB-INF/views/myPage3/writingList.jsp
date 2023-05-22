@@ -32,7 +32,7 @@ function searchList() {
 }
 
 function categoryList() {
-	const f = document.categoryForm;
+	const f = document.boardForm;
 	f.submit();
 }
 </script>
@@ -59,6 +59,12 @@ function categoryList() {
 				</tr>
 			</table>
 			
+			<!-- input 에는 readonly가 있지만, SELECT에는 readonly가 없다. 
+					임시로 disable 한 후에 폼데이터를 넘기면 데이터값이 넘어가지 않는다. 
+					그래서 disable 한 후에 폼데이터를 넘기기 직전에 disable을 풀어주는 방법과
+					option들을 disable 하는 방법이 있다.  -->
+			
+			
 			<table class="table table-border table-list">
 				<thead>
 					<tr>
@@ -67,13 +73,12 @@ function categoryList() {
 						<th class="date">작성일</th>
 						<th class="hit">조회수</th>
 						<th class="category">
-							<form name="categoryForm" action="${pageContext.request.contextPath}/myPage3/writingList.do" method="post">
-								<select name="category" class="form=select">
-									<option value="default" disabled selected="selected">카테고리</option>
-									<option value="all" onchange="categoryList();">모두보기</option>
-									<option value="map" onchange="categoryList();">멍냥지도</option>
-									<option value="gallery" onchange="categoryList();">멍냥갤러리</option>
-									<option value="club" onchange="categoryList();">멍냥모임</option>
+							<form name="boardForm" action="${pageContext.request.contextPath}/myPage3/writingList.do" method="post">
+								<select name="category" class="form=select" onchange="categoryList();">
+									<option value="all" ${category=="all"?"selected='selected'":"" } >모두보기</option>
+									<option value="map" ${category=="map"?"selected='selected'":"" }>멍냥지도</option>
+									<option value="gallery" ${category=="gallery"?"selected='selected'":"" }>멍냥갤러리</option>
+									<option value="club" ${category=="club"?"selected='selected'":"" }>멍냥모임</option>
 								</select>
 							</form>
 						</th>
@@ -85,15 +90,16 @@ function categoryList() {
 						<tr>
 							<td>${dataCount - (page-1) * size - status.index}</td>
 							<td class="left">
-								<a href="${articleUrl}">${dto.subject}</a>
+								<a onclick="location.href='${articleUrl}&num=${dto.num}';">${dto.subject}</a>
 							</td>
 							<td>${dto.reg_date}</td>
 							<td>${dto.hitCount}</td>
-							<td>${dto.category==1 ? "멍냥마켓" : dto.category==2 ? "멍냥갤러리" : "멍냥모임"}</td>
+							<td>${dto.category==1 ? "멍냥지도" : dto.category==2 ? "멍냥갤러리" : "멍냥모임"}</td>
 						</tr>
 					</c:forEach>
 				</tbody>
 			</table>
+
 			
 			<div class="page-navigation">
 				${dataCount == 0 ? "작성한 게시물이 없습니다." : paging}

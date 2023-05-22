@@ -45,7 +45,7 @@ public class MyPageServlet extends MyServlet{
 		// uri에 따른 작업 구분
 		if (uri.indexOf("buyList.do") != -1) {		// 나의 구매내역 리스트
 			list(req, resp);
-		} 
+		}  
 		
 	}
 

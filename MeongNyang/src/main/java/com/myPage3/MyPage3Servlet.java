@@ -2,7 +2,6 @@ package com.myPage3;
 
 import java.io.IOException;
 import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.util.List;
 
 import javax.servlet.ServletException;
@@ -68,13 +67,7 @@ public class MyPage3Servlet extends MyServlet{
 				condition = "all";
 				keyword = "";
 			}
-			
-			
-			
-			// 카테코리 검색
-			String category = req.getParameter("category");
-			
-			
+		
 
 			// GET 방식이면 디코딩
 			if(req.getMethod().equalsIgnoreCase("GET")) {
@@ -93,9 +86,13 @@ public class MyPage3Servlet extends MyServlet{
 			*/
 			
 			
+			// 카테코리 
+			String category = req.getParameter("category");
+			
+			
 			// 전체 데이터 개수(카테코리)
 			int dataCount;
-			if(category == "default") { 	// 카테고리검색이 선택되지 않았을때
+			if(category==null || category.equals("first") || category.equals("all")) { 	// 카테고리검색이 선택되지 않았을때
 				dataCount = dao.dataCount(info.getUserId());
 			} else {	// 카테고리 검색옵션이 선택되었을때
 				dataCount = dao.categoryDataCount(info.getUserId(), category);
@@ -133,7 +130,7 @@ public class MyPage3Servlet extends MyServlet{
 			
 			List<MyPage3DTO> list = null;
 			
-			if(category.length() == 0) {
+			if(category== null || category.equals("first") || category.equals("all")) {
 				list = dao.listBoard(info.getUserId(), offset, size);
 			} else {
 				list = dao.categoryListBoard(info.getUserId(), offset, size, category);
@@ -142,25 +139,45 @@ public class MyPage3Servlet extends MyServlet{
 			
 			
 			
-			/*
-			// 페이징 처리
+			
+			// 카테고리 페이징 처리
 			String query = "";
-			if(keyword.length() != 0) {
-				query = "condition=" + condition + "&keyword=" + URLEncoder.encode(keyword, "utf-8");
+			if(category != null ) {
+				query = "category=" + category;
 			}
 			
 			String listUrl = cp + "/myPage3/writingList.do";
-			String articleUrl = cp + "/market/article.do?"; // 클릭해서 다른조원이 만든 글로 이동하게 수정하기
+			String articleUrl = ""; // 클릭해서 다른조원이 만든 글로 이동하게 수정하기
+			
+			if(category== null || category.equals("all")) {
+					MyPage3DTO dto = new MyPage3DTO();
+				
+				if(dto.getCategory() == 1) {
+					articleUrl = cp + "/map/article.do?";
+				} else if(dto.getCategory() == 2) {
+					articleUrl = cp + "/gallery/article.do?";
+				} else if (dto.getCategory() == 3) {
+					articleUrl = cp + "/club/article.do?";
+				}
+			} else if(category.equals("map")) {
+				articleUrl = cp + "/map/article.do?";
+			} else if(category.equals("gallery")) {
+				articleUrl = cp + "/gallery/article.do?";
+			} else if(category.equals("club")) {
+				articleUrl = cp + "/club/article.do?";
+			}
+
+
 			if(query.length() != 0) {
 				listUrl += "?" + query;
 				articleUrl += "&" + query;
 			}
 			
+			
 			String paging = util.paging(current_page, total_page, listUrl);
-			*/
 
 			
-			
+			/*
 			// 카테고리 페이징 처리
 			String query = "categroy=" + category;
 			
@@ -172,6 +189,8 @@ public class MyPage3Servlet extends MyServlet{
 			}
 			
 			String paging = util.paging(current_page, total_page, listUrl);
+			*/
+			
 			
 			
 			// 포워딩할 JSP에 전달할 속성(attribute)

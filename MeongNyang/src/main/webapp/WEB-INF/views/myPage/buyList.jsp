@@ -90,7 +90,7 @@ function searchList() {
 						<div>판매자 : ${dto.sellerid}</div>
 						<div>거래지 : ${dto.addr}</div>
 						<div>가격 : ${dto.price}원</div>
-						<div>판매날짜 : ${dto.pay_date}</div>
+						<div>구매날자 : ${dto.pay_date}</div>
 						</div>
 					</div>
 				</c:forEach>
@@ -109,8 +109,8 @@ function searchList() {
 						<form name="searchForm" action="${pageContext.request.contextPath}/myPage/buyList.do" method="post">
 							<select name="condition" class="form-select">
 								<option value="all"      ${condition=="all"?"selected='selected'":"" }>제목+내용</option>
-								<option value="userName" ${condition=="userName"?"selected='selected'":"" }>작성자</option>
-								<option value="reg_date"  ${condition=="reg_date"?"selected='selected'":"" }>등록일</option>
+								<option value="seller" ${condition=="userName"?"selected='selected'":"" }>판매자</option>
+								<option value="pay_date"  ${condition=="reg_date"?"selected='selected'":"" }>구매날짜</option>
 								<option value="subject"  ${condition=="subject"?"selected='selected'":"" }>제목</option>
 								<option value="content"  ${condition=="content"?"selected='selected'":"" }>내용</option>
 							</select>
