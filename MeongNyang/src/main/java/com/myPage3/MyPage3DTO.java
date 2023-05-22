@@ -2,12 +2,20 @@ package com.myPage3;
 
 public class MyPage3DTO {
 	
+	private long num;
 	private String subject;
 	private int category;		// 1: 멍냥지도,  2: 멍냥갤러리,   3: 멍냥모임
 	private String reg_date;
 	private int	hitCount;
 	
 	
+	
+	public long getNum() {
+		return num;
+	}
+	public void setNum(long num) {
+		this.num = num;
+	}
 	public String getSubject() {
 		return subject;
 	}

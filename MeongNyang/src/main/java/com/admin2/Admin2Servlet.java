@@ -141,7 +141,7 @@ public class Admin2Servlet extends MyServlet{
 		}
 		
 		forward(req, resp, "/WEB-INF/views/admin2/userFix.jsp");
-		
+	
 	}
 	
 
