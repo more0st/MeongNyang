@@ -262,21 +262,23 @@ var makeMerchantUid = hours +  minutes + seconds + milliseconds;
 
 function requestPay() {
     IMP.request_pay({
-        pg : 'html5_inicis', //html5_inicis
+        pg : 'kakaopay',
         pay_method : 'card',
-        merchant_uid: "IMP"+makeMerchantUid, 
+        merchant_uid: '${dto.marketNum}', 
         name : '${dto.subject}',
-        amount : '${dto.price}',
+        amount : ${dto.price},
         buyer_email : 'Iamport@chai.finance',
-        buyer_name : '아임포트 기술지원팀',
+        buyer_name : '${sessionScope.member.userId}',
         buyer_tel : '010-1234-5678',
         buyer_addr : '서울특별시 강남구 삼성동',
         buyer_postcode : '123-456'
     }, function (rsp) { // callback
         if (rsp.success) {
-            console.log(rsp);
+			console.log(rsp);
+        	alert("결재가 성공되었습니다.");
+            location.href = "${pageContext.request.contextPath}/market/cardbuy_ok.do?buyerId="+rsp.buyer_name+"&marketNum="+rsp.merchant_uid;
         } else {
-            console.log(rsp);
+            alert("결재에 실패했습니다.");
         }
     });
 }

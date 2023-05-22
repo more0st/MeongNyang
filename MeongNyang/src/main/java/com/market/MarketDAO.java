@@ -149,6 +149,33 @@ public class MarketDAO {
 		}
 	}
 	
+	public void cardbuy(Long marketNum, String buyerId) throws SQLException {
+		PreparedStatement pstmt = null;
+		String sql;
+		
+		try {
+			sql = "UPDATE market SET STATE = 1, BUYERID = ?, PAY_DATE = SYSDATE "
+					+ "WHERE MarketNum = ?";
+			pstmt = conn.prepareStatement(sql);
+			
+			pstmt.setString(1, buyerId);
+			pstmt.setLong(2, marketNum);
+			
+			pstmt.executeUpdate();
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw e;
+		} finally {
+			if(pstmt != null) {
+				try {
+					pstmt.close();
+				} catch (Exception e2) {
+				}
+			}
+		}
+	}
+	
 	public void deleteMarket(long marketNum) throws SQLException {
 		PreparedStatement pstmt = null;
 		String sql;

@@ -67,6 +67,8 @@ public class MarketServlet extends MyUploadServlet{
 			deleteFile(req, resp);
 		} else if (uri.indexOf("buy_ok.do") != -1) {
 			buy(req, resp);
+		} else if (uri.indexOf("cardbuy_ok.do") != -1) {
+			cardbuy(req, resp);
 		} else if(uri.indexOf("insertBoardLike.do") != -1) {
 			insertBoardLike(req, resp);
 		} else if(uri.indexOf("insertReply.do") != -1) {
@@ -560,9 +562,25 @@ public class MarketServlet extends MyUploadServlet{
 			String buyerId = req.getParameter("buyerId");
 			long marketNum = Long.parseLong(req.getParameter("marketNum"));
 			
-			System.out.println(marketNum);
-			System.out.println(buyerId);
 			dao.buy(marketNum, buyerId);
+			
+			resp.sendRedirect(cp + "/market/list.do");
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
+	protected void cardbuy(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		MarketDAO dao = new MarketDAO();
+		
+		String cp = req.getContextPath();
+		
+		try {
+			
+			String buyerId = req.getParameter("buyerId");
+			long marketNum = Long.parseLong(req.getParameter("marketNum"));
+			
+			dao.cardbuy(marketNum, buyerId);
 			
 			resp.sendRedirect(cp + "/market/list.do");
 		} catch (Exception e) {
