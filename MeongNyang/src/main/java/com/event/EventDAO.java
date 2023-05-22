@@ -765,6 +765,15 @@ public class EventDAO {
 			pstmt.setLong(2, eNum);
 			rs=pstmt.executeQuery();
 			
+			while(rs.next()) {
+				EventDTO dto=new EventDTO();
+				
+				dto.seteNum(rs.getLong("eNum"));
+				dto.setUserId(rs.getString("userId"));
+				
+				list.add(dto);
+			}
+			
 		} catch (SQLException e) {
 			e.printStackTrace();
 		} finally {
@@ -787,7 +796,7 @@ public class EventDAO {
 		return list;
 	}
 	
-	public List<EventDTO> eventList(String userId){//개인의 참여한 이벤트 리스트//사용안함
+	public List<EventDTO> eventList(String userId){//개인의 참여한 이벤트 리스트
 		//이벤트 참여인원 리스트
 		List<EventDTO> list=new ArrayList<EventDTO>();
 		PreparedStatement pstmt=null;
@@ -803,6 +812,16 @@ public class EventDAO {
 			pstmt=conn.prepareStatement(sql);
 			pstmt.setString(1, userId);
 			rs=pstmt.executeQuery();
+			
+			while(rs.next()) {
+				EventDTO dto=new EventDTO();
+				
+				dto.seteNum(rs.getLong("eNum"));
+				dto.setSubject(rs.getString("subject"));
+				dto.setUserId(rs.getString("userId"));
+				
+				list.add(dto);
+			}
 			
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -863,14 +882,20 @@ public class EventDAO {
 		String sql="";
 		
 		try {
-			sql="select p.eNum, subject, userId "
-					+ " from pass p "
-					+ " left outer join participant c on p.eNum=c.eNum "
-					+ " where eNum=? ";
+			sql="select eNum, userId from pass where eNum=? ";
 			
 			pstmt=conn.prepareStatement(sql);
 			pstmt.setLong(1, eNum);
 			rs=pstmt.executeQuery();
+			
+			while(rs.next()) {
+				EventDTO dto=new EventDTO();
+				
+				dto.seteNum(rs.getLong("eNum"));
+				dto.setUserId(rs.getString("userId"));
+				
+				list.add(dto);
+			}
 			
 		} catch (SQLException e) {
 			e.printStackTrace();

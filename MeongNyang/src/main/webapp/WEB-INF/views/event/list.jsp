@@ -170,13 +170,19 @@ function myEvent(){
 										<span style="display: flex; justify-content: center; padding-bottom: 10px;">
 										<input type="hidden" name="eNum" value="${dto.eNum}">
 											<button type="button" class="btn more" style="display: inline-block;" onclick="location.href='${articleUrl}&eNum=${dto.eNum}';">자세히</button>
-													<button type="button" class="btn ok" style="display: inline-block;" onclick="join_ok(${dto.eNum});">완료</button>
-											<c:if test="${dto.enabled!=0}">
-														<button type="button" class="btn join" style="display: inline-block;" onclick="join(${dto.eNum});">참여</button>
-											</c:if>
-										<c:if test="${dto.enabled==0}">
+	    									
+	    									<c:choose>
+	    										<c:when test="${dto.isEvent ==1 && dto.enabled!=0 }">
+	    											<button type="button" class="btn ok" style="display: inline-block;" onclick="join_ok(${dto.eNum});">완료</button>
+	    										</c:when>
+	    										<c:when test="${dto.enabled!=0 }">
+	    											<button type="button" class="btn join" style="display: inline-block;" onclick="join(${dto.eNum});">참여</button>
+	    										</c:when>
+	    										<c:otherwise>
 													<button type="button" class="btn ok" style="display: inline-block;" onclick="endEvent();">종료</button>
-										</c:if>
+	    										</c:otherwise>
+	    									</c:choose>
+
 										</span>
 										<span class="card-date"> ${dto.start_date} ~ ${dto.end_date} </span>
 										<c:if test="${dto.enabled==0}">
@@ -215,7 +221,7 @@ function myEvent(){
 						</form>
 					</td>
 					<td align="right" width="100">
-						<c:if test="${sessionScope.member.userId != 'admin' && sessionScope.member.userId !=null}">
+						<c:if test="${sessionScope.member.userId != 'admin' && not empty sessionScope.member}">
 						<button type="button" class="btn" onclick="myEvent();">내참여현황</button>
 						</c:if>
 					</td>
@@ -227,10 +233,14 @@ function myEvent(){
 				</tr>
 			</table>
 				<div class="popup-dialog" style="display: none;">
+					<c:if test="${empty eventList}">
 						<p style="display: flex; justify-content: center; text-align: center;">참여한 이벤트가 없습니다.</p>
-					<c:forEach var="user" items="${userList}">
+					</c:if>
+					<c:if test="${not empty eventList}">
+					<c:forEach var="user" items="${eventList}">
 							<p style="font-size: 15px;">${user.subject}</p>
 					</c:forEach>
+					</c:if>
 				</div>
 	    </div>
 	  </div>

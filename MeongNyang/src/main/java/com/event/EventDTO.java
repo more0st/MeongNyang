@@ -11,6 +11,15 @@ public class EventDTO {
 	private String userId;
 	private long passCount;
 	
+	private int isEvent;
+	
+	public int getIsEvent() {
+		return isEvent;
+	}
+	public void setIsEvent(int isEvent) {
+		this.isEvent = isEvent;
+	}
+	
 	private long fileNum;
 	private String imageFileName;
 	private String[] imageFiles;
@@ -83,6 +92,7 @@ public class EventDTO {
 	public void setImageFileName(String imageFileName) {
 		this.imageFileName = imageFileName;
 	}
+	
 	
 	
 }

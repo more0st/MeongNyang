@@ -126,6 +126,25 @@ public class EventServlet extends MyUploadServlet{
 				articleUrl+="&"+query;
 			}
 			
+			HttpSession session=req.getSession();
+			SessionInfo info=(SessionInfo)session.getAttribute("member");
+			if(info!=null) {
+				List<EventDTO> eventList= dao.eventList(info.getUserId());
+				
+				req.setAttribute("eventList", eventList);
+				
+				for(EventDTO a : list) {
+					for(EventDTO b : eventList) {
+						if(a.geteNum() == b.geteNum()) {
+							a.setIsEvent(1);
+						}
+					}
+				}
+			}
+			
+			
+			
+			
 			String paging=util.paging(current_page, total_page, listUrl);
 			
 			req.setAttribute("list", list);
@@ -243,6 +262,9 @@ public class EventServlet extends MyUploadServlet{
 	         
 	         
 	         List<EventDTO> listFile=dao.listFile(eNum);
+	         List<EventDTO> passList=dao.passList(eNum);
+	         
+	         req.setAttribute("passList", passList);
 	         req.setAttribute("listFile", listFile);
 	         req.setAttribute("dto", dto);
 	         req.setAttribute("query", query);

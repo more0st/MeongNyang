@@ -56,6 +56,12 @@ function passEvent(){
 	}
 }
 
+function passEvent_ok(){
+	$(".popup-dialog").dialog({
+		title:"당첨자 확인"
+	});
+}
+
 
 //해당되는 객체가 숨겨져있는지 아닌지 확인하는 함수
 const isHidden = ele => {
@@ -155,7 +161,12 @@ const isHidden = ele => {
 				    	</c:choose>
 					</td>
 					<td align="right">
+					<c:if test="${empty passList && sessionScope.member.userId=='admin'}">
 						<button type="button" class="btn" onclick="passEvent();">추첨</button>
+					</c:if>
+					<c:if test="${not empty passList}">
+						<button type="button" class="btn" onclick="passEvent_ok();">당첨자 확인</button>
+					</c:if>
 						<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/event/list.do?${query}';">리스트</button>
 					</td>
 				</tr>
@@ -163,7 +174,16 @@ const isHidden = ele => {
 					<input type="hidden" name="eNum" value="${dto.eNum}">
 					<input type="hidden" name="eventStatus" value="${eventStatus}">
 					<input type="hidden" name="passCount" value="${dto.passCount}">
-					
+			<div class="popup-dialog" style="display: none;">
+				<c:if test="${empty passList}">
+					<p style="display: flex; justify-content: center; text-align: center;">추첨전입니다.</p>
+				</c:if>
+				<c:if test="${not empty passList}">
+				<c:forEach var="user" items="${passList}">
+					<p style="font-size: 15px;">${user.userId}</p>
+				</c:forEach>
+				</c:if>
+			</div>
 
 	    </div>
 	    </div>
