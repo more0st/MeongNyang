@@ -129,7 +129,7 @@ $(function () {
 		const $i = $(this).find('img');
 		console.log($i.css("color"));
 		let isNoLike = $i.css("color") == "rgb(0, 0, 0)";
-		let msg = isNoLike ? "게시글에 공감하십니까 ?" : "게시글 공감을 취소하시겠습니까 ?"; 
+		let msg = isNoLike ? "찜 하시겠습니까 ?" : "찜하기 취소하시겠습니까 ?"; 
 		
 		if(! confirm(msg)) {
 			return false; 

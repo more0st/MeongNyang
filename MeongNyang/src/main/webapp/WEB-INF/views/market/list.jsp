@@ -63,7 +63,7 @@ function searchList() {
 <main>
 	<div class="container body-container">
 	    <div class="body-title">
-			<h2><img src="${pageContext.request.contextPath}/resource/images/marketPage.png"></h2>
+			<h2><img src="${pageContext.request.contextPath}/resource/images/marketPage.png" style="width: 250px;"></h2>
 	    </div>
 	    
 	    <div class="body-main mx-auto">
