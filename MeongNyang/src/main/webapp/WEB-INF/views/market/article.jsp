@@ -67,8 +67,28 @@
 .answer-article .answer-article-body { clear:both; padding: 5px 5px; border-bottom: 1px solid #ccc; }
 
 .photo-layout img { width: 570px; height: 450px; }
+
+.user-wrap {
+	width: 100%;
+	margin: 10px auto;
+	position: relative;
+}
+.user-wrap img {
+	width: 100%;
+	vertical-align: middle;
+}
+.user-text {
+	position: absolute;
+	top: 45%;
+	left: 50%;
+	width: 100%;
+	transform: translate( -50%, -50% );
+	font-weight: bold;
+    font-size: 15px;
+    font-family: 'ypseo';
+    text-align:center;
+    color: white;
 </style>
-<script type="text/javascript" src="https://code.jquery.com/jquery-1.12.4.min.js" ></script>
     <!-- iamport.payment.js -->
 <script type="text/javascript" src="https://cdn.iamport.kr/js/iamport.payment-1.2.0.js"></script>
 <script type="text/javascript">
@@ -104,36 +124,43 @@ function ajaxFun(url, method, query, dataType, fn) {
 
 // 게시글 공감 여부
 $(function () {
-	$(".btnSendBoardLike").click(function () {
-		const $i = $(this).find("i");
+	
+	$(".btnSendBoardLike").click(function() {
+		const $i = $(this).find('img');
+		console.log($i.css("color"));
 		let isNoLike = $i.css("color") == "rgb(0, 0, 0)";
-		let msg = isNoLike ? "게시글에 찜하십니까?" : "게시글 찜을 취소하시겠습니까 ?";
+		let msg = isNoLike ? "게시글에 공감하십니까 ?" : "게시글 공감을 취소하시겠습니까 ?"; 
 		
-		if(! confirm(msg)){
-			return false;
+		if(! confirm(msg)) {
+			return false; 
 		}
 		
 		let url = "${pageContext.request.contextPath}/market/insertBoardLike.do";
 		let marketNum = "${dto.marketNum}";
 		let qs = "marketNum="+marketNum+"&isNoLike="+isNoLike;
 		
-		const fn = function(data){
+		const fn = function(data) {
 			let state = data.state;
-			if(state === "true"){
+			if(state === "true") {
+				let img = "heart";
 				let color = "black";
-				if( isNoLike ){
+				if( isNoLike) {
+					img = "heart_red";
 					color = "blue";
 				}
+				$i.attr("src", "${pageContext.request.contextPath}/resource/images/"+img+".png");
 				$i.css("color", color);
 				
 				let count = data.boardLikeCount;
 				$("#boardLikeCount").text(count);
-			}else if(state === "liked"){
+				
+			} else if (state === "liked") {
 				alert("찜은 한번만 가능합니다.");
 			}
 		};
 		
 		ajaxFun(url, "post", qs, "json", fn);
+		
 	});
 });
 
@@ -262,7 +289,7 @@ var makeMerchantUid = hours +  minutes + seconds + milliseconds;
 
 function requestPay() {
     IMP.request_pay({
-        pg : 'kakaopay',
+        pg : 'html5_inicis.INIpayTest',
         pay_method : 'card',
         merchant_uid: '${dto.marketNum}', 
         name : '${dto.subject}',
@@ -452,7 +479,26 @@ $(function() {
 					
 					<tr>
 						<td colspan="2" align="center" style="border-bottom: 20px;">
-							<button type="button" class="btn btnSendBoardLike" title="찜"> <i style="color:${isUserLike?'blue':'black'}"><img src="${pageContext.request.contextPath}/resource/images/zzim.png" width="20px;" height="20px;"></img></i>&nbsp;&nbsp;<span id="boardLikeCount">${dto.zzimCount }</span> </button>
+							<%-- <button type="button" class="btn btnSendBoardLike" title="찜"> <i style="color:${isUserLike?'blue':'black'}"><img src="${pageContext.request.contextPath}/resource/images/zzim.png" width="20px;" height="20px;"></img></i>&nbsp;&nbsp;<span id="boardLikeCount">${dto.zzimCount }</span> </button> --%>
+							<button type="button" class="btn btnSendBoardLike" title="찜" style="background: white">
+								<div class="user-wrap">
+									<div class="user-image">
+								    <c:choose>
+										<c:when test="${isUserLike == true}">
+												<img src="${pageContext.request.contextPath}/resource/images/heart_red.png" style="width: 40px; color:blue;" >										
+										</c:when>
+										<c:otherwise>
+												<img src="${pageContext.request.contextPath}/resource/images/heart.png" style="width: 40px; color:black;" >										
+										</c:otherwise>
+									</c:choose>
+								    </div>
+								    <div class="user-text" id="boardLikeCount">
+								        <p>${dto.zzimCount }</p>
+								    </div>
+								    
+								</div>
+							</button>
+							
 						</td>
 					</tr>
 					
