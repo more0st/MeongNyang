@@ -378,6 +378,8 @@ public class MarketServlet extends MyUploadServlet{
 
 			// 테이블 데이터 삭제
 			dao.deletePhoto(marketNum);
+			dao.deleteZZIM(marketNum);
+			dao.deleteMarket(marketNum);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

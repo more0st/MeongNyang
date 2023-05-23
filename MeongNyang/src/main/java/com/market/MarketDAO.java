@@ -176,6 +176,30 @@ public class MarketDAO {
 		}
 	}
 	
+	public void deleteZZIM(long marketNum) throws SQLException {
+		PreparedStatement pstmt = null;
+		String sql;
+		
+		try {
+			sql = "DELETE FROM zzim WHERE marketNum = ?";
+			pstmt = conn.prepareStatement(sql);
+			
+			pstmt.setLong(1, marketNum);
+			
+			pstmt.executeUpdate();
+		} catch (Exception e) {
+			e.printStackTrace();
+			throw e;
+		} finally {
+			if(pstmt != null) {
+				try {
+					pstmt.close();
+				} catch (Exception e2) {
+				}
+			}
+		}
+	}
+	
 	public void deleteMarket(long marketNum) throws SQLException {
 		PreparedStatement pstmt = null;
 		String sql;
@@ -199,6 +223,8 @@ public class MarketDAO {
 			}
 		}
 	}
+	
+	
 	
 	public List<MarketDTO> listMarket(int offset, int size){
 		List<MarketDTO> list = new ArrayList<>();
