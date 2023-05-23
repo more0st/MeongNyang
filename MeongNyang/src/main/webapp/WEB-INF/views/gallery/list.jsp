@@ -86,7 +86,7 @@ function searchList() {
 	<div class="container body-container">
 	    <div class="body-title" style="text-align: center;">
 	    	<a href="${pageContext.request.contextPath}/gallery/list.do">
-			<img src="${pageContext.request.contextPath}/resource/images/gallerypage2.png" style="width: 250px;" >
+			<img src="${pageContext.request.contextPath}/resource/images/gallerypage2.png" style="width: 280px;" >
 	    	</a>
 	    </div>
 	    

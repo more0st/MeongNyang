@@ -329,7 +329,7 @@ $(function(){
 	    <div class="body-title">
 			<h2>
 			<a href="${pageContext.request.contextPath}/gallery/list.do">
-			<img src="${pageContext.request.contextPath}/resource/images/gallerypage2.png" style="width: 250px;" >
+			<img src="${pageContext.request.contextPath}/resource/images/gallerypage2.png" style="width: 280px;" >
 			</a>
 			</h2>
 	    </div>
