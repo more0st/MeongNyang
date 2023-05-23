@@ -18,95 +18,6 @@
 .table-article tr>td { padding-left: 5px; padding-right: 5px; }
 
 
-.table-border thead > tr { border-top: 1px solid #eee; border-bottom: 1px solid #eee; }
-
-
-/* 댓글 */
-.reply {
-	clear: both; padding: 20px 0 10px;
-}
-.reply .bold {
-	font-weight: 900;
-}
-
-.reply .form-header {
-	padding-bottom: 7px;
-}
-.reply-form tr>td {
-	padding: 2px 0 2px;
-}
-.reply-form textarea {
-	width: 100%; height: 75px; resize: none;
-	border-radius: 30px;
-}
-.reply-form button {
-	padding: 8px 25px;
-}
-
-.reply .reply-info {
-	padding-top: 25px; padding-bottom: 7px;
-}
-.reply .reply-info  .reply-count {
-	color: tomato; font-weight: 900;
-}
-
-.reply .reply-list tr>td {
-	padding: 7px 5px;
-}
-.reply .reply-list .bold {
-	font-weight: 600;
-}
-
-.reply .deleteReply, .reply .deleteReplyAnswer {
-	cursor: pointer;
-}
-.reply .notifyReply {
-	cursor: pointer;
-}
-
-.reply-list .list-header {
-	border: 1px solid white; background: #ffedea;
-	border-radius: 30px;
-	
-}
-.reply-list tr>td {
-	padding-left: 7px; padding-right: 7px;
-}
-
-.reply-answer {
-	display: none;
-}
-.reply-answer .answer-left {
-	float: left; width: 5%;
-}
-.reply-answer .answer-right {
-	float: left; width: 95%;
-	border-radius: 30px;
-}
-.reply-answer .answer-list {
-	border-top: 1px solid #cccccc; padding: 0 10px 7px;
-}
-.reply-answer .answer-form {
-	clear: both; padding: 3px 10px 5px;
-}
-.reply-answer .answer-form textarea {
-	width: 100%; height: 75px; resize: none;
-	border-radius: 30px;
-}
-.reply-answer .answer-footer {
-	clear: both; padding: 0 13px 10px 10px; text-align: right;
-}
-
-.answer-article {
-	clear: both;
-}
-.answer-article .answer-article-header {
-	clear: both; padding-top: 5px;
-}
-.answer-article .answer-article-body {
-	clear:both; padding: 5px 5px; border-bottom: 1px solid #cccccc;
-}
-
 
 
 </style>
@@ -228,15 +139,15 @@ window.addEventListener('load',() => {
 <main>
 	<div class="container body-container">
 	    <div class="body-title">
-			<h2><img src="${pageContext.request.contextPath}/resource/images/noticepage.png" style="width: 250px;"></h2>
+			<h2><img src="${pageContext.request.contextPath}/resource/images/noticePage.png" style="width: 250px;"></h2>
 	    </div>
 	    <div style="box-shadow: 0 0 15px 0 rgb(2 59 109 / 10%);border-radius: 30px; margin: 0 auto ; width: 70%; margin-bottom: 50px;">
 	    <div class="body-main mx-auto" >
 			<table class="table table-border table-article">
 				<thead>
-					<tr>
-						<td colspan="2" align="left" style="font-weight: 900; color: tomato; font-size: 20px;">
-							${dto.subject}
+					<tr style="border-top: 2px solid #eee; border-bottom: 2px solid #eee;">
+						<td colspan="2" align="center">
+							<h3>${dto.subject}</h3>
 						</td>
 					</tr>
 				</thead>
@@ -307,102 +218,7 @@ window.addEventListener('load',() => {
 	    </div>
 	</div>
 	
-	
-	<!-- 댓글 폼 -->
-	<div class="body-container">
 
-	<div class="reply">
-		<form name="replyForm" method="post">
-			<div class='form-header'>
-				<span class="bold">댓글쓰기</span><span> - 타인을 비방하거나 개인정보를 유출하는 글의 게시를 삼가해 주세요.</span>
-			</div>
-			
-			<table class="table reply-form" >
-				<tr>
-					<td>
-						<textarea class='form-control' name="content"></textarea>
-					</td>
-				</tr>
-				<tr>
-				   <td align='right'>
-				        <button type='button' class='btn btnSendReply'>댓글 등록</button>
-				    </td>
-				 </tr>
-			</table>
-		</form>
-		
-		<div id="listReply">
-		
-			<div class='reply-info'>
-				<span class='reply-count'>댓글 15개</span>
-				<span style="font-size: 12px;">[목록, 1/3 페이지]</span>
-			</div>
-			
-			<table class='table reply-list'>
-			
-					<tr class='list-header'>
-						<td width='50%'>
-							<span class='bold'>홍길동</span>
-						</td>
-						<td width='50%' align='right'>
-							<span>2021-11-01</span> |
-							<span class='deleteReply' data-replyNum='10' data-pageNo='1'>삭제</span>
-						</td>
-					</tr>
-					<tr>
-						<td colspan='2' valign='top'>댓글입니다댓글입니다<br>댓글입니다댓글입니다</td>
-					</tr>
-			
-					<tr>
-						<td>
-							<button type='button' class='btn btnReplyAnswerLayout' data-replyNum='10'>답글 <span id="answerCount10">3</span></button>
-						</td>
-						<td align='right'>
-							<button type='button' class='btn btnSendReplyLike' data-replyNum='10' data-replyLike='1' title="좋아요">좋아요 <span>3</span></button>
-							<button type='button' class='btn btnSendReplyLike' data-replyNum='10' data-replyLike='0' title="싫어요">싫어요 <span>1</span></button>	        
-						</td>
-					</tr>
-				
-				    <tr class='reply-answer'>
-				        <td colspan='2'>
-				            <div id='Answer10' class='answer-list'>
-				            
-								<div class='answer-article'>
-									<div class='answer-article-header'>
-										<div class='answer-left'>└</div>
-										<div class='answer-right'>
-											<div style='float: left;'><span class='bold'>스프링</span></div>
-											<div style='float: right;'>
-												<span>2021-11-01</span> |
-												<span class='deleteReplyAnswer' data-replyNum='10' data-answer='15'>삭제</span>
-											</div>
-										</div>
-									</div>
-									<div class='answer-article-body'>
-										답글입니다.
-									</div>
-								</div>
-												            
-				            </div>
-				            <div class="answer-form">
-				                <div class='answer-left'>└</div>
-				                <div class='answer-right'><textarea class='form-control' ></textarea></div>
-				            </div>
-				             <div class='answer-footer'>
-				                <button type='button' class='btn btnSendReplyAnswer' data-replyNum='10'>답글 등록</button>
-				            </div>
-						</td>
-				    </tr>
-				
-
-					
-				
-			</table>
-		
-		</div>
-	</div>
-
-</div>
 	
 	
 </main>

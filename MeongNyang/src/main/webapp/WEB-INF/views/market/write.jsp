@@ -175,8 +175,10 @@ function deleteFile(fileNum) {
 <main>
 	<div class="container body-container">
 	    <div class="body-title">
-			<h2> 내 물건 팔기 </h2>
+			<h2 style="color: tomato"> 내 물건 팔기 </h2>
 	    </div>
+	    <div style="box-shadow: 0 0 15px 0 rgb(2 59 109 / 10%);border-radius: 30px; margin: 0 auto ; width: 70%;">
+	    <div class="body-main mx-auto">
 			<form name="photoForm" method="post" enctype="multipart/form-data">
 				<table class="table table-border table-form">
 					<tr> 
@@ -252,6 +254,8 @@ function deleteFile(fileNum) {
 				</table>
 		
 			</form>
+			</div>
+			</div>
 	    </div>
 </main>
 

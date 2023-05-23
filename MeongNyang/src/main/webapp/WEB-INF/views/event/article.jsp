@@ -18,7 +18,7 @@
 .table-article tr>td { padding-left: 5px; padding-right: 5px; }
 
 img-box {
-	max-width: 700px;
+	max-width: 1000px;
 	padding: 10px;
 	box-sizing: border-box;
 	display: flex;
@@ -30,7 +30,7 @@ img-box {
 }
 
 .img-box img {
-	width: 400px; height: 400px;
+	width: 600px; height: 600px;
 	display: block;
 	margin: auto;
 }
@@ -84,15 +84,15 @@ const isHidden = ele => {
 <main>
 	<div class="container body-container">
 	    <div class="body-title">
-			<h2> 글보기 </h2>
+			<h2><img src="${pageContext.request.contextPath}/resource/images/eventPage.png" style="width: 250px;"></h2>
 	    </div>
 	    <div style="box-shadow: 0 0 15px 0 rgb(2 59 109 / 10%);border-radius: 30px; margin: 0 auto ; width: 70%; margin-bottom: 50px;">
 	    <div class="body-main mx-auto">
 			<table class="table table-border table-article">
 				<thead>
-					<tr>
+					<tr style="border-top: 2px solid #eee; border-bottom: 2px solid #eee;">
 						<td colspan="2" align="center">
-							${dto.subject}
+							<h3>${dto.subject}</h3>
 						</td>
 					</tr>
 				</thead>

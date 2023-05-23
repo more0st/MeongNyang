@@ -59,7 +59,7 @@ function sendOk() {
 
 	<div class="container body-container">
 	    <div class="body-title">
-			<h2> 공지사항 </h2>
+			<h2><img src="${pageContext.request.contextPath}/resource/images/noticePage.png" style="width: 250px;"></h2>
 	    </div>
 	   
 	    <div style="box-shadow: 0 0 15px 0 rgb(2 59 109 / 10%);border-radius: 30px; margin: 0 auto ; width: 70%;">

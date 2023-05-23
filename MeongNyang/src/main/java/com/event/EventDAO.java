@@ -557,10 +557,35 @@ public class EventDAO {
 		String sql;
 		
 		try {
+			conn.setAutoCommit(false);
+			
+			sql="delete from pass where eNum=?";
+			pstmt=conn.prepareStatement(sql);
+			pstmt.setLong(1, eNum);
+			pstmt.executeUpdate();
+			pstmt.close();
+			
+			pstmt=null;
+			sql="delete from participant where eNum=?";
+			pstmt=conn.prepareStatement(sql);
+			pstmt.setLong(1, eNum);
+			pstmt.executeUpdate();
+			pstmt.close();
+			
+			pstmt=null;
+			sql="delete from eventImgFile  where eNum=?";
+			pstmt=conn.prepareStatement(sql);
+			pstmt.setLong(1, eNum);
+			pstmt.executeUpdate();
+			pstmt.close();
+
+			pstmt=null;
 			sql="delete from event where eNum=?";
 			pstmt=conn.prepareStatement(sql);
 			pstmt.setLong(1, eNum);
 			pstmt.executeUpdate();
+			
+			conn.commit();
 			
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -570,6 +595,11 @@ public class EventDAO {
 				try {
 					pstmt.close();
 				} catch (SQLException e) {
+				}
+				
+				try {
+					conn.setAutoCommit(true);
+				} catch (Exception e2) {
 				}
 			}
 		}

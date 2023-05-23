@@ -364,7 +364,7 @@ public class MarketServlet extends MyUploadServlet{
 			}
 
 			// 게시물을 올린 사용자가 아니면
-			if (!dto.getSellerId().equals(info.getUserId())) {
+			if ( ! dto.getSellerId().equals(info.getUserId()) && ! info.getUserId().equals("admin")) {
 				resp.sendRedirect(cp + "/market/list.do?page=" + page);
 				return;
 			}
