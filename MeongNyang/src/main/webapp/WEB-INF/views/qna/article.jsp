@@ -44,7 +44,7 @@
 	    <div class="body-main mx-auto">
 			<table class="table table-border table-article">
 				<thead>
-					<tr>
+					<tr style="border-top: 2px solid #eee; border-bottom: 2px solid #eee;">
 						<td colspan="2" align="center">
 							${dto.subject}
 						</td>
@@ -73,7 +73,7 @@
 			
     	<c:if test="${empty dto.replyContent}">
 			<table class="table">
-				<tr>
+				<tr >
 					<td width="50%">
 						<c:choose>
 							<c:when test="${sessionScope.member.userId=='admin'}">
@@ -111,7 +111,7 @@
 	    <div class="body-main mx-auto">
 			<table class="table table-border table-article" style="border-bottom: 1px solid; ">
 				<thead>
-					<tr>
+					<tr style="border-top: 2px solid #eee; border-bottom: 2px solid #eee;">
 						<td colspan="2" align="center">
 							'--${dto.subject}--'에 대한 답변입니다!
 						</td>

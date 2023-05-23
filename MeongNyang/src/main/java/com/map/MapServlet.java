@@ -491,7 +491,7 @@ public class MapServlet extends MyUploadServlet{
 			}
 			
 			// 게시물을 올린 사용자가 아니면
-			if (!dto.getUserId().equals(info.getUserId())) {
+			if (!dto.getUserId().equals(info.getUserId())&& dto.getUserId().equals("admin")) {
 				resp.sendRedirect(cp + "/map/list.do?page=" + page);
 				return;
 			}
