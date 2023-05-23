@@ -34,38 +34,90 @@
 	cursor: pointer;
 }
 
-.reply { clear: both; padding: 20px 0 10px; }
-.reply .bold { font-weight: 600; }
+.reply {
+	clear: both; padding: 20px 0 10px;
+}
+.reply .bold {
+	font-weight: 900;
+}
 
-.reply .form-header { padding-bottom: 7px; }
-.reply-form  tr>td { padding: 2px 0 2px; }
-.reply-form textarea { width: 100%; height: 75px; }
-.reply-form button { padding: 8px 25px; }
+.reply .form-header {
+	padding-bottom: 7px;
+}
+.reply-form tr>td {
+	padding: 2px 0 2px;
+}
+.reply-form textarea {
+	width: 100%; height: 75px; resize: none;
+	border-radius: 30px;
+}
+.reply-form button {
+	padding: 8px 25px;
+}
 
-.reply .reply-info { padding-top: 25px; padding-bottom: 7px; }
-.reply .reply-info  .reply-count { color: #3EA9CD; font-weight: 700; }
+.reply .reply-info {
+	padding-top: 25px; padding-bottom: 7px;
+}
+.reply .reply-info  .reply-count {
+	color: tomato; font-weight: 900; 
+}
 
-.reply .reply-list tr>td { padding: 7px 5px; }
-.reply .reply-list .bold { font-weight: 600; }
+.reply .reply-list tr>td {
+	padding: 7px 5px;
+}
+.reply .reply-list .bold {
+	font-weight: 600;
+}
 
-.reply .deleteReply, .reply .deleteReplyAnswer { cursor: pointer; }
-.reply .notifyReply { cursor: pointer; }
+.reply .deleteReply, .reply .deleteReplyAnswer {
+	cursor: pointer;
+}
+.reply .notifyReply {
+	cursor: pointer;
+}
 
-.reply-list .list-header { border: 1px solid #ccc; background: #f8f8f8; }
-.reply-list tr>td { padding-left: 7px; padding-right: 7px; }
+.reply-list .list-header {
+	border: 1px solid white; background: #ffedea;
+	border-radius: 50px; 
+	
+}
+.reply-list tr>td {
+	padding-left: 7px; padding-right: 7px;
+}
 
-.reply-answer { display: none; }
-.reply-answer .answer-left { float: left; width: 5%; }
-.reply-answer .answer-right { float: left; width: 95%; }
-.reply-answer .answer-list { border-top: 1px solid #ccc; padding: 0 10px 7px; }
-.reply-answer .answer-form { clear: both; padding: 3px 10px 5px; }
-.reply-answer .answer-form textarea { width: 100%; height: 75px; }
-.reply-answer .answer-footer { clear: both; padding: 0 13px 10px 10px; text-align: right; }
+.reply-answer {
+	display: none;
+}
+.reply-answer .answer-left {
+	float: left; width: 5%;
+}
+.reply-answer .answer-right {
+	float: left; width: 95%;
+	border-radius: 30px;
+}
+.reply-answer .answer-list {
+	border-top: 1px solid #cccccc; padding: 0 10px 7px;
+}
+.reply-answer .answer-form {
+	clear: both; padding: 3px 10px 5px;
+}
+.reply-answer .answer-form textarea {
+	width: 100%; height: 75px; resize: none;
+	border-radius: 30px;
+}
+.reply-answer .answer-footer {
+	clear: both; padding: 0 13px 10px 10px; text-align: right;
+}
 
-.answer-article { clear: both; }
-.answer-article .answer-article-header { clear: both; padding-top: 5px; }
-.answer-article .answer-article-body { clear:both; padding: 5px 5px; border-bottom: 1px solid #ccc; }
-
+.answer-article {
+	clear: both;
+}
+.answer-article .answer-article-header {
+	clear: both; padding-top: 5px;
+}
+.answer-article .answer-article-body {
+	clear:both; padding: 5px 5px; border-bottom: 1px solid #cccccc;
+}
 .photo-layout img { width: 570px; height: 450px; }
 
 .user-wrap {
@@ -167,7 +219,7 @@ $(function () {
 <c:if test="${sessionScope.member.userId==dto.sellerId || sessionScope.member.userId=='admin'}">
 	function deleteBoard() {
 	    if(confirm("게시글을 삭제 하시 겠습니까 ? ")) {
-		    let query = "marketNum=${dto.marketNum}&${query}";
+		    let query = "marketNum=${dto.marketNum}&page=${page}";
 		    let url = "${pageContext.request.contextPath}/market/delete.do?" + query;
 	    	location.href = url;
 	    }
@@ -440,13 +492,13 @@ $(function() {
 <main>
 	<div class="container body-container">
 	    <div class="body-title">
-			<h2> 글보기 </h2>
+			<h2><img src="${pageContext.request.contextPath}/resource/images/marketPage.png" style="width: 250px;"></h2>
 	    </div>
 	    <div style="box-shadow: 0 0 15px 0 rgb(2 59 109 / 10%);border-radius: 30px; margin: 0 auto ; width: 70%; margin-bottom: 50px;">
 	    <div class="body-main mx-auto">
 			<table class="table table-border table-article">
 				<thead>
-					<tr>
+					<tr style="border-top: 2px solid #eee; border-bottom: 2px solid #eee;">
 						<td colspan="2" align="center">
 							${dto.subject}
 						</td>
