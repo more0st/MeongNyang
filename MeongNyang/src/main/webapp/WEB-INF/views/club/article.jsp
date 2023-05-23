@@ -698,8 +698,6 @@ $(function(){
 					</div>
 
 	    </div>
-	    </div>
-	</div>
 	
 	
 	<!-- 댓글 쓰기폼 -->
@@ -741,7 +739,7 @@ $(function(){
 						<table class="table reply-form">
 							<tr>
 								<td>
-									<textarea class='form-control' name="content" style="height: 130px;" disabled="disabled">댓글쓰기 기능은 모임멤버만 참여 할 수 있습니다.</textarea>
+									<textarea class='form-control' name="content" style="height: 130px;" disabled="disabled">댓글쓰기 기능은 모임멤버만 참여 하고 볼 수 있습니다.</textarea>
 								</td>
 							</tr>
 							<tr>
@@ -756,6 +754,8 @@ $(function(){
 			</div>
 		</c:otherwise>
 	</c:choose>
+	    </div>
+	</div>
 
 	
 </main>
