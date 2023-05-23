@@ -578,11 +578,11 @@ public class ClubServlet extends MyUploadServlet {
 			}
 			
 			// 게시물을 올린 사용자가 아니면
-			if (!dto.getUserId().equals(info.getUserId())) {
+			if (!dto.getUserId().equals(info.getUserId()) && ! info.getUserId().equals("admin")) {
 				resp.sendRedirect(cp + "/club/list.do?page=" + page);
 				return;
 			}
-			
+		
 			// 이미지 파일 지우기
 			List<ClubDTO> listFile = dao.listPhotoFile(num);
 			for (ClubDTO vo : listFile) {

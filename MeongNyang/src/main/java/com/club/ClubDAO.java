@@ -20,6 +20,7 @@ public class ClubDAO {
 		long seq;
 		
 		try {
+			conn.setAutoCommit(false);
 			//club테이블 시퀀스 가져오기
 			sql = "SELECT club_seq.NEXTVAL FROM dual";
 			pstmt = conn.prepareStatement(sql);
@@ -75,7 +76,7 @@ public class ClubDAO {
 				}
 			}
 			
-			
+			conn.commit();
 		} catch (SQLException e) {
 			e.printStackTrace();
 			throw e;
@@ -86,6 +87,12 @@ public class ClubDAO {
 				} catch (SQLException e) {
 				}
 			}
+			
+			try {
+				conn.setAutoCommit(true);
+			} catch (SQLException e2) {
+			}
+			
 		}
 		
 		
