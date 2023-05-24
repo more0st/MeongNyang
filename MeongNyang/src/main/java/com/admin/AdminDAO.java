@@ -94,10 +94,10 @@ public class AdminDAO {
 		PreparedStatement pstmt = null;
 		ResultSet rs = null;
 		String sql;
-		
+
 		try {
 			// 회원id 이름 생년월일 전화번호 주소 이메일 마켓판매횟수 마켓구매횟수 참여중인모임 회원상태
-			sql = "SELECT userid, username, birth, tel, addr, email, b.buycount buycount, c.sellcount sellcount, enabled"
+			sql = "SELECT userid, username,TO_CHAR(birth, 'YYYY-MM-DD') birth, tel, addr, email, b.buycount buycount, c.sellcount sellcount, enabled"
 					+ " FROM member a"
 					+ " LEFT OUTER JOIN (SELECT buyerid, count(state) buycount FROM market WHERE state in(1,2) GROUP BY buyerid) b ON a.userid = b.buyerid"
 					+ " LEFT OUTER JOIN (SELECT sellerid, count(state) sellcount FROM market WHERE state in(1,2) GROUP BY sellerid) c ON a.userid = c.sellerid"

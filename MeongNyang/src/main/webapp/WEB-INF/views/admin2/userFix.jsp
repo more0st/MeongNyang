@@ -11,14 +11,22 @@
 <jsp:include page="/WEB-INF/views/layout/staticHeader.jsp"/>
 <style type="text/css">
 .body-main {
-	max-width: 700px;
+	max-width: 1000px;
 }
 
 .table-list thead > tr:first-child{ background: #ffedea; }
 .table-list th, .table-list td { text-align: center; }
 .table-list .left { text-align: left; padding-left: 5px; }
 
+.table-list .userid { width: 60px; color: #787878; }
 .table-list .num { width: 60px; color: #787878; }
+.table-list .birth { width: 100px; color: #787878; }
+.table-list .tel { width: 150px; color: #787878; }
+.table-list .addr { width: 200px; color: #787878; }
+.table-list .email { width: 200px; color: #787878; }
+.table-list .sell { width: 30px; color: #787878; }
+.table-list .buy { width: 30px; color: #787878; }
+.table-list .state { width: 70px; color: #787878; }
 .table-list .subject { color: #787878; }
 .table-list .name { width: 100px; color: #787878; }
 .table-list .date { width: 100px; color: #787878; }
@@ -49,7 +57,7 @@ function changeState(userId,enabled) {
 	    <div class="body-title">
 			<h2> 사용자 관리 </h2>
 	    </div>
-	   <div style="box-shadow: 0 0 15px 0 rgb(2 59 109 / 10%);border-radius: 30px; margin: 0 auto ; width: 70%;">
+	   <div style="box-shadow: 0 0 15px 0 rgb(2 59 109 / 10%);border-radius: 30px; margin: 0 auto ; width: 100%;">
 	    <div class="body-main mx-auto">
 			<table class="table">
 				<tr>

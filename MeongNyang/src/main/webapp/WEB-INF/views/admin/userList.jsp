@@ -11,14 +11,21 @@
 <jsp:include page="/WEB-INF/views/layout/staticHeader.jsp"/>
 <style type="text/css">
 .body-main {
-	max-width: 700px;
+	max-width: 1000px;
 }
-
 .table-list thead > tr:first-child{ background: #ffedea; }
 .table-list th, .table-list td { text-align: center; }
 .table-list .left { text-align: left; padding-left: 5px; }
 
+.table-list .userid { width: 60px; color: #787878; }
 .table-list .num { width: 60px; color: #787878; }
+.table-list .birth { width: 100px; color: #787878; }
+.table-list .tel { width: 150px; color: #787878; }
+.table-list .addr { width: 200px; color: #787878; }
+.table-list .email { width: 200px; color: #787878; }
+.table-list .sell { width: 30px; color: #787878; }
+.table-list .buy { width: 30px; color: #787878; }
+.table-list .state { width: 70px; color: #787878; }
 .table-list .subject { color: #787878; }
 .table-list .name { width: 100px; color: #787878; }
 .table-list .date { width: 100px; color: #787878; }
@@ -42,7 +49,7 @@ function searchList() {
 	    <div class="body-title">
 			<h2> 전체 사용자 조회 </h2>
 	    </div>
-	   <div style="box-shadow: 0 0 15px 0 rgb(2 59 109 / 10%);border-radius: 30px; margin: 0 auto ; width: 70%;">
+	   <div style="box-shadow: 0 0 15px 0 rgb(2 59 109 / 10%);border-radius: 30px; margin: 0 auto ; width: 100%;">
 	    <div class="body-main mx-auto">
 			<table class="table">
 				<tr>
@@ -63,9 +70,8 @@ function searchList() {
 						<th class="tel">전화번호</th>
 						<th class="addr">주소</th>
 						<th class="email">이메일</th>
-						<th class="sell">마켓판매횟수</th>
-						<th class="buy">마켓구매횟수</th>
-						<th class="club">참여중인 모임</th>
+						<th class="sell">판매횟수</th>
+						<th class="buy">구매횟수</th>
 						<th class="state">회원상태</th>
 					</tr>
 				</thead>
@@ -82,7 +88,7 @@ function searchList() {
 							<td>${dto.email}</td>
 							<td>${dto.sellCount}</td>
 							<td>${dto.buyCount}</td>
-							<td>${dto.enabled}</td>
+							<td>${dto.enabled == 1 ? '활동중' : '정지' }</td>
 						</tr>
 					</c:forEach>
 				</tbody>
