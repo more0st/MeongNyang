@@ -46,7 +46,7 @@
 				<thead>
 					<tr style="border-top: 2px solid #eee; border-bottom: 2px solid #eee;">
 						<td colspan="2" align="center">
-							${dto.subject}
+							<h3> ${dto.subject} </h3> 
 						</td>
 					</tr>
 				</thead>
@@ -113,7 +113,7 @@
 				<thead>
 					<tr style="border-top: 2px solid #eee; border-bottom: 2px solid #eee;">
 						<td colspan="2" align="center">
-							'--${dto.subject}--'에 대한 답변입니다!
+						<h3>'--${dto.subject}--'에 대한 답변입니다! </h3>	
 						</td>
 					</tr>
 				</thead>

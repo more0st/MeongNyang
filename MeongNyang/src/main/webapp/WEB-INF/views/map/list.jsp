@@ -14,7 +14,7 @@
 	max-width: 700px;
 }
 
-.table-list thead > tr:first-child{ background: #ffedea; }
+.table-list thead > tr:first-child{ background: #ffedea; border-top: white;}
 .table-list th, .table-list td { text-align: center; }
 .table-list .left { text-align: left; padding-left: 5px; }
 

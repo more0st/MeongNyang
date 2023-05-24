@@ -224,7 +224,9 @@
 					<table class="table table-border table-article">
 						<thead>
 							<tr  style="border-top: 2px solid #eee; border-bottom: 2px solid #eee;">
-								<td colspan="2" align="center">${dto.subject}</td>
+								<td colspan="2" align="center">
+								<h3> ${dto.subject} </h3> 
+								</td>
 							</tr>
 						</thead>
 
