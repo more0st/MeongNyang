@@ -96,7 +96,7 @@ public class Admin2DAO {
 		String sql;
 		
 		try {
-			sql = "SELECT userid, username, birth, tel, addr, email, enabled"
+			sql = "SELECT userid, username, TO_CHAR(birth, 'YYYY-MM-DD') birth, tel, addr, email, enabled"
 					+ " FROM member"
 					+ " ORDER BY enabled DESC"
 					+ " OFFSET ? ROWS FETCH FIRST ? ROWS ONLY";	

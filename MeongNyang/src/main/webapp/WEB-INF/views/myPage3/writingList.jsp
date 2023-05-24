@@ -15,7 +15,7 @@
 	max-width: 700px;
 }
 
-.table-list thead > tr:first-child{ background: #ffedea; }
+.table-list thead > tr:first-child{ background: #ffedea; border: none; }
 .table-list th, .table-list td { text-align: center; }
 .table-list .left { text-align: left; padding-left: 5px; }
 
@@ -46,7 +46,7 @@ function categoryList() {
 <main>
 	<div class="container body-container">
 	    <div class="body-title">
-			<h2> 작성글 목록 </h2>
+			<h2><img src="${pageContext.request.contextPath}/resource/images/writeList.PNG" style="width: 250px;"></h2>
 	    </div>
 	   <div style="box-shadow: 0 0 15px 0 rgb(2 59 109 / 10%);border-radius: 30px; margin: 0 auto ; width: 70%;">
 	    <div class="body-main mx-auto">

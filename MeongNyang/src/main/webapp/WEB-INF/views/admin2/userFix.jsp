@@ -27,6 +27,7 @@
 .table-list .sell { width: 30px; color: #787878; }
 .table-list .buy { width: 30px; color: #787878; }
 .table-list .state { width: 70px; color: #787878; }
+.table-list .statechange { width: 70px; color: #787878; }
 .table-list .subject { color: #787878; }
 .table-list .name { width: 100px; color: #787878; }
 .table-list .date { width: 100px; color: #787878; }
@@ -38,12 +39,25 @@ function searchList() {
 	f.submit();
 }
 
-function changeState(userId,enabled) {
-	const f = document.stateForm;
-	f.userId.value = userId;
-	f.enabled.value = enabled;
-	f.submit();
+function changeState1(userId,enabled) {
+	if(confirm("회원을 복구하시겠습니까 ? ")) {
+		const f = document.stateForm;
+		f.userId.value = userId;
+		f.enabled.value = enabled;
+		f.submit();
+	}
 }
+
+function changeState2(userId,enabled) {
+	if(confirm("회원을 정지시키겠습니까 ? ")) {
+		const f = document.stateForm;
+		f.userId.value = userId;
+		f.enabled.value = enabled;
+		f.submit();
+	}
+}
+
+
 </script>
 </head>
 <body>
@@ -55,7 +69,7 @@ function changeState(userId,enabled) {
 <main>
 	<div class="container body-container">
 	    <div class="body-title">
-			<h2> 사용자 관리 </h2>
+			<h2><img src="${pageContext.request.contextPath}/resource/images/managerPage.png" style="width: 250px;"></h2>
 	    </div>
 	   <div style="box-shadow: 0 0 15px 0 rgb(2 59 109 / 10%);border-radius: 30px; margin: 0 auto ; width: 100%;">
 	    <div class="body-main mx-auto">
@@ -79,7 +93,8 @@ function changeState(userId,enabled) {
 						<th class="addr">주소</th>
 						<th class="email">이메일</th>
 						<th class="state">회원상태</th>
-						<th class="statechange">상태변경</th>
+						<th class="statechange"></th>
+						<th class="statechange"></th>
 					</tr>
 				</thead>
 				
@@ -95,8 +110,10 @@ function changeState(userId,enabled) {
 							<td>${dto.email}</td>
 							<td>${dto.enabled == 1 ? '활동중' : '정지' }</td>
 							<td>
-									<button type="button" name="recovery" value="${recovery}" onclick="changeState('${dto.userId}', 1);"><img src="${pageContext.request.contextPath}/resource/images/able.png" style="width: 50px;"></button>
-									<button type="button" name="pause" value="${pause}" onclick="changeState('${dto.userId}', 0);"><img src="${pageContext.request.contextPath}/resource/images/enable.png" style="width: 50px;"></button>
+									<button type="button" name="recovery" value="${recovery}" onclick="changeState1('${dto.userId}', 1);"><img src="${pageContext.request.contextPath}/resource/images/able.png" style="width: 50px;"></button>
+							</td>
+							<td>
+									<button type="button" name="pause" value="${pause}" onclick="changeState2('${dto.userId}', 0);"><img src="${pageContext.request.contextPath}/resource/images/enable.png" style="width: 50px;"></button>
 							</td>
 						</tr>
 					</c:forEach>
