@@ -126,7 +126,7 @@ public class QnaDAO {
 
 				sql = "SELECT NVL(COUNT(*), 0) FROM questions q " + " JOIN member m ON q.userId = m.userId ";
 				if (condition.equals("all")) {
-					sql += "  WHERE INSTR(subject, ?) >= 1 OR INSTR(content, ?) >= 1 ";
+					sql += "  WHERE (INSTR(subject, ?) >= 1 OR INSTR(content, ?) >= 1) ";
 				} else if (condition.equals("reg_date")) {
 					keyword = keyword.replaceAll("(\\-|\\/|\\.)", "");
 					sql += "  WHERE TO_CHAR(reg_date, 'YYYYMMDD') = ? ";
@@ -291,7 +291,7 @@ public class QnaDAO {
 				sb.append(" FROM questions q ");
 				sb.append(" JOIN member m ON q.userId = m.userId ");
 				if (condition.equals("all")) {
-					sb.append(" WHERE INSTR(subject, ?) >= 1 OR INSTR(content, ?) >= 1 ");
+					sb.append(" WHERE (INSTR(subject, ?) >= 1 OR INSTR(content, ?) >= 1) ");
 				} else if (condition.equals("reg_date")) {
 					keyword = keyword.replaceAll("(\\-|\\/|\\.)", "");
 					sb.append(" WHERE TO_CHAR(reg_date, 'YYYYMMDD') = ?");
