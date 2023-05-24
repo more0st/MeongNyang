@@ -45,7 +45,7 @@
 	<div class="container body-container">
 	    <div class="body-main mx-auto">
 	    <div class="inner-page mx-auto" style="text-align: center; font-size: 30px; margin-bottom: 15px; font-weight: 900;" >
-			실시간 인기 매물
+			<img src="${pageContext.request.contextPath}/resource/images/homePage.png" style="width: 400px;">
 	    </div>
 			
 			<div class="market-box">
