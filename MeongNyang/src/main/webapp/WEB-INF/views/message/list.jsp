@@ -96,7 +96,7 @@ function searchList() {
 				</tr>
 			</table>
 			
-			<table class="table table-border table-list">
+			<table class="table table-list">
 				<thead>
 					<tr>
 						<th class="num">번호</th>
