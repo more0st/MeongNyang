@@ -149,17 +149,7 @@ public class MyPage3Servlet extends MyServlet{
 			String listUrl = cp + "/myPage3/writingList.do";
 			String articleUrl = ""; // 클릭해서 다른조원이 만든 글로 이동하게 수정하기
 			
-			if(category== null || category.equals("all")) {
-					MyPage3DTO dto = new MyPage3DTO();
-				
-				if(dto.getCategory() == 1) {
-					articleUrl = cp + "/map/article.do?";
-				} else if(dto.getCategory() == 2) {
-					articleUrl = cp + "/gallery/article.do?";
-				} else if (dto.getCategory() == 3) {
-					articleUrl = cp + "/club/article.do?";
-				}
-			} else if(category.equals("map")) {
+			if(category== null || category.equals("map")) {
 				articleUrl = cp + "/map/article.do?";
 			} else if(category.equals("gallery")) {
 				articleUrl = cp + "/gallery/article.do?";

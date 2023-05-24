@@ -45,9 +45,12 @@ public class MyPage4Servlet extends MyServlet {
 		// uri에 따른 작업 구분
 		if (uri.indexOf("likeList.do") != -1) {		// 나의 구매내역 리스트
 			list(req, resp);
+		} else if(uri.indexOf("likeArticle.do") != -1) {
+			article(req,resp);
 		}
 
 	}
+
 
 	private void list(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		// TODO Auto-generated method stub
@@ -116,7 +119,7 @@ public class MyPage4Servlet extends MyServlet {
 			}
 			
 			String listUrl = cp + "/myPage4/likeList.do";
-			String articleUrl = cp + "/market/article.do?"; // 클릭해서 다른조원이 만든 글로 이동하게 수정하기
+			String articleUrl = cp + "/myPage4/likeArticle.do?"; // 클릭해서 다른조원이 만든 글로 이동하게 수정하기
 			if(query.length() != 0) {
 				listUrl += "?" + query;
 				articleUrl += "&" + query;
@@ -142,5 +145,56 @@ public class MyPage4Servlet extends MyServlet {
 
 		forward(req, resp, "/WEB-INF/views/myPage4/likeList.jsp");
 	}
+	
+
+	private void article(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		MyPage4DAO dao = new MyPage4DAO();
+		
+		HttpSession session = req.getSession();
+		SessionInfo info = (SessionInfo) session.getAttribute("member");
+
+		String cp = req.getContextPath();
+		String page = req.getParameter("page");
+		
+		try {
+			long marketNum = Long.parseLong(req.getParameter("marketNum"));		
+
+			MyPage4DTO dto = dao.readBoard(info.getUserId(), marketNum);
+			if (dto == null) {
+				resp.sendRedirect(cp + "/myPage4/likeList.do?page=" + page);
+				return;
+			}
+
+			// 사진
+			List<MyPage4DTO> listFile = dao.listPhotoFile(marketNum);
+
+			/// 조회수 증가
+			dao.updateHitCount(marketNum);
+		
+			// 이전글 다음글
+			MyPage4DTO preReadDto = dao.preReadBoard(marketNum, info.getUserId());
+			MyPage4DTO nextReadDto = dao.nextReadBoard(marketNum, info.getUserId());
+			
+			// 포워딩할 JSP에 넘겨줄 속성
+			req.setAttribute("dto", dto);
+			req.setAttribute("page", page);
+			req.setAttribute("listFile", listFile);
+			req.setAttribute("preReadDto", preReadDto);
+			req.setAttribute("nextReadDto", nextReadDto);
+						
+			// 포워딩
+			forward(req,resp,"/WEB-INF/views/myPage4/likeArticle.jsp");
+			return;
+			
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		
+		forward(req, resp, "/WEB-INF/views/myPage4/likeArticle.jsp");
+		
+	}
+	
+	
 
 }

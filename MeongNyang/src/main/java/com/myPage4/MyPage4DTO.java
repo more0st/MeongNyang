@@ -11,6 +11,7 @@ public class MyPage4DTO {
 	private int hitCount;
 	private String reg_Date;
 	private int state; // 상품상태(0:판매중, 1:온라인거래완료, 2:직거래완료)
+	private int zzimCount;
 	
 	private long fileNum;
 	private String imageFileName;
@@ -19,6 +20,12 @@ public class MyPage4DTO {
 	
 	
 	
+	public int getZzimCount() {
+		return zzimCount;
+	}
+	public void setZzimCount(int zzimCount) {
+		this.zzimCount = zzimCount;
+	}
 	public int getState() {
 		return state;
 	}

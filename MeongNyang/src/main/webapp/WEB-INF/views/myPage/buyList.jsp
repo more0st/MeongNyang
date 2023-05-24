@@ -23,8 +23,6 @@
 .table-list .name { width: 100px; color: #787878; }
 .table-list .date { width: 100px; color: #787878; }
 .table-list .hit { width: 70px; color: #787878; }
-.table-list .pay_date { width: 70px; color: #787878; }
-.table-list .content { width: 70px; color: #787878; }
 
 .market-box {
 	margin-top: 3px; margin-bottom: 70px;
@@ -41,13 +39,12 @@
 	gap: 10px;
 	
 }
-.market-box .item { border: 1px solid #DAD9FF; cursor: pointer; max-width: 220px;  }
+.market-box .item { cursor: pointer; max-width: 220px;  }
 .item > img {  width: 220px; height: 220px; object-fit: cover; cursor: pointer; border-radius : 20px; }
 .border{
-	border: 1px solid;
 	background: #ffedea;
+	border-radius : 10px;
 }
-
 </style>
 <script type="text/javascript">
 function searchList() {
@@ -83,7 +80,7 @@ function searchList() {
 			<div class="market-box">
 				<c:forEach var="dto" items="${list}" varStatus="status">
 					<div class="item" title="${dto.subject}"
-						onclick="location.href='${articleUrl}&marketNum=${dto.marketnum}';">
+						onclick="location.href='${articleUrl}&marketnum=${dto.marketnum}';">
 						<img src="${pageContext.request.contextPath}/uploads/market/${dto.imageFilename}">
 						<div class="border">
 						<div>제목 : ${dto.subject}</div>

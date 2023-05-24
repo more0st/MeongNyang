@@ -75,7 +75,6 @@ function categoryList() {
 						<th class="category">
 							<form name="boardForm" action="${pageContext.request.contextPath}/myPage3/writingList.do" method="post">
 								<select name="category" class="form=select" onchange="categoryList();">
-									<option value="all" ${category=="all"?"selected='selected'":"" } >모두보기</option>
 									<option value="map" ${category=="map"?"selected='selected'":"" }>멍냥지도</option>
 									<option value="gallery" ${category=="gallery"?"selected='selected'":"" }>멍냥갤러리</option>
 									<option value="club" ${category=="club"?"selected='selected'":"" }>멍냥모임</option>

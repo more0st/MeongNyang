@@ -45,9 +45,12 @@ public class MyPageServlet extends MyServlet{
 		// uri에 따른 작업 구분
 		if (uri.indexOf("buyList.do") != -1) {		// 나의 구매내역 리스트
 			list(req, resp);
-		}  
+		} else if(uri.indexOf("buyArticle.do") != -1) {
+			article(req, resp);
+		}
 		
 	}
+
 
 	private void list(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		// 게시물 리스트
@@ -121,7 +124,7 @@ public class MyPageServlet extends MyServlet{
 			}
 			
 			String listUrl = cp + "/myPage/buyList.do";
-			String articleUrl = cp + "/market/article.do?";
+			String articleUrl = cp + "/myPage/buyArticle.do?";
 			if(query.length() != 0) {
 				listUrl += "?" + query;
 				articleUrl += "&" + query;
@@ -152,7 +155,7 @@ public class MyPageServlet extends MyServlet{
 	}
 
 
-/*
+
 	private void article(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		// 글 보기
 		MyPageDAO dao = new MyPageDAO();
@@ -166,8 +169,8 @@ public class MyPageServlet extends MyServlet{
 		try {
 			long marketnum = Long.parseLong(req.getParameter("marketnum"));		
 
-			MyPageDTO dto = dao.readBoard(marketnum);
-			if (dto == null || !dto.getBuyerid().equals(info.getUserId())) {
+			MyPageDTO dto = dao.readBoard(info.getUserId(), marketnum);
+			if (dto == null) {
 				resp.sendRedirect(cp + "/myPage/buyList.do?page=" + page);
 				return;
 			}
@@ -203,71 +206,8 @@ public class MyPageServlet extends MyServlet{
 		forward(req, resp, "/WEB-INF/views/myPage/buyArticle.jsp");
 	}
 
-*/	
+
 	
-	/*
-	private void article(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		// 글 보기
-		MyPageDAO dao = new MyPageDAO();
-		MyUtil util = new MyUtil();
-		
-		String cp = req.getContextPath();
-		
-		String page = req.getParameter("page");
-		String query = "page=" + page;
-		
-		try {
-			long marketnum = Long.parseLong(req.getParameter("num"));		// num 맞는지 확인
-			String condition = req.getParameter("condition");
-			String keyword = req.getParameter("keyword");
-			if(condition == null) {
-				condition = "all";
-				keyword = "";
-			}
-			keyword = URLDecoder.decode(keyword, "utf-8");
-			
-			if(keyword.length() != 0) {
-				query += "&condition=" + condition + "&keyword=" + URLEncoder.encode(keyword, "utf-8");
-			}
-			
-			/// 조회수 증가
-			dao.updateHitCount(marketnum);
-			
-			// 게시글 가져오기
-			MyPageDTO dto = dao.readBoard(marketnum);
-			if(dto == null) {	// 게시글이 없으면 다시 리스트로	
-				resp.sendRedirect(cp + "/myPage/buyList.do?" + query);
-				return;
-			}
-			dto.setContent(util.htmlSymbols(dto.getContent()));
-			
-			
-			// 글내용 엔터를 <br>로
-			dto.setContent(dto.getContent().replaceAll("\n", "<br>"));
-			
-			// 이전글 다음글
-			MyPageDTO preReadDto = dao.preReadBoard(dto.getMarketnum(), condition, keyword);
-			MyPageDTO nextReadDto = dao.nextReadBoard(dto.getMarketnum(), condition, keyword);
-			
-			// 포워딩할 JSP에 넘겨줄 속성
-			req.setAttribute("dto", dto);
-			req.setAttribute("page", page);
-			req.setAttribute("query", query);
-			req.setAttribute("preReadDto", preReadDto);
-			req.setAttribute("nextReadDto", nextReadDto);
-			
-			// 포워딩
-			forward(req,resp,"/WEB-INF/views/myPage/buyArticle.jsp");
-			return;
-			
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
-		resp.sendRedirect(cp + "/myPage/buyList.do?" + query);
-	}
-	
-	*/
 }
 
 

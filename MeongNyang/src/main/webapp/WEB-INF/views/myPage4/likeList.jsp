@@ -24,8 +24,6 @@
 .table-list .name { width: 100px; color: #787878; }
 .table-list .date { width: 100px; color: #787878; }
 .table-list .hit { width: 70px; color: #787878; }
-.table-list .pay_date { width: 70px; color: #787878; }
-.table-list .content { width: 70px; color: #787878; }
 
 .market-box {
 	margin-top: 3px; margin-bottom: 70px;
@@ -42,13 +40,12 @@
 	gap: 10px;
 	
 }
-.market-box .item { border: 1px solid #DAD9FF; cursor: pointer; max-width: 220px;  }
+.market-box .item { cursor: pointer; max-width: 220px;  }
 .item > img {  width: 220px; height: 220px; object-fit: cover; cursor: pointer; border-radius : 20px; }
 .border{
-	border: 1px solid;
 	background: #ffedea;
+	border-radius : 10px;
 }
-
 </style>
 <script type="text/javascript">
 function searchList() {
@@ -109,6 +106,8 @@ function searchList() {
 						<form name="searchForm" action="${pageContext.request.contextPath}/myPage4/likeList.do" method="post">
 							<select name="condition" class="form-select">
 								<option value="all"      ${condition=="all"?"selected='selected'":"" }>제목+내용</option>
+								<option value="seller" ${condition=="userName"?"selected='selected'":"" }>판매자</option>
+								<option value="zzim_date"  ${condition=="reg_date"?"selected='selected'":"" }>찜한날짜</option>
 								<option value="subject"  ${condition=="subject"?"selected='selected'":"" }>제목</option>
 								<option value="content"  ${condition=="content"?"selected='selected'":"" }>내용</option>
 							</select>

@@ -102,47 +102,10 @@ function ajaxFun(url, method, query, dataType, fn) {
 	});
 }
 
-// 게시글 공감 여부
-/*
-$(function () {
-	$(".btnSendBoardLike").click(function () {
-		const $i = $(this).find("i");
-		let isNoLike = $i.css("color") == "rgb(0, 0, 0)";
-		let msg = isNoLike ? "게시글에 찜하십니까?" : "게시글 찜을 취소하시겠습니까 ?";
-		
-		if(! confirm(msg)){
-			return false;
-		}
-		
-		let url = "${pageContext.request.contextPath}/market/insertBoardLike.do";
-		let marketNum = "${dto.marketnum}";
-		let qs = "marketNum="+marketNum+"&isNoLike="+isNoLike;
-		
-		const fn = function(data){
-			let state = data.state;
-			if(state === "true"){
-				let color = "black";
-				if( isNoLike ){
-					color = "blue";
-				}
-				$i.css("color", color);
-				
-				let count = data.boardLikeCount;
-				$("#boardLikeCount").text(count);
-			}else if(state === "liked"){
-				alert("찜은 한번만 가능합니다.");
-			}
-		};
-		
-		ajaxFun(url, "post", qs, "json", fn);
-	});
-});
-*/
-
-<c:if test="${sessionScope.member.userId==dto.sellerid || sessionScope.member.userId=='admin'}">
+<c:if test="${sessionScope.member.userId==dto.sellerId || sessionScope.member.userId=='admin'}">
 	function deleteBoard() {
 	    if(confirm("게시글을 삭제 하시 겠습니까 ? ")) {
-		    let query = "marketNum=${dto.marketnum}&${query}";
+		    let query = "marketNum=${dto.marketNum}&${query}";
 		    let url = "${pageContext.request.contextPath}/market/delete.do?" + query;
 	    	location.href = url;
 	    }
@@ -151,7 +114,7 @@ $(function () {
 
 function modal() {
 	const viewer = $(".buymodal");
-	let userId = "${dto.sellerid}";
+	let userId = "${dto.sellerId}";
 	let sessionId = "${sessionScope.member.userId}";
 	let s;
 	if(userId === sessionId){
@@ -200,7 +163,7 @@ $(function () {
 
 function listPage(page) {
 	let url = "${pageContext.request.contextPath}/market/listReply.do";
-	let qs = "marketNum=${dto.marketnum}&pageNo="+page;
+	let qs = "marketNum=${dto.marketNum}&pageNo="+page;
 	let selector = "#listReply";
 	
 	const fn = function (data) {
@@ -214,7 +177,7 @@ function listPage(page) {
 
 $(function () {
 	$(".btnSendReply").click(function name() {
-		let marketNum = "${dto.marketnum}";
+		let marketNum = "${dto.marketNum}";
 		const $tb = $(this).closest("table");
 		let content = $tb.find("textarea").val().trim();
 		
@@ -248,7 +211,7 @@ function buy_ok() {
 		alert("구매자의 ID를 입력해주세요");
 		return;
 	}
-	marketNum = ${dto.marketnum};
+	marketNum = ${dto.marketNum};
 	location.href = "${pageContext.request.contextPath}/market/buy_ok.do?buyerId="+buyerId+"&marketNum="+marketNum;
 }
 
@@ -266,7 +229,7 @@ function requestPay() {
     IMP.request_pay({
         pg : 'kakaopay',
         pay_method : 'card',
-        merchant_uid: '${dto.marketnum}', 
+        merchant_uid: '${dto.marketNum}', 
         name : '${dto.subject}',
         amount : ${dto.price},
         buyer_email : 'Iamport@chai.finance',
@@ -334,7 +297,7 @@ function countReplyAnswer(answer) {
 //답글 등록 버튼
 $(function () {
 	$("#listReply").on("click", ".btnSendReplyAnswer",function(){
-		let marketNum = "${dto.marketnum}";
+		let marketNum = "${dto.marketNum}";
 		let replyNum = $(this).attr("data-replyNum");
 		const $td = $(this).closest("td");
 		
@@ -416,7 +379,7 @@ $(function() {
 <main>
 	<div class="container body-container">
 	    <div class="body-title">
-			<h2> 나의 구매내역 </h2>
+			<h2> 찜목록 </h2>
 	    </div>
 	    <div style="box-shadow: 0 0 15px 0 rgb(2 59 109 / 10%);border-radius: 30px; margin: 0 auto ; width: 70%; margin-bottom: 50px;">
 	    <div class="body-main mx-auto">
@@ -440,10 +403,10 @@ $(function() {
 				<tbody>
 					<tr>
 						<td width="50%">
-							판매자 : ${dto.sellerid}
+							판매자 : ${dto.sellerId}
 						</td>
 						<td align="right">
-							${dto.reg_date} | 조회 ${dto.hitCount}
+							${dto.reg_Date} | 조회 ${dto.hitCount}
 						</td>
 					</tr>
 					
@@ -453,17 +416,12 @@ $(function() {
 						</td>
 					</tr>
 					
-					<tr>
-						<td colspan="2" align="center" style="border-bottom: 20px;">
-							<button type="button" class="btn btnSendBoardLike" title="찜"> <i style="color:${isUserLike?'blue':'black'}"><img src="${pageContext.request.contextPath}/resource/images/zzim.png" width="20px;" height="20px;"></img></i>&nbsp;&nbsp;<span id="boardLikeCount">${dto.zzimCount }</span> </button>
-						</td>
-					</tr>
 					
 					<tr style="border-bottom: none;">
 						<td colspan="2" height="110">
 							<div class="img-box">
 								<c:forEach var="vo" items="${listFile}">
-									<img src="${pageContext.request.contextPath}/uploads/market/${vo.imageFilename}" onclick="imageViewer('${pageContext.request.contextPath}/uploads/market/${vo.imageFilename}');">
+									<img src="${pageContext.request.contextPath}/uploads/market/${vo.imageFileName}" onclick="imageViewer('${pageContext.request.contextPath}/uploads/market/${vo.imageFileName}');">
 								</c:forEach>
 							</div>
 						</td>	
@@ -472,7 +430,7 @@ $(function() {
 						<td colspan="2">
 							이전글 :
 							<c:if test="${not empty preReadDto}">
-								<a href="${pageContext.request.contextPath}/myPage/buyArticle.do?page=${page}&marketnum=${preReadDto.marketnum}">${preReadDto.subject}</a>
+								<a href="${pageContext.request.contextPath}/myPage4/likeArticle.do?page=${page}&marketNum=${preReadDto.marketNum}">${preReadDto.subject}</a>
 							</c:if>
 						</td>
 					</tr>
@@ -480,7 +438,7 @@ $(function() {
 						<td colspan="2">
 							다음글 :
 							<c:if test="${not empty nextReadDto}">
-								<a href="${pageContext.request.contextPath}/myPage/buyArticle.do?page=${page}&marketnum=${nextReadDto.marketnum}">${nextReadDto.subject}</a>
+								<a href="${pageContext.request.contextPath}/myPage4/likeArticle.do?page=${page}&marketNum=${nextReadDto.marketNum}">${nextReadDto.subject}</a>
 							</c:if>
 						</td>
 					</tr>
@@ -489,38 +447,8 @@ $(function() {
 			
 			<table class="table">
 				<tr>
-					<td width="50%">
-						<c:choose>
-							<c:when test="${sessionScope.member.userId==dto.sellerid}">
-								<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/market/update.do?marketNum=${dto.marketnum}&page=${page}';">수정</button>
-							</c:when>
-							<c:otherwise>
-								<button type="button" class="btn" disabled="disabled">수정</button>
-							</c:otherwise>
-						</c:choose>
-				    	
-						<c:choose>
-				    		<c:when test="${sessionScope.member.userId==dto.sellerid || sessionScope.member.userId=='admin'}">
-				    			<button type="button" class="btn" onclick="deleteBoard();">삭제</button>
-				    		</c:when>
-				    		<c:otherwise>
-				    			<button type="button" class="btn" disabled="disabled">삭제</button>
-				    		</c:otherwise>
-				    	</c:choose>
-					</td>
 					<td align="right">
-					<c:choose>
-						<c:when test="${sessionScope.member.userId==dto.sellerid && dto.state == 0}">
-							<button type="button" class="btn" onclick="modal();">판매시작</button>
-						</c:when>
-						<c:when test="${dto.state == 1 || dto.state == 2}">
-							<button type="button" class="btn" disabled="disabled">판매완료</button>
-						</c:when>
-						<c:otherwise>
-							<button type="button" class="btn" onclick="requestPay();">카드결재</button>
-						</c:otherwise>
-					</c:choose>	
-						<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/myPage/buyList.do';">리스트</button>
+						<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/myPage4/likeList.do';">리스트</button>
 					</td>
 				</tr>
 			</table>

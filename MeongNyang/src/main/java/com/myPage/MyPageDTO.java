@@ -13,12 +13,20 @@ public class MyPageDTO {
 	private int state;		// 상품상태(0:판매중, 1:온라인거래완료, 2:직거래완료)
 	private String reg_date;	// 글 등록날짜
 	private String pay_date;	// 결제날짜(판매완료 날짜)
-
+	private int zzimCount;
+	
+	
 	private long fileNum;
 	private String imageFilename;
 	private String[] imageFiles;
 	
 	
+	public int getZzimCount() {
+		return zzimCount;
+	}
+	public void setZzimCount(int zzimCount) {
+		this.zzimCount = zzimCount;
+	}
 	public long getFileNum() {
 		return fileNum;
 	}
