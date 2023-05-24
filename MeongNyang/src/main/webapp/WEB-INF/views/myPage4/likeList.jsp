@@ -8,7 +8,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Insert title here</title>
+<title>마이페이지 :: 찜목록</title>
 <jsp:include page="/WEB-INF/views/layout/staticHeader.jsp"/>
 <style type="text/css">
 .body-main {
@@ -64,7 +64,7 @@ function searchList() {
 <main>
 	<div class="container body-container">
 	    <div class="body-title">
-			<h2> 찜목록 </h2>
+			<h2><img src="${pageContext.request.contextPath}/resource/images/zzimlist.PNG" style="width: 250px;"></h2>
 	    </div>
 	   <div style="box-shadow: 0 0 15px 0 rgb(2 59 109 / 10%);border-radius: 30px; margin: 0 auto ; width: 70%;">
 	    <div class="body-main mx-auto">
