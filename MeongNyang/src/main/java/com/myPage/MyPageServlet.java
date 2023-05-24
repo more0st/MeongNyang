@@ -1,6 +1,5 @@
 package com.myPage;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -22,7 +21,7 @@ import com.util.MyUtil;
 public class MyPageServlet extends MyServlet{
 	private static final long serialVersionUID = 1L;
 
-	private String pathname;
+//	private String pathname;
 
 	@Override
 	protected void execute(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -39,8 +38,8 @@ public class MyPageServlet extends MyServlet{
 			return;
 		}
 
-		String root = session.getServletContext().getRealPath("/");
-		pathname = root + "uploads" + File.separator + "market";
+//		String root = session.getServletContext().getRealPath("/");
+//		pathname = root + "uploads" + File.separator + "market";
 
 		// uri에 따른 작업 구분
 		if (uri.indexOf("buyList.do") != -1) {		// 나의 구매내역 리스트

@@ -1,6 +1,5 @@
 package com.myPage4;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
@@ -22,7 +21,6 @@ import com.util.MyUtil;
 public class MyPage4Servlet extends MyServlet {
 	private static final long serialVersionUID = 1L;
 
-	private String pathname;
 
 	@Override
 	protected void execute(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
@@ -39,9 +37,6 @@ public class MyPage4Servlet extends MyServlet {
 			return;
 		}
 
-		String root = session.getServletContext().getRealPath("/");
-		pathname = root + "uploads" + File.separator + "market";
-		
 		// uri에 따른 작업 구분
 		if (uri.indexOf("likeList.do") != -1) {		// 나의 구매내역 리스트
 			list(req, resp);

@@ -3,6 +3,7 @@ package com.admin2;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -55,8 +56,13 @@ public class Admin2DAO {
 		String sql;
 		
 		try {
-			sql = "SELECT COUNT(*) FROM member"
-					+ " WHERE INSTR(\" + condition + \", ?) >= 1";
+			sql = "SELECT COUNT(*) FROM member";
+			
+			if (condition.equals("userId")) {
+				sql += " WHERE userid = ?";
+			} else if (condition.equals("userName")) {
+				sql += " WHERE username = ?";
+			}
 			
 			pstmt = conn.prepareStatement(sql);
 			
@@ -175,6 +181,73 @@ public class Admin2DAO {
 		return result;
 		
 		
+	}
+
+	public List<Admin2DTO> listBoard(int offset, int size, String condition, String keyword) {
+		List<Admin2DTO> list = new ArrayList<Admin2DTO>();
+		PreparedStatement pstmt = null;
+		ResultSet rs = null;
+		StringBuilder sb = new StringBuilder();		
+		
+		try {
+			sb.append("SELECT userid, username, TO_CHAR(birth, 'YYYY-MM-DD') birth, tel, addr, email, enabled");
+			sb.append(" FROM member");
+
+			if (condition.equals("userId")) {
+				sb.append(" WHERE userid = ?");
+			} else if (condition.equals("userName")) {
+				sb.append(" WHERE username = ?");
+			}
+
+			sb.append(" ORDER BY enabled DESC");
+			sb.append(" OFFSET ? ROWS FETCH FIRST ? ROWS ONLY ");
+
+			pstmt = conn.prepareStatement(sb.toString());
+
+			if (condition.equals("userId")) {
+				pstmt.setString(1, keyword);
+				pstmt.setInt(2, offset);
+				pstmt.setInt(3, size);
+			} else if(condition.equals("userName")){
+				pstmt.setString(1, keyword);
+				pstmt.setInt(2, offset);
+				pstmt.setInt(3, size);
+			} 			
+
+			rs = pstmt.executeQuery();
+
+			while(rs.next()) {
+				Admin2DTO dto = new Admin2DTO();
+				
+				dto.setUserId(rs.getString("userId"));
+				dto.setUserName(rs.getString("userName"));
+				dto.setBirth(rs.getString("birth"));
+				dto.setTel(rs.getString("tel"));
+				dto.setAddr(rs.getString("addr"));
+				dto.setEmail(rs.getString("email"));	
+				dto.setEnabled(rs.getInt("enabled"));
+				
+				list.add(dto);
+			}
+			
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			if (rs != null) {
+				try {
+					rs.close();
+				} catch (SQLException e2) {
+				}
+			}
+			if (pstmt != null) {
+				try {
+					pstmt.close();
+				} catch (SQLException e2) {
+				}
+			}
+		}
+
+		return list;
 	}
 
 

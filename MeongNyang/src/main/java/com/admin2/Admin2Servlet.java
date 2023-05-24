@@ -37,9 +37,7 @@ public class Admin2Servlet extends MyServlet{
 		
 		if( uri.indexOf("userFix.do") != -1) {
 			list(req,resp);
-		} else if(true) {
-			
-		}
+		} 
 		
 	}
 
@@ -97,7 +95,7 @@ public class Admin2Servlet extends MyServlet{
 				list = dao.listBoard(offset, size);		// 게시물 리스트
 			} 
 			  else {
-//				list = dao.listBoard(offset, size, condition, keyword);		// 검색에서 게시물 리스트
+				list = dao.listBoard(offset, size, condition, keyword);		// 검색에서 게시물 리스트
 			} 			
 					
 			// 페이징 처리

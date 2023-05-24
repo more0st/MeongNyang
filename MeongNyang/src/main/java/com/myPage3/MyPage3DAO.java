@@ -234,13 +234,13 @@ public class MyPage3DAO {
 		
 		try {
 			
-			sql = "SELECT mapnum, subject, reg_date, hitCount, 1 category FROM map"
+			sql = "SELECT mapnum, subject, TO_CHAR(reg_date, 'YYYY-MM-DD') reg_date, hitCount, 1 category FROM map"
 				+	" WHERE userid=?"
 				+	" UNION"
-				+	" SELECT photonum, subject, reg_date, hitCount, 2 category FROM gallery"
+				+	" SELECT photonum, subject, TO_CHAR(reg_date, 'YYYY-MM-DD') reg_date, hitCount, 2 category FROM gallery"
 				+	" WHERE userid=?"
 				+	" UNION"
-				+	" SELECT clubnum, subject, reg_date, hitCount, 3 category FROM club"
+				+	" SELECT clubnum, subject, TO_CHAR(reg_date, 'YYYY-MM-DD') reg_date, hitCount, 3 category FROM club"
 				+	" WHERE userid=?"
 				+	" ORDER BY reg_date DESC"
 				+   " OFFSET ? ROWS FETCH FIRST ? ROWS ONLY";
@@ -301,13 +301,13 @@ public class MyPage3DAO {
 			
 				
 			if(category.equals("map")) {
-				sb.append("SELECT mapnum, subject, reg_date, hitCount, 1 category FROM map");
+				sb.append("SELECT mapnum, subject, TO_CHAR(reg_date, 'YYYY-MM-DD') reg_date, hitCount, 1 category FROM map");
 				sb.append(" WHERE userid=?");				
 			} else if(category.equals("gallery")) {
-				sb.append(" SELECT photonum, subject, reg_date, hitCount, 2 category FROM gallery");
+				sb.append(" SELECT photonum, subject, TO_CHAR(reg_date, 'YYYY-MM-DD') reg_date, hitCount, 2 category FROM gallery");
 				sb.append(" WHERE userid=?");
 			} else if(category.equals("club")) {
-				sb.append(" SELECT clubnum, subject, reg_date, hitCount, 3 category FROM club");
+				sb.append(" SELECT clubnum, subject, TO_CHAR(reg_date, 'YYYY-MM-DD') reg_date, hitCount, 3 category FROM club");
 				sb.append(" WHERE userid=?");
 			}
 			

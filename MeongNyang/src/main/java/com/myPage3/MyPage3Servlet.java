@@ -131,7 +131,11 @@ public class MyPage3Servlet extends MyServlet{
 			List<MyPage3DTO> list = null;
 			
 			if(category== null || category.equals("first") || category.equals("all")) {
-				list = dao.listBoard(info.getUserId(), offset, size);
+				
+				if(category==null) {
+					category = "map";
+				}
+				list = dao.categoryListBoard(info.getUserId(), offset, size, category);
 			} else {
 				list = dao.categoryListBoard(info.getUserId(), offset, size, category);
 			}
