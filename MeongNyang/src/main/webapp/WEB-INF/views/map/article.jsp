@@ -332,11 +332,7 @@
 					</table>
 
 				</div>
-			</div>
-		</div>
-
-
-		<!-- 댓글 폼 -->
+			<!-- 댓글 폼 -->
 		<div class="body-container">
 
 			<div class="reply">
@@ -363,7 +359,12 @@
 				</div>
 				
 			</div>
+			</div>
 		</div>
+	</div>
+
+
+		
 
 
 
