@@ -33,6 +33,13 @@
 	font-weight: bold;
 	
 }
+
+.list {
+height : 18px;
+overflow : hidden;
+text-overflow : ellipsis;
+white-space : nowrap;
+}
 </style>
 </head>
 <body>
@@ -55,9 +62,9 @@
 						<img src="${pageContext.request.contextPath}/uploads/market/${dto.imageFilename}">
 						<div class="border">
 						<div style="margin-left: 10px">
-						<div>제목 : ${dto.subject}</div>
-						<div>거래지 : ${dto.addr}</div>
-						<div>가격 : ${dto.price}원</div>
+						<div class="list">제목 : ${dto.subject}</div>
+						<div class="list">거래지 : ${dto.addr}</div>
+						<div class="list">가격 : ${dto.price}원</div>
 						</div>
 						</div>
 					</div>

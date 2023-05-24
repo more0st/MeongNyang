@@ -45,6 +45,13 @@
 	background: #ffedea;
 	border-radius : 10px;
 }
+
+.list{
+height : 18px;
+overflow : hidden;
+text-overflow : ellipsis;
+white-space : nowrap;
+}
 </style>
 <script type="text/javascript">
 function searchList() {
@@ -92,9 +99,9 @@ function searchList() {
 					</c:choose>	
 						<div>
 							<div class="border">
-								<div>제목 : ${dto.subject}</div>
-								<div>거래지 : ${dto.addr}</div>
-								<div>가격 : ${dto.price}원</div>
+								<div class="list">제목 : ${dto.subject}</div>
+								<div class="list">거래지 : ${dto.addr}</div>
+								<div class="list">가격 : ${dto.price}원</div>
 							</div>
 						</div>
 					</div>
