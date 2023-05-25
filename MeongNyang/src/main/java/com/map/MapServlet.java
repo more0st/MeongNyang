@@ -35,6 +35,7 @@ public class MapServlet extends MyUploadServlet{
 		req.setCharacterEncoding("utf-8");
 		
 		String uri = req.getRequestURI();
+		String cp = req.getContextPath();
 
 		HttpSession session = req.getSession();
 		SessionInfo info = (SessionInfo)session.getAttribute("member");
@@ -42,13 +43,11 @@ public class MapServlet extends MyUploadServlet{
 		String ajax = req.getHeader("AJAX");
 		
 		// 세션 정보
-		if (ajax!=null && info == null) {
-			// AJAX로 요청해서 로그인이 안된 경우 403 이라는 에러코드를 던짐 
+		if(ajax != null && uri.indexOf("list.do") == -1 && info == null) {
 			resp.sendError(403);
 			return;
-		} else if(info == null) {
-			// AJAX로 요청하지 않고 로그인되지 않은 상태 
-			forward(req, resp, "/WEB-INF/views/member/login.jsp");
+		}else if (uri.indexOf("list.do") == -1 && info == null) { // 로그인되지 않은 경우
+			resp.sendRedirect(cp + "/member/login.do");
 			return;
 		}
 
