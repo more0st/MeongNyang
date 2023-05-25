@@ -41,7 +41,7 @@ public class MarketServlet extends MyUploadServlet{
 		HttpSession session = req.getSession();
 		SessionInfo info = (SessionInfo) session.getAttribute("member");
 
-		if (info == null) {
+		if (uri.indexOf("list.do")==-1 && info == null) {
 			forward(req, resp, "/WEB-INF/views/member/login.jsp");
 			return;
 		}
