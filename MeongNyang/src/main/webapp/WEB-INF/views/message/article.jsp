@@ -44,23 +44,27 @@ const isHidden = ele => {
 	
 <main>
 	<div class="container body-container">
-	    <div class="body-title">
+	    <div class="body-title" style="text-align: center;">
 			<c:choose>
 	   			<c:when test="${category == 'receive' }">
-					<h2> 받은 쪽지함 </h2>
+					<a href="${pageContext.request.contextPath}/message/list_receive.do">
+					<img src="${pageContext.request.contextPath}/resource/images/receiveham.png" style="width: 280px;" >
+	    			</a>
 				</c:when>
 				<c:otherwise>
-					<h2> 보낸 쪽지함 </h2>
+					<a href="${pageContext.request.contextPath}/message/list_send.do">
+					<img src="${pageContext.request.contextPath}/resource/images/sendham.png" style="width: 280px;" >
+	    			</a>
 				</c:otherwise>
 			</c:choose>
 	    </div>
 	    <div style="box-shadow: 0 0 15px 0 rgb(2 59 109 / 10%);border-radius: 30px; margin: 0 auto ; width: 70%; margin-bottom: 50px;">
 	    <div class="body-main mx-auto">
-			<table class="table table-border table-article">
+			<table class="table  table-article">
 				<thead>
-					<tr>
+					<tr style="border-top: 2px solid #eee; border-bottom: 2px solid #eee;">
 						<td colspan="2" align="center">
-							${dto.subject}
+							<h3>${dto.subject}</h3>
 						</td>
 					</tr>
 				</thead>
@@ -68,7 +72,7 @@ const isHidden = ele => {
 				<tbody>
 					<tr>
 						<td width="50%">
-							보낸사람 : ${dto.sendName} | 받은사람 : ${dto.receiveName}
+							보낸사람 : ${dto.sendName} &nbsp; | &nbsp; 받은사람 : ${dto.receiveName}
 						</td>
 						<td align="right">
 							${dto.send_date}

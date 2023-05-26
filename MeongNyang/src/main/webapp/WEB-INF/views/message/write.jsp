@@ -65,8 +65,8 @@ function sendOk() {
 <main>
 
 	<div class="container body-container">
-	    <div class="body-title">
-			<h2> 쪽지쓰기 </h2>
+	    <div class="body-title" style="text-align: center;">
+			<img src="${pageContext.request.contextPath}/resource/images/writeMassage.png" style="width: 235px;" >
 	    </div>
 	    <div style="box-shadow: 0 0 15px 0 rgb(2 59 109 / 10%);border-radius: 30px; margin: 0 auto ; width: 70%;">
 	    <div class="body-main mx-auto">
