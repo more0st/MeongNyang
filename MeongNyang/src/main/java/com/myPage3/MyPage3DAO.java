@@ -274,6 +274,9 @@ public class MyPage3DAO {
 			
 			pstmt = conn.prepareStatement(sb.toString());
 
+			
+			
+			
 			if(category.equals("map")) {
 				pstmt.setString(1, userId);
 				

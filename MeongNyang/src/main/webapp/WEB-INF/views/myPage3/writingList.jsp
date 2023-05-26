@@ -117,6 +117,7 @@ function categoryList() {
 								<option value="content"  ${condition=="content"?"selected='selected'":"" }>내용</option>
 								<option value="reg_date"  ${condition=="reg_date"?"selected='selected'":"" }>등록일</option>
 							</select>
+							<input type="hidden" name="category" value="${category }">
 							<input type="text" name="keyword" value="${keyword}" class="form-control" style="border-radius: 20px;">
 							<button type="button" class="btn" onclick="searchList();">검색</button>
 						</form>

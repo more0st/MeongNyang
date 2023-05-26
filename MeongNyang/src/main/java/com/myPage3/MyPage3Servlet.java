@@ -102,23 +102,7 @@ public class MyPage3Servlet extends MyServlet{
 			}
 			
 			
-			
-			/*	
-			// 게시글 가져오기
-			int offset = (current_page - 1) * size;
-			if(offset < 0) offset = 0;
-			
-			List<MyPage3DTO> list = null;
-			
-			if(keyword.length() == 0) {
-				list = dao.listBoard(info.getUserId(), offset, size);		// 게시물 리스트
-			} 
-			  else {
-				list = dao.listBoard(info.getUserId(), offset, size, condition, keyword);		// 검색에서 게시물 리스트
-			} 			
-			*/		
-			
-			
+					
 			// 카테고리 검색 게시글 가져오기
 			int offset = (current_page - 1) * size;
 			if(offset <0) offset = 0;
