@@ -75,29 +75,24 @@ public class MyPage3Servlet extends MyServlet{
 			}
 			
 			
-			/*
-			// 전체 데이터 개수
-			int dataCount;
-			if(keyword.length() == 0) {	// 검색이 아닐때
-				dataCount = dao.dataCount(info.getUserId());
-			} else {
-				dataCount = dao.dataCount(info.getUserId(), condition, keyword);
-			}
-			*/
-			
 			
 			// 카테코리 
 			String category = req.getParameter("category");
 			
 			
-			// 전체 데이터 개수(카테코리)
-			int dataCount;
-			if(category==null || category.equals("first") || category.equals("all")) { 	// 카테고리검색이 선택되지 않았을때
-				dataCount = dao.dataCount(info.getUserId());
-			} else {	// 카테고리 검색옵션이 선택되었을때
-				dataCount = dao.categoryDataCount(info.getUserId(), category);
+			// 전체 데이터 개수
+			int dataCount = 0;
+			if(category==null && keyword.length() == 0) { 	// 카테고리검색이 선택되지 않았을때
+				category = "map";
+				dataCount = dao.writeCount(info.getUserId(), category);
+			} else if(category == null && keyword.length() != 0) {
+				category = "map";
+				dataCount = dao.writeCount(info.getUserId(), condition, keyword, category);
+			} else if(category != null && keyword.length() == 0) {
+				dataCount = dao.writeCount(info.getUserId(), category);
+			} else if(category != null && keyword.length() != 0) {
+				dataCount = dao.writeCount(info.getUserId(), condition, keyword, category);
 			}
-			
 			
 			// 전체 페이지수
 			int size = 10;
@@ -130,14 +125,16 @@ public class MyPage3Servlet extends MyServlet{
 			
 			List<MyPage3DTO> list = null;
 			
-			if(category== null || category.equals("first") || category.equals("all")) {
-				
-				if(category==null) {
-					category = "map";
-				}
+			if(category==null && keyword.length() == 0) {
+				category = "map";
 				list = dao.categoryListBoard(info.getUserId(), offset, size, category);
-			} else {
+			} else if(category == null && keyword.length() != 0) {
+				category = "map";
+				list = dao.categoryListBoard(info.getUserId(), offset, size, condition, keyword, category);
+			} else if (category != null && keyword.length() == 0) {
 				list = dao.categoryListBoard(info.getUserId(), offset, size, category);
+			} else if (category != null && keyword.length() != 0) {
+				list = dao.categoryListBoard(info.getUserId(), offset, size, condition, keyword, category);
 			}
 			
 			
