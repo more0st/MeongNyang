@@ -102,7 +102,9 @@ const isHidden = ele => {
 				    	 -->
 					</td>
 					<td align="right">
+					<c:if test="${category == 'receive'}">
 						<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/message/write.do?name=${dto.sendName}';">답장</button>
+					</c:if>
 						<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/message/list_${category}.do?';">리스트</button>
 					</td>
 				</tr>
