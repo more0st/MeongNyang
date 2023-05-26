@@ -89,7 +89,7 @@ function sendOk() {
 					<tr> 
 						<td>받는사람</td>
 						<td> 
-							<input type="text" name="receiveName" maxlength="100" class="form-control">
+							<input type="text" name="receiveName" maxlength="100" class="form-control" value="${name}">
 						</td>
 					</tr>
 					

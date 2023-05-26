@@ -68,7 +68,7 @@ const isHidden = ele => {
 				<tbody>
 					<tr>
 						<td width="50%">
-							보낸사람 : ${dto.sendName} | 받은사람 : ${dto.receiveName }
+							보낸사람 : ${dto.sendName} | 받은사람 : ${dto.receiveName}
 						</td>
 						<td align="right">
 							${dto.send_date}
@@ -102,6 +102,7 @@ const isHidden = ele => {
 				    	 -->
 					</td>
 					<td align="right">
+						<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/message/write.do?name=${dto.sendName}';">답장</button>
 						<button type="button" class="btn" onclick="location.href='${pageContext.request.contextPath}/message/list_${category}.do?';">리스트</button>
 					</td>
 				</tr>

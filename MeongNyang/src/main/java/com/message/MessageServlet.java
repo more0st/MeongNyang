@@ -162,6 +162,8 @@ public class MessageServlet extends MyServlet {
 
 	protected void writeForm(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		// 글쓰기 폼
+		String name = req.getParameter("name");
+		req.setAttribute("name", name);
 		req.setAttribute("mode", "write");
 		forward(req, resp, "/WEB-INF/views/message/write.jsp");
 	}
