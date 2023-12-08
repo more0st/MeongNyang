@@ -26,3 +26,20 @@ java 11, Servlet & JSP, Oracle
 <br>
 
 ## 화면 설계 
+
+### 물품 - 결제
+![image](https://github.com/more0st/MeongNyang/assets/118714351/c5747c97-504b-4f45-bb68-d3c0ee046120)
+
+<br>
+
+### 커뮤니티 - 모임
+![image](https://github.com/more0st/MeongNyang/assets/118714351/8d0cec4d-a4f8-4d74-9041-6543fdb18976)
+
+<br>
+<br>
+
+## 주문-결제 시퀀스 다이어그램
+![image](https://github.com/more0st/MeongNyang/assets/118714351/21f73eb3-fd2d-4bf4-a1dc-12a5ced929c5)
+
+<br>
+<br>
